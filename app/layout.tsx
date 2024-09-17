@@ -1,5 +1,6 @@
 'use client'
 
+import { usePathname } from "next/navigation";
 import Footer from "./components/Footer";
 import Navbar from "./components/Navbar";
 // import type { Metadata } from "next";
@@ -28,13 +29,26 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+
+  const pathname = usePathname();
+  const noNav = [
+    "/login",
+    "/register",
+    "/dashboard",
+    "/admin",
+    "/forgetPassword",
+    "/sendOTP"
+  ];
+
+  const shouldHideNavbar = noNav.some((path) => pathname.startsWith(path));
+
   return (
     <html lang="en">
       <body
       // className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <Providers>
-          <Navbar />
+          {!shouldHideNavbar && <Navbar />}
           {children}
           <Footer />
         </Providers>

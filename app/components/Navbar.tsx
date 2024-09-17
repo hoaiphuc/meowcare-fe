@@ -42,7 +42,7 @@ const Navbar = () => {
             </NavbarContent>
             <NavbarContent justify="end">
                 <NavbarItem className="hidden lg:flex">
-                    <Link href="#" className='text-[#000857]'>Đăng nhập <FontAwesomeIcon icon={faArrowRightToBracket} className='pl-2' /></Link>
+                    <Link href="/login" className='text-[#000857]'>Đăng nhập <FontAwesomeIcon icon={faArrowRightToBracket} className='pl-2' /></Link>
                 </NavbarItem>
             </NavbarContent>
             <NavbarMenu>

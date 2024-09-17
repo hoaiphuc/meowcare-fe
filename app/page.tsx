@@ -32,6 +32,7 @@ export default function Home() {
         </div>
       </div>
 
+      <hr className="mt-20" />
       <div className="flex flex-row p-32">
         <Image src="/image/cat3.png" alt="" width={238} height={253} />
         <h1 className="text-4xl font-semibold flex items-center text-center px-32">Trong khi bạn đang đi nghỉ hoặc làm việc có thể khiến bạn trở nên lo lắng.</h1>
