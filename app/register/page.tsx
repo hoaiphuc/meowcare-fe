@@ -75,7 +75,7 @@ const Register = () => {
                 </div>
 
                 {/* section 2 */}
-                <div className='bg-[#FF9676] rounded-r-[70px] bg-[url("/login/registerBG.png")] bg-no-repeat bg-left bg-contain'>
+                <div className='bg-[#FACFE2] rounded-r-[70px] bg-[url("/login/registerBG.png")] bg-no-repeat bg-left bg-contain'>
                     <div className='text-2xl text-white flex justify-end items-center h-full flex-col gap-3 text-center px-10'>
                         <h1 className='text-4xl font-bold'>Chào mừng bạn quay trở lại</h1>
                         <h1 className='text-2xl font-bold'>Tham gia ngay để bắt đầu hành trình cùng những chú mèo đáng yêu!</h1>

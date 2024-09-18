@@ -28,6 +28,7 @@ const config: Config = {
     extend: {
       colors: {
         secondary: "#666089",
+        text: "#000857",
       },
       backgroundImage: {
         "login-bg": "url('/login/background.png')",

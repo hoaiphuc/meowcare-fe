@@ -1,0 +1,34 @@
+.circle-custom {
+  border-radius: 50%; // rounded-full
+  background-color: #902c6c; // bg-[#902C6C]
+  width: 70px; // w-10 (10 * 0.25rem = 2.5rem)
+  height: 70px; // h-10 (10 * 0.25rem = 2.5rem)
+  display: flex; // flex
+  align-items: center; // items-center
+  justify-content: center; // justify-center
+  text-align: center; // text-center
+  color: white;
+  font-size: 40px;
+  font: bold;
+}
+
+.circle-hr {
+  height: 2px;
+  width: 350px;
+  background-color: #902c6c;
+  opacity: 0.6;
+}
+
+.circle-h1 {
+  font: bold;
+  color: #000857;
+  font-weight: 600;
+  font-size: 24px;
+}
+
+.circle-p {
+  font: bold;
+  font-size: 18px;
+  color: #000857;
+  font-weight: 400;
+}
