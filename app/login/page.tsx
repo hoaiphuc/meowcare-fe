@@ -6,11 +6,40 @@ import { Button, Input } from '@nextui-org/react'
 import Image from 'next/image'
 import Link from 'next/link'
 import React, { useState } from 'react'
+import axiosClient from '../lib/axiosClient'
+import { useRouter } from 'next/navigation';
 
 const Login = () => {
+    const router = useRouter();
     const [isVisible, setIsVisible] = useState(false);
-
     const toggleVisibility = () => setIsVisible(!isVisible);
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const dataLogin = {
+        email: email,
+        password: password,
+    };
+
+    const handleSubmit = async () => {
+        try {
+            await axiosClient
+                .post('auth/generateToken', dataLogin)
+                .then((response) => {
+                    localStorage.setItem(
+                        'auth-token',
+                        JSON.stringify(response)
+                    );
+                    router.push('/');
+
+                })
+                .catch((error) => {
+                    console.log(error);
+                }
+                )
+        } catch (error) {
+            console.log(error);
+        }
+    };
 
     return (
         <div className='flex bg-login-bg bg-cover items-center justify-center'>
@@ -21,9 +50,6 @@ const Login = () => {
                         <h1 className='text-2xl font-bold'>Kết nối yêu thương, chăm sóc hoàn hảo</h1>
                         <Button as={Link} className='my-10 border-white bg-transparent text-white border px-14 py-7 rounded-full text-2xl' href='/register'>Đăng ký</Button>
                     </div>
-                    {/* <div className='flex justify-end'>
-                        <Image src='/login/cat.png' alt='' width={680} height={700} className='w-[600px] h-[700px] ' />
-                    </div> */}
                 </div>
 
                 <div className='flex flex-col justify-center items-center gap-10 px-20'>
@@ -41,6 +67,7 @@ const Login = () => {
                         endContent={
                             <FontAwesomeIcon icon={faEnvelope} className="text-2xl text-default-400 pointer-events-none flex-shrink-0" />
                         }
+                        onChange={(e) => setEmail(e.target.value)}
                     />
                     <Input
                         type={isVisible ? "text" : "password"}
@@ -55,9 +82,14 @@ const Login = () => {
                                 )}
                             </button>
                         }
+                        onChange={(e) => setPassword(e.target.value)}
                     />
                     <h1 className='font-semibold text-3xl'>Quên mật khẩu?</h1>
-                    <Button className='bg-[#2BAAE7] text-2xl font-semibold text-white p-8 px-20 rounded-full'>Đăng nhập</Button>
+                    <Button
+                        className='bg-[#2BAAE7] text-2xl font-semibold text-white p-8 px-20 rounded-full'
+                        onClick={() => handleSubmit()}>
+                        Đăng nhập
+                    </Button>
                 </div>
 
             </div>

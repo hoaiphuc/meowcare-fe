@@ -29,6 +29,7 @@ const config: Config = {
       colors: {
         secondary: "#666089",
         text: "#000857",
+        btnbg: "#2E67D1",
       },
       backgroundImage: {
         "login-bg": "url('/login/background.png')",

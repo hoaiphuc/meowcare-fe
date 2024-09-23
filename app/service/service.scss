@@ -1,0 +1,65 @@
+.circle-done {
+  border-radius: 50%;
+  background-color: #902c6c;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: white;
+  font-size: 28px;
+  font: bold;
+  font-weight: 500;
+}
+
+.circle-pending {
+  border-radius: 50%;
+  background-color: #979797;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: white;
+  font-size: 28px;
+  font: bold;
+  font-weight: 500;
+}
+
+.circle-hr {
+  height: 2px;
+  width: 96px;
+  background-color: #902c6c;
+  opacity: 0.6;
+}
+
+h2 {
+  @apply font-bold text-[16px];
+}
+
+.input {
+  @apply w-[486px] h-12 border-black;
+}
+
+.input label {
+  @apply font-bold text-[16px];
+}
+
+.select {
+  @apply w-[238px] h-10;
+}
+
+.select label {
+  @apply font-bold text-[16px];
+}
+
+button {
+  @apply w-6 h-6 bg-transparent border border-black rounded-full flex justify-center items-center;
+}
+
+/* CSS when button is clicked */
+.btn-clicked {
+  @apply fill-red-500 text-red-500;
+}

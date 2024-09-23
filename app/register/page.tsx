@@ -6,12 +6,40 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Button, Input } from '@nextui-org/react'
 import Image from 'next/image'
 import Link from 'next/link'
+import axiosClient from '../lib/axiosClient'
+import { useRouter } from 'next/navigation'
 
 
 const Register = () => {
+    const router = useRouter();
     const [isVisible, setIsVisible] = useState(false);
-
     const toggleVisibility = () => setIsVisible(!isVisible);
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [username, setUserName] = useState('');
+    const dataRegister = {
+        email: email,
+        password: password,
+        username: username,
+    };
+
+    const handleSubmit = async () => {
+        try {
+            await axiosClient
+                .post('auth/registerNewUser', dataRegister)
+                .then(() => {
+
+                    router.push('/login');
+
+                })
+                .catch((error) => {
+                    console.log(error);
+                }
+                )
+        } catch (error) {
+            console.log(error);
+        }
+    };
     return (
         <div className='flex bg-login-bg bg-cover items-center justify-center'>
             <div className='bg-white w-[1360px] h-[700px] m-5  rounded-[70px] grid grid-cols-1 md:grid-cols-2 md:m-[82px]'>
@@ -27,6 +55,7 @@ const Register = () => {
                         type="text"
                         placeholder="Họ và tên"
                         labelPlacement="outside"
+                        onChange={(e) => setUserName(e.target.value)}
                         endContent={
                             <FontAwesomeIcon icon={faUser} className="text-2xl text-default-400 pointer-events-none flex-shrink-0" />
                         }
@@ -37,6 +66,7 @@ const Register = () => {
                         type="email"
                         placeholder="Email"
                         labelPlacement="outside"
+                        onChange={(e) => setEmail(e.target.value)}
                         endContent={
                             <FontAwesomeIcon icon={faEnvelope} className="text-2xl text-default-400 pointer-events-none flex-shrink-0" />
                         }
@@ -46,6 +76,7 @@ const Register = () => {
                         size='lg'
                         placeholder="Mật khẩu"
                         labelPlacement="outside"
+                        onChange={(e) => setPassword(e.target.value)}
                         endContent={
                             <button className="focus:outline-none" type="button" onClick={toggleVisibility} aria-label="toggle password visibility">
                                 {isVisible ? (
@@ -71,7 +102,7 @@ const Register = () => {
                             </button>
                         }
                     />
-                    <Button className='bg-[#2BAAE7] text-2xl font-semibold text-white p-8 px-20 rounded-full'>Đăng ký</Button>
+                    <Button className='bg-[#2BAAE7] text-2xl font-semibold text-white p-8 px-20 rounded-full' onClick={() => handleSubmit()}>Đăng ký</Button>
                 </div>
 
                 {/* section 2 */}
