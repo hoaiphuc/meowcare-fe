@@ -57,7 +57,7 @@ const Register = () => {
                         labelPlacement="outside"
                         onChange={(e) => setUserName(e.target.value)}
                         endContent={
-                            <FontAwesomeIcon icon={faUser} className="text-2xl text-default-400 pointer-events-none flex-shrink-0" />
+                            <FontAwesomeIcon icon={faUser} className="size-6 text-default-400 pointer-events-none flex-shrink-0" />
                         }
                     />
                     <Input
@@ -68,7 +68,7 @@ const Register = () => {
                         labelPlacement="outside"
                         onChange={(e) => setEmail(e.target.value)}
                         endContent={
-                            <FontAwesomeIcon icon={faEnvelope} className="text-2xl text-default-400 pointer-events-none flex-shrink-0" />
+                            <FontAwesomeIcon icon={faEnvelope} className="size-6 text-default-400 pointer-events-none flex-shrink-0" />
                         }
                     />
                     <Input
@@ -80,9 +80,9 @@ const Register = () => {
                         endContent={
                             <button className="focus:outline-none" type="button" onClick={toggleVisibility} aria-label="toggle password visibility">
                                 {isVisible ? (
-                                    <FontAwesomeIcon icon={faEye} className="text-2xl text-default-400 pointer-events-none" />
+                                    <FontAwesomeIcon icon={faEye} className="size-6 text-default-400 pointer-events-none" />
                                 ) : (
-                                    <FontAwesomeIcon icon={faEyeSlash} className="text-2xl text-default-400 pointer-events-none" />
+                                    <FontAwesomeIcon icon={faEyeSlash} className="size-6 text-default-400 pointer-events-none" />
                                 )}
                             </button>
                         }
@@ -95,9 +95,9 @@ const Register = () => {
                         endContent={
                             <button className="focus:outline-none" type="button" onClick={toggleVisibility} aria-label="toggle password visibility">
                                 {isVisible ? (
-                                    <FontAwesomeIcon icon={faEye} className="text-2xl text-default-400 pointer-events-none" />
+                                    <FontAwesomeIcon icon={faEye} className="size-6 text-default-400 pointer-events-none" />
                                 ) : (
-                                    <FontAwesomeIcon icon={faEyeSlash} className="text-2xl text-default-400 pointer-events-none" />
+                                    <FontAwesomeIcon icon={faEyeSlash} className="size-6 text-default-400 pointer-events-none" />
                                 )}
                             </button>
                         }

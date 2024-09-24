@@ -36,14 +36,14 @@ const Navbar = () => {
             <NavbarContent>
                 <NavbarMenuToggle
                     aria-label={isMenuOpen ? "Close menu" : "Open menu"}
-                    className="sm:hidden"
+                    className="md:hidden"
                 />
 
                 <NavbarBrand >
                     <Image src="/meow.png" alt='' width={210} height={100} />
                 </NavbarBrand>
             </NavbarContent>
-            <NavbarContent className="hidden sm:flex gap-20" justify="center">
+            <NavbarContent className="hidden md:flex gap-20" justify="center">
                 {menuItems.map((item, index) => (
                     <NavbarItem key={`${item}-${index}`}>
                         <Link
@@ -75,18 +75,15 @@ const Navbar = () => {
                     </NavbarItem>
                 }
             </NavbarContent>
-            <NavbarMenu>
+            <NavbarMenu className='pt-10'>
                 {menuItems.map((item, index) => (
                     <NavbarMenuItem key={`${item}-${index}`}>
                         <Link
-                            color={
-                                index === 2 ? "primary" : index === menuItems.length - 1 ? "danger" : "foreground"
-                            }
-                            className="w-full"
-                            href="#"
+                            className="w-full text-secondary font-semibold"
+                            href={item.path}
                             size="lg"
                         >
-                            <div className={`${pathname === item.path ? "text-[#e74c3c]" : ""}`}>
+                            <div className={`${pathname === item.path ? "text-text" : ""}`}>
                                 {item.name}
                             </div>
                         </Link>

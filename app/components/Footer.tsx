@@ -1,15 +1,28 @@
 import { faFacebookF, faInstagram, faTwitter } from '@fortawesome/free-brands-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Image from 'next/image';
+import { usePathname } from 'next/navigation';
 import React from 'react'
 
 const Footer = () => {
     const current_year = new Date().getFullYear();
+
+    const pathname = usePathname();
+    const noFooter = [
+        "/login",
+        "/register",
+        "/dashboard",
+        "/admin",
+        "/forgetPassword",
+        "/sendOTP"
+    ];
+
+    const shouldHideFirstFooter = noFooter.some((path) => pathname.startsWith(path));
     return (
-        <div className='mt-20'>
-            <div className="grid grid-cols-3 px-20 py-10">
+        <div className={shouldHideFirstFooter ? `` : `mt-20`}>
+            <div className={shouldHideFirstFooter ? `hidden` : `grid grid-cols-3 px-20 py-10`}>
                 <div>
-                    <h1 className="text-3xl font-semibold">Sơ lượt về MeowCare</h1>
+                    <h1 className="text-3xl font-semibold">Sơ lược về MeowCare</h1>
                     <div className="text-2xl font-semibold text-[#666089] gap-2 mt-5 flex flex-col">
                         <p>Về chúng tôi</p>
                         <p>Q&A và cộng đồng</p>

@@ -27,8 +27,12 @@ export default function Home() {
           </div>
         </div>
         <div className="flex justify-end">
-          <Image src="/image/cat1.png" alt="" width={374} height={551} className="mt-20" />
-          <Image src="/image/cat7.png" alt="" width={235} height={350} className="mb-10 flex justify-end items-end" />
+          <div>
+            <Image src="/image/cat1.png" alt="" width={374} height={572} className="mt-20" />
+          </div>
+          <div>
+            <Image src="/image/cat7.png" alt="" width={235} height={418} className="" />
+          </div>
         </div>
       </div>
 
@@ -73,20 +77,14 @@ export default function Home() {
         <Image src="/image/cat6.png" alt="" width={575} height={366} className="ml-32" />
       </div>
 
-      <div className="bg-[#FFE3D5] flex mx-72 my-20 rounded-3xl py-24 px-20">
+      <div className="bg-[#FFE3D5] flex mx-52 my-20 rounded-3xl py-24">
         <Image src="/phoneIMG/phone.png" alt="" width={591} height={315} />
-        <div className="items-center flex flex-col justify-center gap-10">
-          <h1 className="text-5xl font-semibold text-center">Kết nối mọi nơi với ứng dụng MeowCare</h1>
-          <div className="flex items-center justify-center gap-5">
-            {/* <Link className="w-[188px] h-[56px]" href="#" >
-              <Image src="/phoneIMG/apple2.png" alt="" width={188} height={56} className="" />
-            </Link>
-            <Link className="w-[188px] h-[56px]" href="#" >
-              <Image src="/phoneIMG/chplay.png" alt="" width={188} height={100} className="" />
-            </Link> */}
+        <div className="items-center flex flex-col justify-center gap-10 ml-[-100px]">
+          <h1 className="text-4xl font-semibold text-center">Kết nối mọi nơi với ứng dụng MeowCare</h1>
+          <div className="flex items-center justify-center gap-5 w-[663px]">
             <Button className="bg-black text-white w-56 h-20 ">
-              <FontAwesomeIcon icon={faApple} className="size-10" />
-              <div className="flex flex-col text-left text-xl">
+              <FontAwesomeIcon icon={faApple} className="size-8" />
+              <div className="flex flex-col text-left text-[18px]">
                 Tải về từ
                 <p className="font-semibold">Apple Store</p>
               </div>
