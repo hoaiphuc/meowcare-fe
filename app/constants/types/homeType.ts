@@ -1,15 +1,15 @@
 export type UserType = {
   userId: number;
-  userName: string;
-  password: string;
-  avatar: string;
-  url: string;
-  introduce: string;
-  position: string;
-  email: string;
-  phoneNumber: number;
-  roleName: string;
-  status: number;
+  // userName: string;
+  // password: string;
+  // avatar: string;
+  // url: string;
+  // introduce: string;
+  // position: string;
+  // email: string;
+  // phoneNumber: number;
+  // roleName: string;
+  // status: number;
 };
 
 export interface UserLocal {
@@ -21,3 +21,9 @@ export interface UserLocal {
     };
   };
 }
+
+export type ProfileSidebarItem = {
+  title: string;
+  path: string;
+  icon?: JSX.Element;
+};

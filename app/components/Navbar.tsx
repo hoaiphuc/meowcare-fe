@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { NavbarBrand, NavbarContent, NavbarItem, NavbarMenuToggle, NavbarMenu, NavbarMenuItem, Link, Avatar } from "@nextui-org/react";
+import { NavbarBrand, NavbarContent, NavbarItem, NavbarMenuToggle, NavbarMenu, NavbarMenuItem, Link, Avatar, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from "@nextui-org/react";
 import { Navbar as MyNavbar } from "@nextui-org/react";
 import Image from 'next/image';
 import { faArrowRightToBracket } from '@fortawesome/free-solid-svg-icons';
@@ -21,6 +21,7 @@ const Navbar = () => {
         if (typeof window !== 'undefined') {
             const authToken = localStorage.getItem('auth-token');
             setIsUser(Boolean(authToken));
+            setIsUser(true); //make this user true, remove it later!
         }
     }, []);
 
@@ -67,7 +68,33 @@ const Navbar = () => {
             <NavbarContent justify="end">
                 {isUser ?
                     <NavbarItem className="hidden lg:flex">
-                        <Avatar src="https://i.pravatar.cc/150?u=a042581f4e29026024d" />
+                        <Dropdown placement="bottom-start">
+                            <DropdownTrigger>
+                                <Avatar
+                                    isBordered
+                                    as="button"
+                                    className="transition-transform"
+                                    src="https://i.pravatar.cc/150?u=a042581f4e29026704d"
+                                />
+                            </DropdownTrigger>
+                            <DropdownMenu aria-label="User Actions" variant="flat">
+                                <DropdownItem key="profile" className="h-14 gap-2">
+                                    <p className="font-bold">Nguyễn Lê Đức Tấn</p>
+                                </DropdownItem>
+                                <DropdownItem key="profile">
+                                    <Link
+                                        href="/profile"
+                                        className="text-black w-full py-3 text-[17px]"
+                                    >
+                                        Hồ sơ
+                                    </Link>
+                                </DropdownItem>
+
+                                <DropdownItem key="logout" color="danger">
+                                    Log Out
+                                </DropdownItem>
+                            </DropdownMenu>
+                        </Dropdown>
                     </NavbarItem>
                     :
                     <NavbarItem className="hidden lg:flex">

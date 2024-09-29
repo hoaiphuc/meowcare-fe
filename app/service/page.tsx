@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCircle, faStar } from '@fortawesome/free-solid-svg-icons';
 import { faCircleCheck } from '@fortawesome/free-regular-svg-icons';
-import { Heart } from "lucide-react"
+import { Icon } from '@iconify/react';
 
 interface Province {
     idProvince: string;
@@ -126,7 +126,7 @@ const Service = () => {
                                         <div className='flex items-center gap-3'>
                                             <h1 className='text-[14px] font-semibold'>1. Nguyễn Lê Đức Tấn</h1>
                                             <button onClick={() => handleClick()}>
-                                                <Heart className={`transition-colors size-3 ${isClicked ? 'fill-red-500 text-red-500 ' : ''}`} />
+                                                <Icon icon="mdi:heart" className={`transition-colors size-3 ${isClicked ? 'text-red-500  ' : ''}`} />
                                             </button>
                                         </div>
                                         <h1 className='text-xs font-semibold'>I love cat</h1>
