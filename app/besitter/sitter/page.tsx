@@ -18,16 +18,19 @@ interface District {
 }
 
 const Sitter = () => {
-    // const [province, setProvince] = useState("")
-    const [name, setName] = useState("")
-    // let dataa = {
-    //     name,
-    //     province,
-    // }
+    const [formData, setFormData] = useState({
+        name: '',
+        email: '',
+        phone: '',
+        selectedProvince: '',
+        // Add other fields as needed
+    });
+    const [isInitialized, setIsInitialized] = useState(false);
+
 
     const [step, setStep] = useState(1);
     // State for selected province
-    const [selectedProvince, setSelectedProvince] = useState<string>('');
+    // const [selectedProvince, setSelectedProvince] = useState<string>('');
     // State for filtered districts
     const [filteredDistricts, setFilteredDistricts] = useState<District[]>([]);
 
@@ -35,16 +38,54 @@ const Sitter = () => {
     const districts: District[] = data.district;
 
     // Handle province change
+    // const handleProvinceChange = (provinceId: string) => {
+    //     setSelectedProvince(provinceId);
+    // };
+
     const handleProvinceChange = (provinceId: string) => {
-        setSelectedProvince(provinceId);
+        setFormData((prevData) => ({ ...prevData, selectedProvince: provinceId }));
     };
 
+    // Handle input change
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        setFormData((prevData) => ({ ...prevData, [name]: value }));
+    };
     // Filter districts when selected province changes
+    // useEffect(() => {
+    //     const newDistricts: District[] = districts.filter(district => district.idProvince === selectedProvince);
+    //     setFilteredDistricts(newDistricts);
+    // }, [districts, selectedProvince]);
     useEffect(() => {
-        const newDistricts: District[] = districts.filter(district => district.idProvince === selectedProvince);
+        const newDistricts: District[] = districts.filter(
+            (district) => district.idProvince === formData.selectedProvince
+        );
         setFilteredDistricts(newDistricts);
-    }, [districts, selectedProvince]);
+    }, [districts, formData.selectedProvince]);
 
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const storedData = localStorage.getItem('formData');
+            if (storedData) {
+                const parsedData = JSON.parse(storedData);
+                setFormData(parsedData);
+            }
+            setIsInitialized(true); // Set to true after data is loaded
+        }
+    }, []);
+
+
+    useEffect(() => {
+        if (typeof window !== 'undefined' && isInitialized) {
+            localStorage.setItem('formData', JSON.stringify(formData));
+        }
+    }, [formData, isInitialized]);
+
+
+
+    // const handleSubmit = () => {
+    //     const a = formData;
+    // }
     const renderStep = () => {
         switch (step) {
             case 1:
@@ -53,7 +94,7 @@ const Sitter = () => {
                         <h1 className='font-semibold text-xl py-10'>Vui lòng điền đầy đủ thông tin để chúng tôi đảm bảo thông tin để xác nhận bạn trở thành người chăm sóc mèo</h1>
                         <div className='flex flex-col justify-center items-start gap-6'>
                             {/* <h2>Họ và tên</h2> */}
-                            <Input placeholder="Nhập họ và tên" label="Họ và tên" labelPlacement='outside' variant="bordered" className='input' value={name} onChange={(e) => setName(e.target.value)} />
+                            <Input placeholder="Nhập họ và tên" label="Họ và tên" labelPlacement='outside' variant="bordered" className='input' name="name" value={formData.name} onChange={handleInputChange} />
                             <Input placeholder="Nhập họ và tên" label="Email" labelPlacement='outside' variant="bordered" className='input' />
                             <Input placeholder="Nhập số điện thoại" label="Số điện thoại" labelPlacement='outside' variant="bordered" className='input' />
 
@@ -80,7 +121,7 @@ const Sitter = () => {
                                         placeholder="Quận/Huyện"
                                         className="select"
                                         variant="bordered"
-                                        disabled={!selectedProvince} // Disable if no province is selected
+                                        disabled={!formData.selectedProvince} // Disable if no province is selected
                                     >
                                         {filteredDistricts.length > 0 ? (
                                             filteredDistricts.map((district) => (
