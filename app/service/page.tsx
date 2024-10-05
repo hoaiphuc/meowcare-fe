@@ -8,6 +8,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCircle, faStar } from '@fortawesome/free-solid-svg-icons';
 import { faCircleCheck } from '@fortawesome/free-regular-svg-icons';
 import { Icon } from '@iconify/react';
+import Map from '../components/Map';
 
 interface Province {
     idProvince: string;
@@ -20,6 +21,14 @@ interface District {
     name: string;
 }
 
+interface Marker {
+    id: string;
+    lat: number;
+    lng: number;
+    title: string;
+    price: string;
+}
+
 const Service = () => {
     const [selectedService, setSelectedService] = useState<string>('1');
     const [selectedProvince, setSelectedProvince] = useState<string>('');
@@ -28,6 +37,12 @@ const Service = () => {
     const provinces: Province[] = data.province;
     const districts: District[] = data.district;
 
+    //data
+    const markers: Marker[] = [
+        { id: 'item-1', lat: 10.77584, lng: 106.70098, title: 'Hoài Phúc', price: '$55/đêm' }, // District 1
+        { id: 'item-2', lat: 10.82310, lng: 106.62968, title: 'Samantha & Laura K.', price: '$80/night' }, // Phu Nhuan District
+        { id: 'item-3', lat: 10.762622, lng: 106.660172, title: 'Edgar P.', price: '$75/night' }, // District 3
+    ];
     const services = [
         { id: '1', serviceName: 'Gửi thú cưng' },
         { id: '2', serviceName: 'Trông tại nhà' },
@@ -63,7 +78,8 @@ const Service = () => {
     };
 
     return (
-        <div className='flex my-6 gap-2'>
+        <div className='flex flex-cols-3 m-6 gap-2 justify-center'>
+            {/* 1 */}
             <div className='bg-[#FFF6ED] w-[407px] h-[517px] flex flex-col gap-5 pt-10 px-1 rounded-xl shadow-xl'>
                 <Select
                     label="Loại dịch vụ"
@@ -115,6 +131,7 @@ const Service = () => {
                 </div>
 
             </div>
+            {/* 2 */}
             <div className='flex justify-start items-start w-[590px] bg-[#FFF6ED] text-black p-3'>
                 {
                     catSitters.length > 0 ?
@@ -161,7 +178,10 @@ const Service = () => {
                         )
                 }
             </div >
-            <div></div>
+            {/* 3 */}
+            <div className='w-[735px] flex'>
+                <Map markers={markers} />
+            </div>
         </div >
     )
 }
