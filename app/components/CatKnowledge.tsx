@@ -1,7 +1,10 @@
+import { Button } from '@nextui-org/react'
 import Image from 'next/image'
+import Link from 'next/link'
 import React from 'react'
 
 const CatKnowledge = () => {
+
     return (
         <div className=' w-[1253px] my-10 flex flex-col items-center'>
             <div className='text-[28px] font-semibold mb-10'>Kiến thức cơ bản về ngôn ngữ mèo cần biết</div>
@@ -28,7 +31,7 @@ const CatKnowledge = () => {
 
             <h1 className='text-[20px] font-semibold py-10 text-center'>Bạn tự tin hiểu rõ về mèo cưng? Hãy thử sức với bài kiểm tra của chúng tôi để kiểm tra kiến thức của bạn!</h1>
 
-
+            <Button as={Link} href='/besitter/quizstart'>Bắt đầu bài kiểm tra</Button>
         </div>
     )
 }

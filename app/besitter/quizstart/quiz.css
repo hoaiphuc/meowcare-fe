@@ -1,0 +1,7 @@
+h2 {
+    @apply text-[18px] font-semibold;
+}
+
+.button {
+    @apply w-[228px] h-[46px] rounded-full text-[18px]
+}

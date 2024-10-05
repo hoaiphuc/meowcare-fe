@@ -12,7 +12,7 @@ const BeSister = () => {
                 <div className='flex flex-col gap-3 justify-center items-center pt-80 pb-36 text-white px-[500px] text-center'>
                     <h1 className='font-bold text-4xl'>Trở thành người chăm sóc mèo</h1>
                     <h1 className='font-semibold text-2xl '>Nếu mèo là đam mê của bạn, hãy gia nhập và trở thành người chăm sóc đáng tin cậy cho những chú mèo cần được yêu thương!</h1>
-                    <Button as={Link} href='besitter/sitter' className='bg-[#2E67D1] rounded-full text-white mt-10 px-20 py-8 font-semibold text-xl'>Bắt đầu</Button>
+                    <Button as={Link} href='besitter/sitter/1' className='bg-[#2E67D1] rounded-full text-white mt-10 px-20 py-8 font-semibold text-xl'>Bắt đầu</Button>
                 </div>
             </div>
 
@@ -51,7 +51,7 @@ const BeSister = () => {
                         <p className='circle-p'>Sau khi hoàn thành quá trình chăm sóc. Thanh toán có thể được rút sau hai ngày kể từ khi bạn hoàn thành dịch vụ.</p>
                     </div>
                 </div>
-                <Button as={Link} href='besitter/sitter' className='bg-[#2E67D1] rounded-full text-white mt-10 px-20 py-8 font-semibold text-xl'>Bắt đầu</Button>
+                <Button as={Link} href='besitter/sitter/1' className='bg-[#2E67D1] rounded-full text-white mt-10 px-20 py-8 font-semibold text-xl'>Bắt đầu</Button>
             </div>
 
             <div className='grid grid-cols-2 my-32'>
@@ -102,7 +102,7 @@ const BeSister = () => {
 
             <div className='flex flex-col justify-center items-center gap-5'>
                 <h1 className='text-[32px] font-semibold'>Kết nối với chủ vật nuôi sau khi hồ sơ của bạn được chấp thuận</h1>
-                <Button as={Link} href='besitter/sitter' className='bg-btnbg  text-xl p-6 rounded-full'>Bắt đầu xây dựng hồ sơ</Button>
+                <Button as={Link} href='besitter/sitter/1' className='bg-btnbg  text-xl p-6 rounded-full'>Bắt đầu xây dựng hồ sơ</Button>
             </div>
 
         </div>

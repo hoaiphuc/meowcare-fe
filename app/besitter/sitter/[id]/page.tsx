@@ -5,6 +5,8 @@ import React, { useEffect, useState } from 'react'
 import './sitter.scss'
 import data from '@/app/lib/vietnam.json';
 import CatKnowledge from '@/app/components/CatKnowledge';
+import { useParams } from 'next/navigation';
+
 
 interface Province {
     idProvince: string;
@@ -18,6 +20,8 @@ interface District {
 }
 
 const Sitter = () => {
+    const params = useParams<{ id: string }>();
+
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -28,7 +32,8 @@ const Sitter = () => {
     const [isInitialized, setIsInitialized] = useState(false);
 
 
-    const [step, setStep] = useState(1);
+    const [step, setStep] = useState(Number(params.id) ? Number(params.id) : 1);
+
     // State for selected province
     // const [selectedProvince, setSelectedProvince] = useState<string>('');
     // State for filtered districts
