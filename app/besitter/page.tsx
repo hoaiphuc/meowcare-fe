@@ -102,7 +102,7 @@ const BeSister = () => {
 
             <div className='flex flex-col justify-center items-center gap-5'>
                 <h1 className='text-[32px] font-semibold'>Kết nối với chủ vật nuôi sau khi hồ sơ của bạn được chấp thuận</h1>
-                <Button as={Link} href='besitter/sitter/1' className='bg-btnbg  text-xl p-6 rounded-full'>Bắt đầu xây dựng hồ sơ</Button>
+                <Button as={Link} href='besitter/sitter/1' className='bg-btnbg  text-xl p-6 rounded-full text-white'>Bắt đầu xây dựng hồ sơ</Button>
             </div>
 
         </div>

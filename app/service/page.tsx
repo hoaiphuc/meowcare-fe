@@ -9,6 +9,8 @@ import { faCircle, faStar } from '@fortawesome/free-solid-svg-icons';
 import { faCircleCheck } from '@fortawesome/free-regular-svg-icons';
 import { Icon } from '@iconify/react';
 import Map from '../components/Map';
+import user from '@/app/lib/user.json';
+import Link from 'next/link';
 
 interface Province {
     idProvince: string;
@@ -136,37 +138,73 @@ const Service = () => {
                 {
                     catSitters.length > 0 ?
                         (
-                            <div className='min-w-full border-b pb-3'>
-                                <div className='flex gap-3'>
-                                    <Avatar src="https://i.pravatar.cc/150?u=a042581f4e29026024d" className='h-[52px] w-[52px]' />
-                                    <div className=''>
-                                        <div className='flex items-center gap-3'>
-                                            <h1 className='text-[14px] font-semibold'>1. Nguyễn Lê Đức Tấn</h1>
-                                            <button onClick={() => handleClick()}>
-                                                <Icon icon="mdi:heart" className={`transition-colors size-3 ${isClicked ? 'text-red-500  ' : ''}`} />
-                                            </button>
+                            user.map((catSitter) => (
+                                <div key={catSitter.id} className='min-w-full border-b pb-3'>
+                                    <Link href={`/service/sitterprofile/${catSitter.id}`}>
+                                        <div className='flex gap-3 cursor-pointer'>
+                                            <Avatar
+                                                src={catSitter.avatarUrl}
+                                                className='h-[52px] w-[52px]'
+                                            />
+                                            <div>
+                                                <div className='flex items-center gap-3'>
+                                                    <h1 className='text-[14px] font-semibold'>
+                                                        {catSitter.name}
+                                                    </h1>
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleClick();
+                                                        }}
+                                                    >
+                                                        <Icon
+                                                            icon='mdi:heart'
+                                                            className={`transition-colors size-3 ${isClicked ? 'text-red-500' : ''
+                                                                }`}
+                                                        />
+                                                    </button>
+                                                </div>
+                                                <h1 className='text-xs font-semibold'>
+                                                    {catSitter.description}
+                                                </h1>
+                                                <h1 className='text-xs font-semibold'>
+                                                    Địa chỉ: {catSitter.address}
+                                                </h1>
+                                            </div>
+                                            <div className='ml-auto flex flex-col text-right'>
+                                                <h1 className='text-xs font-semibold text-right'>
+                                                    Giá mỗi đêm
+                                                </h1>
+                                                <h1 className='text-[20px] font-semibold text-[#2B764F]'>
+                                                    {catSitter.price}
+                                                </h1>
+                                            </div>
                                         </div>
-                                        <h1 className='text-xs font-semibold'>I love cat</h1>
-                                        <h1 className='text-xs font-semibold'>Địa chỉ: Linh Xuân, Thành phố Thủ Đức, Thành phố Hồ Chí Minh</h1>
+                                    </Link>
+                                    <div className='flex gap-1 text-[10px] text-[#66625F]'>
+                                        <FontAwesomeIcon
+                                            icon={faStar}
+                                            className='text-[#F8B816] size-3'
+                                        />
+                                        <h1>{catSitter.rating}</h1>
+                                        <FontAwesomeIcon
+                                            icon={faCircle}
+                                            className='text-text size-1 self-center px-1'
+                                        />
+                                        <h1>{catSitter.reviews} Đánh giá</h1>
                                     </div>
-                                    <div className='ml-auto flex flex-col text-right'>
-                                        <h1 className='text-xs font-semibold text-right'>Giá mỗi đêm</h1>
-                                        <h1 className='text-[20px] font-semibold text-[#2B764F]'>100.000đ</h1>
+                                    <h1 className='text-[11px] font-semibold my-2'>
+                                        {catSitter.bio}
+                                    </h1>
+                                    <div className='flex text-[10px] font-semibold text-[#66625F]'>
+                                        <FontAwesomeIcon
+                                            icon={faCircleCheck}
+                                            className='text-green-600 size-4 self-center px-1'
+                                        />
+                                        <h1>Đã cập nhật {catSitter.lastUpdated} ngày trước</h1>
                                     </div>
                                 </div>
-                                <div className='flex gap-1 text-[10px] text-[#66625F]'>
-                                    <FontAwesomeIcon icon={faStar} className='text-[#F8B816] size-3' />
-                                    <h1>5.0</h1>
-                                    <FontAwesomeIcon icon={faCircle} className='text-text size-1 self-center px-1' />
-                                    <h1>15 Đánh giá</h1>
-                                </div>
-                                <h1 className='text-[11px] font-semibold my-2'>Tôi là một người yêu mèo, với việc nuôi mèo từ khi 12 tuổi và chăm sóc đến bây giờ, tôi tự tin chăm sóc mèo của bạn như cách tôi chăm sóc mèo của chính mình</h1>
-                                <div className='flex text-[10px] font-semibold text-[#66625F]'>
-                                    <FontAwesomeIcon icon={faCircleCheck} className='text-green-600 size-4 self-center px-1' />
-                                    <h1>Đã cập nhật 1 ngày trước</h1>
-                                </div>
-
-                            </div>
+                            ))
                         )
                         :
                         (

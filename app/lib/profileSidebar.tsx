@@ -26,7 +26,7 @@ export const profileSidebar: ProfileSidebarItem[] = [
     },
     {
         title: 'Hoạt động',
-        path: '/profile/nothing',
+        path: '/profile/activity',
         icon: (
             <FontAwesomeIcon icon={faWallet} className="h-7 w-7 text-[#902C6C]" />
         ),
