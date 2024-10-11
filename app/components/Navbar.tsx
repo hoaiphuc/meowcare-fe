@@ -6,9 +6,10 @@ import { Navbar as MyNavbar } from "@nextui-org/react";
 import Image from 'next/image';
 import { faArrowRightToBracket } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 
 const Navbar = () => {
+    const router = useRouter();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const menuItems = [
         { name: "Trang chủ", path: "/" },
@@ -21,7 +22,6 @@ const Navbar = () => {
         if (typeof window !== 'undefined') {
             const authToken = localStorage.getItem('auth-token');
             setIsUser(Boolean(authToken));
-            setIsUser(true); //make this user true, remove it later!
         }
     }, []);
 
@@ -32,6 +32,12 @@ const Navbar = () => {
         return pathname.startsWith(path);
     };
 
+    const handleLogout = () => {
+        if (typeof window !== 'undefined') {
+            localStorage.clear();
+        }
+        router.push('/login')
+    }
     return (
         <MyNavbar onMenuOpenChange={setIsMenuOpen} shouldHideOnScroll isBordered maxWidth="full" className='min-h-24 bg-[#fffaf5] '>
             <NavbarContent>
@@ -90,7 +96,7 @@ const Navbar = () => {
                                     </Link>
                                 </DropdownItem>
 
-                                <DropdownItem key="logout" color="danger">
+                                <DropdownItem key="logout" color="danger" onClick={() => handleLogout()}>
                                     Log Out
                                 </DropdownItem>
                             </DropdownMenu>

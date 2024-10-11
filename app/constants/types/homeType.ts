@@ -13,12 +13,18 @@ export type UserType = {
 };
 
 export interface UserLocal {
+  // data: {
   data: {
-    data: {
-      userId: number;
-      roleName: string;
-      token: string;
-    };
+    userId: number;
+    // roleName: string;
+    token: string;
+    // };
+    roles: [
+      {
+        name: string;
+        description: string;
+      }
+    ];
   };
 }
 

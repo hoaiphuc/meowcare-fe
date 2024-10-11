@@ -63,3 +63,7 @@ button {
 .btn-clicked {
   @apply fill-red-500 text-red-500;
 }
+
+.selectDiv:hover {
+  @apply border-l-4 border-l-[#1B7CD5] pl-2;
+}

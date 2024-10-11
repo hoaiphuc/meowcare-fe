@@ -3,14 +3,15 @@
 import './service.scss';
 import { Avatar, Select, SelectItem } from '@nextui-org/react';
 import data from '@/app/lib/vietnam.json';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCircle, faStar } from '@fortawesome/free-solid-svg-icons';
 import { faCircleCheck } from '@fortawesome/free-regular-svg-icons';
 import { Icon } from '@iconify/react';
-import Map from '../components/Map';
 import user from '@/app/lib/user.json';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
+const Map = dynamic(() => import('../components/Map'), { ssr: false });
 
 interface Province {
     idProvince: string;
@@ -23,13 +24,13 @@ interface District {
     name: string;
 }
 
-interface Marker {
-    id: string;
-    lat: number;
-    lng: number;
-    title: string;
-    price: string;
-}
+// interface Marker {
+//     id: string;
+//     lat: number;
+//     lng: number;
+//     title: string;
+//     price: string;
+// }
 
 const Service = () => {
     const [selectedService, setSelectedService] = useState<string>('1');
@@ -40,11 +41,22 @@ const Service = () => {
     const districts: District[] = data.district;
 
     //data
-    const markers: Marker[] = [
-        { id: 'item-1', lat: 10.77584, lng: 106.70098, title: 'Hoài Phúc', price: '$55/đêm' }, // District 1
-        { id: 'item-2', lat: 10.82310, lng: 106.62968, title: 'Samantha & Laura K.', price: '$80/night' }, // Phu Nhuan District
-        { id: 'item-3', lat: 10.762622, lng: 106.660172, title: 'Edgar P.', price: '$75/night' }, // District 3
-    ];
+    // const markers: Marker[] = [
+    //     { id: 'item-1', lat: 10.77584, lng: 106.70098, title: 'Hoài Phúc', price: '$55/đêm' }, // District 1
+    //     { id: 'item-2', lat: 10.82310, lng: 106.62968, title: 'Samantha & Laura K.', price: '$80/night' }, // Phu Nhuan District
+    //     { id: 'item-3', lat: 10.762622, lng: 106.660172, title: 'Edgar P.', price: '$75/night' }, // District 3
+    // ];
+    // Create refs for list items
+    const listItemRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+
+    // Function to scroll to a list item
+    const scrollToListItem = (id: string) => {
+        const element = listItemRefs.current[id];
+        if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest', });
+        }
+    };
+
     const services = [
         { id: '1', serviceName: 'Gửi thú cưng' },
         { id: '2', serviceName: 'Trông tại nhà' },
@@ -115,6 +127,7 @@ const Service = () => {
 
                     {/* District Select (filtered by province) */}
                     <Select
+                        aria-label="Quận/Huyện"
                         placeholder="Quận/Huyện"
                         className="select"
                         variant="bordered"
@@ -134,23 +147,29 @@ const Service = () => {
 
             </div>
             {/* 2 */}
-            <div className='flex justify-start items-start w-[590px] bg-[#FFF6ED] text-black p-3'>
+            <div className='flex flex-col justify-start items-start w-[590px] text-black p-3 h-[900px] overflow-auto scrollbar-hide'>
                 {
                     catSitters.length > 0 ?
                         (
-                            user.map((catSitter) => (
-                                <div key={catSitter.id} className='min-w-full border-b pb-3'>
+                            user.map((catSitter, index) => (
+                                <div
+                                    key={catSitter.id}
+                                    ref={(el) => {
+                                        listItemRefs.current[catSitter.id] = el;
+                                    }}
+                                    className='selectDiv min-w-full border-b pb-3 bg-[#FFF6ED]'>
                                     <Link href={`/service/sitterprofile/${catSitter.id}`}>
                                         <div className='flex gap-3 cursor-pointer'>
                                             <Avatar
                                                 src={catSitter.avatarUrl}
                                                 className='h-[52px] w-[52px]'
                                             />
-                                            <div>
+                                            <div className='flex flex-col gap-1'>
                                                 <div className='flex items-center gap-3'>
-                                                    <h1 className='text-[14px] font-semibold'>
+                                                    <p className='text-[14px] font-semibold'>
+                                                        <span className="text-sm font-bold">{index + 1}. </span>
                                                         {catSitter.name}
-                                                    </h1>
+                                                    </p>
                                                     <button
                                                         onClick={(e) => {
                                                             e.stopPropagation();
@@ -164,53 +183,54 @@ const Service = () => {
                                                         />
                                                     </button>
                                                 </div>
-                                                <h1 className='text-xs font-semibold'>
+                                                <p className='text-xs font-semibold'>
                                                     {catSitter.description}
-                                                </h1>
-                                                <h1 className='text-xs font-semibold'>
+                                                </p>
+                                                <p className='text-xs font-semibold'>
                                                     Địa chỉ: {catSitter.address}
-                                                </h1>
+                                                </p>
                                             </div>
                                             <div className='ml-auto flex flex-col text-right'>
-                                                <h1 className='text-xs font-semibold text-right'>
+                                                <p className='text-xs font-semibold text-right'>
                                                     Giá mỗi đêm
-                                                </h1>
-                                                <h1 className='text-[20px] font-semibold text-[#2B764F]'>
+                                                </p>
+                                                <p className='text-[20px] font-semibold text-[#2B764F]'>
                                                     {catSitter.price}
-                                                </h1>
+                                                </p>
                                             </div>
                                         </div>
+                                        <div className='flex gap-1 text-[#66625F]'>
+                                            <FontAwesomeIcon
+                                                icon={faStar}
+                                                className='text-[#F8B816] size-3'
+                                            />
+                                            <p className=' text-[10px]'>{catSitter.rating}</p>
+                                            <FontAwesomeIcon
+                                                icon={faCircle}
+                                                className='text-text size-1 self-center px-1'
+                                            />
+                                            <p className=' text-[10px]'>{catSitter.reviews} Đánh giá</p>
+                                        </div>
+                                        <p className='text-[11px] font-semibold my-2'>
+                                            {catSitter.bio}
+                                        </p>
+                                        <div className='flex  font-semibold text-[#66625F]'>
+                                            <FontAwesomeIcon
+                                                icon={faCircleCheck}
+                                                className='text-green-600 size-4 self-center px-1'
+                                            />
+                                            <p className='text-[10px]'>Đã cập nhật {catSitter.lastUpdated} ngày trước</p>
+                                        </div>
                                     </Link>
-                                    <div className='flex gap-1 text-[10px] text-[#66625F]'>
-                                        <FontAwesomeIcon
-                                            icon={faStar}
-                                            className='text-[#F8B816] size-3'
-                                        />
-                                        <h1>{catSitter.rating}</h1>
-                                        <FontAwesomeIcon
-                                            icon={faCircle}
-                                            className='text-text size-1 self-center px-1'
-                                        />
-                                        <h1>{catSitter.reviews} Đánh giá</h1>
-                                    </div>
-                                    <h1 className='text-[11px] font-semibold my-2'>
-                                        {catSitter.bio}
-                                    </h1>
-                                    <div className='flex text-[10px] font-semibold text-[#66625F]'>
-                                        <FontAwesomeIcon
-                                            icon={faCircleCheck}
-                                            className='text-green-600 size-4 self-center px-1'
-                                        />
-                                        <h1>Đã cập nhật {catSitter.lastUpdated} ngày trước</h1>
-                                    </div>
+
                                 </div>
                             ))
                         )
                         :
                         (
                             <div className='flex flex-col justify-center items-center px-32'>
-                                <h1 className='text-xl font-semibold'>Chúng tôi không tìm thấy người chăm sóc thú cưng nào.</h1>
-                                <h1 className='text-[18px]'>Hãy thử thay đổi tiêu chí tìm kiếm hoặc cập nhật vị trí của bạn. </h1>
+                                <p className='text-xl font-semibold'>Chúng tôi không tìm thấy người chăm sóc thú cưng nào.</p>
+                                <p className='text-[18px]'>Hãy thử thay đổi tiêu chí tìm kiếm hoặc cập nhật vị trí của bạn. </p>
                             </div>
 
                         )
@@ -218,7 +238,7 @@ const Service = () => {
             </div >
             {/* 3 */}
             <div className='w-[735px] flex'>
-                <Map markers={markers} />
+                <Map markers={user} onMarkerClick={scrollToListItem} />
             </div>
         </div >
     )

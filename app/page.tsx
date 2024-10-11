@@ -55,7 +55,7 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="flex my-20 mx-60 font-semibold">
+      <div className="flex my-20 mx-60 font-semibold ">
         <div className="">
           <h1 className="text-5xl">Dịch vụ của chúng tôi</h1>
           <h1 className="text-2xl text-[#666089] mt-5 mb-10">Với tư cách là một nhóm gồm những người chủ và người yêu mèo giàu kinh nghiệm, chúng tôi thực sự hiểu rõ bạn và thú cưng của bạn.</h1>
@@ -77,11 +77,11 @@ export default function Home() {
         <Image src="/image/cat6.png" alt="" width={575} height={366} className="ml-32" />
       </div>
 
-      <div className="bg-[#FFE3D5] flex mx-52 my-20 rounded-3xl py-24">
+      <div className="bg-[#FFE3D5] flex mx-52 my-20 rounded-3xl py-24 gap-20">
         <Image src="/phoneIMG/phone.png" alt="" width={591} height={315} />
         <div className="items-center flex flex-col justify-center gap-10 ml-[-100px]">
           <h1 className="text-4xl font-semibold text-center">Kết nối mọi nơi với ứng dụng MeowCare</h1>
-          <div className="flex items-center justify-center gap-5 w-[663px]">
+          <div className="flex items-center justify-center gap-5 w-[663px] ">
             <Button className="bg-black text-white w-56 h-20 ">
               <FontAwesomeIcon icon={faApple} className="size-8" />
               <div className="flex flex-col text-left text-[18px]">

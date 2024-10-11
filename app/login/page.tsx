@@ -29,13 +29,59 @@ const Login = () => {
                         'auth-token',
                         JSON.stringify(response)
                     );
-                    router.push('/');
+                    // router.push('/');
+
+                    // axiosClient
+                    //     .get('/auth')
+                    //     .then((response) => {
+                    //         console.log(response);
+
+                    //         switch (response.data.roles[0].name) {
+                    //             case 'ROLE_ADMIN':
+                    //                 router.push('/admin');
+                    //                 break;
+                    //             case 'ROLE_MANAGER':
+                    //                 router.push('/dashboard');
+                    //                 break;
+                    //             case 'ROLE_STAFF':
+                    //                 router.push('/dashboardStaff');
+                    //                 break;
+                    //             case 'ROLE_USER':
+                    //                 router.push('/');
+                    //                 break;
+                    //         }
+                    //     })
 
                 })
                 .catch((error) => {
                     console.log(error);
                 }
                 )
+
+            // toast.success('Đăng nhập thành công');
+            await axiosClient
+                .get('/auth')
+                .then((response) => {
+                    localStorage.setItem(
+                        'user',
+                        JSON.stringify(response)
+                    );
+                    switch (response.data.roles[0].name) {
+                        case 'ROLE_ADMIN':
+                            router.push('/admin');
+                            break;
+                        case 'ROLE_MANAGER':
+                            router.push('/dashboard');
+                            break;
+                        case 'ROLE_STAFF':
+                            router.push('/dashboardStaff');
+                            break;
+                        case 'ROLE_USER':
+                            router.push('/');
+                            break;
+                    }
+                })
+
         } catch (error) {
             console.log(error);
         }
