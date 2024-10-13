@@ -89,6 +89,14 @@ const Navbar = () => {
                                 </DropdownItem>
                                 <DropdownItem key="profile">
                                     <Link
+                                        href="/setupservice"
+                                        className="text-black w-full py-3 text-[17px]"
+                                    >
+                                        Quản lí dịch vụ
+                                    </Link>
+                                </DropdownItem>
+                                <DropdownItem key="profile">
+                                    <Link
                                         href="/profile"
                                         className="text-black w-full py-3 text-[17px]"
                                     >

@@ -1,0 +1,39 @@
+.h1 {
+    @apply text-[20px] font-semibold my-2;
+}
+
+.h2 {
+    @apply text-[15px] font-semibold;
+}
+
+.h3 {
+    @apply text-[13px] font-semibold;
+}
+
+.button {
+    @apply bg-transparent border border-black self-center text-xs font-semibold my-3 min-w-60;
+}
+
+.p {
+    @apply text-[12px] font-semibold text-black;
+}
+
+.hr {
+    @apply text-[#D9D9D9] mt-2 mb-3;
+}
+
+.li {
+    @apply font-semibold text-xs;
+}
+
+.input {
+    @apply bg-white p-3 border w-full h-14
+}
+
+.textarea {
+    @apply h-24 w-full bg-white p-3
+}
+
+.textareaTitle {
+    @apply h-24 w-full bg-white p-3 text-[20px] font-bold
+}

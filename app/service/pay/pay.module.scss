@@ -1,0 +1,19 @@
+.h1 {
+  @apply font-bold text-[28px];
+}
+
+.h2 {
+  @apply font-bold text-[18px];
+}
+
+.h3 {
+  @apply font-bold text-[14px] text-black;
+}
+
+.p {
+  @apply font-bold text-[14px] text-secondary;
+}
+
+.money {
+  @apply pl-3 border border-black;
+}

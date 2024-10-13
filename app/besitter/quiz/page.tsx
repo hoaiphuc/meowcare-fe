@@ -42,13 +42,14 @@ const Page = () => {
             ],
         },
     ];
+
     // State to track selected answers
-    const [selectedAnswers, setSelectedAnswers] = useState({});
+    const [selectedAnswers, setSelectedAnswers] = useState<{ [key: number]: number }>({});
     const [showScore, setShowScore] = useState(false);
     const [score, setScore] = useState(0);
 
     // Handle answer selection
-    const handleAnswerChange = (questionIndex, answerIndex) => {
+    const handleAnswerChange = (questionIndex: number, answerIndex: number) => {
         setSelectedAnswers((prevSelectedAnswers) => ({
             ...prevSelectedAnswers,
             [questionIndex]: answerIndex,
@@ -70,6 +71,7 @@ const Page = () => {
         setScore(newScore);
         setShowScore(true);
     };
+
     return (
         <div className='app'>
             {showScore ? (
@@ -86,7 +88,7 @@ const Page = () => {
                             <div className='question-text'>{question.questionText}</div>
                             <div className='answer-section'>
                                 {question.answerOptions.map((answerOption, answerIndex) => (
-                                    <div key={answerOption.id} className='answer-option'>
+                                    <div key={answerOption.answerText} className='answer-option'>
                                         <label>
                                             <input
                                                 type='radio'
@@ -111,4 +113,4 @@ const Page = () => {
     )
 }
 
-export default Page
+export default Page;

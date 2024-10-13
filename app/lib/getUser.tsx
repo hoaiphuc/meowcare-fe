@@ -18,7 +18,7 @@ const GetUser = () => {
     };
 
     const user: UserLocal | null = getUserFromStorage();
-    const userId = user?.data.data.userId;
+    const userId = user?.data.userId;
 
     const getUserById = async () => {
         if (!user) return;

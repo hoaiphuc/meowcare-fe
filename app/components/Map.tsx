@@ -57,7 +57,7 @@ const Map: React.FC<MapProps> = ({ markers, onMarkerClick }) => {
             const marker = L.marker([markerData.lat, markerData.lng], { icon: numberedIcon })
                 .addTo(mapRef.current as L.Map)
                 .bindPopup(
-                    `<b>${markerData.name}</b><br>Price: ${markerData.price}`
+                    `<b>${markerData.name}</b>`
                 );
             // Add click event to marker
             marker.on('click', () => {

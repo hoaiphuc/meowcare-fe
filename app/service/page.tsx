@@ -1,7 +1,7 @@
 'use client'
 
 import './service.scss';
-import { Avatar, Select, SelectItem } from '@nextui-org/react';
+import { Avatar, Button, DateRangePicker, Input, Select, SelectItem, Slider } from '@nextui-org/react';
 import data from '@/app/lib/vietnam.json';
 import { useEffect, useRef, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -40,6 +40,8 @@ const Service = () => {
     const provinces: Province[] = data.province;
     const districts: District[] = data.district;
 
+    const [price, setPrice] = useState<number[]>([20000, 2000000]);
+
     //data
     // const markers: Marker[] = [
     //     { id: 'item-1', lat: 10.77584, lng: 106.70098, title: 'Hoài Phúc', price: '$55/đêm' }, // District 1
@@ -67,6 +69,9 @@ const Service = () => {
         { id: '2', serviceName: 'Trông tại nhà' },
     ];
 
+    const [selectedCatNumber, setSelectedCatNumber] = useState<string | null>(null);
+    const options = ['1', '2', '3+'];
+
     // Handle service change
     const handleServiceChange = (serviceId: string) => {
         setSelectedService(serviceId);
@@ -91,10 +96,16 @@ const Service = () => {
         setIsClicked(!isClicked); // Toggle the state
     };
 
+    //change price range
+    const handleInputChange = (index: number, value: string) => {
+        const newPrice = [...price];
+        newPrice[index] = Number(value);
+        setPrice(newPrice);
+    };
     return (
         <div className='flex flex-cols-3 m-6 gap-2 justify-center'>
             {/* 1 */}
-            <div className='bg-[#FFF6ED] w-[407px] h-[517px] flex flex-col gap-5 pt-10 px-1 rounded-xl shadow-xl'>
+            <div className='bg-[#FFF6ED] w-[407px] h-[617px] flex flex-col gap-5 pt-10 px-1 rounded-xl shadow-xl'>
                 <Select
                     label="Loại dịch vụ"
                     labelPlacement='outside'
@@ -145,6 +156,82 @@ const Service = () => {
                     </Select>
                 </div>
 
+                <div>
+                    <h2>Đặt lịch</h2>
+                    <DateRangePicker
+                        label="Stay duration"
+                        className="max-w-[388px]"
+                        variant="bordered"
+                    />
+                </div>
+
+                <div className='flex flex-col gap-3'>
+                    <h2>Số lượng thú cưng</h2>
+                    <div className="options-container">
+                        {options.map((option) => (
+                            <div
+                                key={option}
+                                className={`option ${selectedCatNumber === option ? 'selected' : ''}`}
+                                onClick={() => setSelectedCatNumber(option)}
+                            >
+                                {option}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* <p className="text-default-500 font-medium text-small">
+                        {Array.isArray(price) && price.map((b) => `$${b}`).join(" – ")}
+                    </p> */}
+                <div>
+                    <h2 className='mb-3'>Giá mỗi giờ</h2>
+                    <div className='flex gap-3 justify-center items-center'>
+                        <Input
+                            aria-label="Giá tối thiểu"
+                            type="number"
+                            value={price[0].toString().toLocaleString()}
+                            onChange={(e) => handleInputChange(0, e.target.value)}
+                            className="input"
+                            endContent={
+                                <div className="pointer-events-none flex items-center">
+                                    <span className="text-default-400 text-small">đ</span>
+                                </div>
+                            }
+                        />
+                        <p>~</p>
+                        <Input
+                            aria-label="Giá tối đa"
+                            type="number"
+                            value={price[1].toString().toLocaleString()}
+                            onChange={(e) => handleInputChange(1, e.target.value)}
+                            className="input"
+                            endContent={
+                                <div className="pointer-events-none flex items-center">
+                                    <span className="text-default-400 text-small">đ</span>
+                                </div>
+                            }
+                        />
+                    </div>
+                    <Slider
+                        aria-label='price range'
+                        step={50}
+                        minValue={20000}
+                        maxValue={2000000}
+                        defaultValue={[100, 500]}
+                        value={price}
+                        // getValue={(price) => `${price}đ`}
+                        onChange={(value) => {
+                            const newValue = Array.isArray(value) ? value : [value];
+                            setPrice(newValue);
+                        }}
+                        formatOptions={{ style: "currency", currency: "VND" }}
+                        className="max-w-md"
+                    />
+                </div>
+
+                <div className='flex items-center justify-end'>
+                    <Button className='h-12 w-10 font-semibold' variant='bordered'>Tìm kiếm</Button>
+                </div>
             </div>
             {/* 2 */}
             <div className='flex flex-col justify-start items-start w-[590px] text-black p-3 h-[900px] overflow-auto scrollbar-hide'>

@@ -1,48 +1,19 @@
 'use client'
 
-import { faCircle, faMessage, faStar } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Icon } from '@iconify/react';
 import { Avatar, Button } from '@nextui-org/react';
 import Image from 'next/image';
-import React, { useState } from 'react'
-import { Icon } from '@iconify/react';
-import styles from './sitterprofile.module.css'
-import Link from 'next/link';
+import styles from './setupservice.module.css';
 const Page = () => {
-    const [isClicked, setIsClicked] = useState(false);
-
-
-    const handleClick = () => {
-        setIsClicked(!isClicked); // Toggle the state
-    };
-
-
     return (
         <div className='flex flex-cols-2 mx-72 my-10 gap-3 '>
             <div className='flex flex-col gap-2 w-96'>
                 <div className='flow-root'>
                     <Avatar src='/User-avatar.png' className='float-left h-20 w-20' />
-                    <button onClick={() => handleClick()} className='float-right'>
-                        {/* <Heart className={`transition-colors size-3 ${isClicked ? 'fill-red-500 text-red-500 ' : ''}`} /> */}
-                        <Icon icon="mdi:heart" className={`transition-colors size-7 ${isClicked ? 'text-red-500  ' : ''}`} />
-                    </button>
                 </div>
                 <h1 className={styles.h1}>Nguyễn Lê Đức Tấn</h1>
 
                 <h1 className='text-xs font-semibold'>Địa chỉ: Linh Xuân, Thành phố Thủ Đức, Thành phố Hồ Chí Minh</h1>
-                <div className='flex gap-1 text-[10px] text-[#66625F]'>
-                    <FontAwesomeIcon icon={faStar} className='text-[#F8B816] size-3' />
-                    <p>5.0</p>
-                    <FontAwesomeIcon icon={faCircle} className='text-text size-1 self-center px-1' />
-                    <p>15 Đánh giá</p>
-                </div>
-                <div className='flex gap-3'>
-                    <Button as={Link} href='/service/booking' className='w-44 rounded-full text-white bg-[#2E67D1]'>Đặt lịch</Button>
-                    <Button className='rounded-full bg-[#2E67D1] text-white min-w-8 min-h-8'>
-                        <FontAwesomeIcon icon={faMessage} />
-                    </Button>
-                </div>
-
                 <div className='shadow-xl p-2'>
                     <h1 className='font-semibold text-xl'>Dịch vụ</h1>
                     <div className=' flex flex-col'>
@@ -83,33 +54,18 @@ const Page = () => {
             </div>
 
             <div >
-                <div className='bg-white p-3'>
+                <div className='bg-white p-3 mb-5'>
                     <Image src="/service/cat1.png" alt='' width={592} height={297} />
                 </div>
                 <div>
-                    <h1 className={styles.h1}>Cat sitter</h1>
+                    <textarea className={styles.textareaTitle} defaultValue='Tôi có kinh nghiệm chăm sóc mèo 10 năm' />
                     <h1 className={styles.h1}>Kinh nghiệm chăm sóc mèo:</h1>
-                    <p className={styles.p}>Tôi là Tấn, một người rất yêu thích mèo và đã gắn bó với chúng từ khi còn nhỏ. Tôi bắt đầu chăm sóc bé mèo đầu tiên của mình từ khi 10 tuổi, và từ đó, tình yêu dành cho loài vật đáng yêu này ngày càng lớn dần. Với kinh nghiệm và sự tận tâm, tôi luôn mong muốn mang lại sự thoải mái và an toàn nhất cho mỗi bé mèo mà tôi chăm sóc....
-                        Đọc thêm</p>
+                    <textarea className={styles.textarea} defaultValue='Tôi là Tấn, một người rất yêu thích mèo và đã gắn bó với chúng từ khi còn nhỏ. Tôi bắt đầu chăm sóc bé mèo đầu tiên của mình từ khi 10 tuổi, và từ đó, tình yêu dành cho loài vật đáng yêu này ngày càng lớn dần.' />
                 </div>
                 <hr className={styles.hr} />
 
                 <h1 className={styles.h1}>Thời gian chăm sóc </h1>
-                <p className={styles.p}>6:00 - 7:00 AM: Cho mèo ăn sáng và vệ sinh khay cát</p>
-                <p className={styles.p}>  7:00 - 9:00 AM: Quan sát sức khỏe và chơi với mèo</p>
-                <hr className={styles.hr} />
-
-                <h1 className={styles.h1}>Đánh giá</h1>
-                <div className='grid grid-cols-2 gap-3'>
-                    <div>
-                        <div className='flex items-center gap-3'>
-                            <Avatar src='/User-avatar.png' />
-                            <h2 className={styles.h2}>Nguyễn Hoài Phúc</h2>
-                        </div>
-                        <h3 className={styles.h3}>Gửi thú cưng   30/08/2024</h3>
-                        <p className={styles.p}>Đức Tấn là một người chăm sóc thú cưng chuyển nghiệp mà tôi yên tâm gửi bé!</p>
-                    </div>
-                </div>
+                <textarea className={styles.textarea} defaultValue={'6:00 - 7:00 AM: Cho mèo ăn sáng và vệ sinh khay cát'} />
                 <hr className={styles.hr} />
 
                 <h1 className={styles.h1}>Thông tin về người chăm sóc</h1>
@@ -118,13 +74,13 @@ const Page = () => {
                     <h3 className='border items-center flex justify-center p-3 rounded-full border-[#666666]'>Hiểu về dinh dưỡng</h3>
                 </div>
                 <h2 className='text-[18px] my-3 font-semibold'>Thông tin về nơi ở</h2>
-                <p className='text-xs font-semibold text-black'>Sống trong một ngôi nhà</p>
+                <textarea className={styles.textarea} defaultValue={'Sống trong một ngôi nhà'} />
 
                 <h1 className='mt-10 text-xl font-semibold'>An toàn, tin cậy & môi trường</h1>
-                <p className={styles.p}>Hiện tại tôi có một căn hộ nhỏ. Tuy nhiên, tôi có thể chăm sóc chúng tại căn hộ của tôi khi không có lựa chọn nào khác. Tôi có thể đến căn hộ của bạn trong thời gian còn lại.Tôi có gắn camera theo dõi quá trình chăm sóc nếu bạn muốn xem quá trìnhỨng dụng giám sát: App(name) IOSSau khi booking tôi sẽ gửi tài khoản mật khẩu để bạn có thể theo dõi quá trình chăm sóc.</p>
+                <textarea className={styles.textarea} defaultValue={'Hiện tại tôi có một căn hộ nhỏ. Tuy nhiên, tôi có thể chăm sóc chúng tại căn hộ của tôi khi không có lựa chọn nào khác.'} />
 
                 <h1 className='mt-10 text-xl font-semibold'>Thông tin muốn biết về thú cưng của bạn</h1>
-                <p className={styles.p}>Rất muốn biết tính khí của thú cưng của bạn và bất kỳ loại thức ăn cụ thể nào mà chúng cần hoặc nếu bạn cũng có thể cung cấp những thứ này. Tôi cũng muốn biết chúng được huấn luyện đi vệ sinh tốt như thế nào và nếu bạn cần tôi cung cấp hộp vệ sinh hay không (chỉ dành cho mèo).</p>
+                <textarea className={styles.textarea} defaultValue={"Hiện tại tôi có một căn hộ nhỏ. Tuy nhiên, tôi có thể chăm sóc chúng tại căn hộ của tôi khi không có lựa chọn nào khác."} />
             </div>
         </div>
     )
