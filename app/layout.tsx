@@ -8,6 +8,10 @@ import Navbar from "./components/Navbar";
 import "./globals.css";
 import { Providers } from "./providers";
 
+//make icon size not display the default size
+import { config } from '@fortawesome/fontawesome-svg-core';
+import '@fortawesome/fontawesome-svg-core/styles.css';
+config.autoAddCss = false;
 // const geistSans = localFont({
 //   src: "./fonts/GeistVF.woff",
 //   variable: "--font-geist-sans",

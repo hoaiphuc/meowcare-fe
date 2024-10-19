@@ -1,3 +1,5 @@
+'use client'
+
 import React from 'react'
 import styles from './pay.module.scss';
 import { Button, Radio, RadioGroup } from '@nextui-org/react';
@@ -58,8 +60,8 @@ const page = () => {
                                 <div className='flex'>
                                     <Image src='/nganhang.png' alt='' width={50} height={50} className='mx-3' />
                                     <div>
-                                        <h1 className='m-0'>Thanh toán qua tài khoản ngân hàng</h1>
-                                        <h2 className='m-0'>Thanh toán bằng mã VietQR</h2>
+                                        <h1 className={styles.paymentHeading1}>Thanh toán qua tài khoản ngân hàng</h1>
+                                        <h2 className={styles.paymentHeading2}>Thanh toán bằng mã VietQR</h2>
                                     </div>
                                 </div>
                             </Radio>
@@ -69,8 +71,8 @@ const page = () => {
                                 <div className='flex'>
                                     <Image src='/cash.png' alt='' width={51} height={44} className='mx-3' />
                                     <div>
-                                        <h1 className='m-0'>Thanh toán bằng tiền mặt</h1>
-                                        <h2 className='m-0'>Sau khi hoàn thành dịch vụ</h2>
+                                        <h1 className={styles.paymentHeading1}>Thanh toán bằng tiền mặt</h1>
+                                        <h2 className={styles.paymentHeading2}>Sau khi hoàn thành dịch vụ</h2>
                                     </div>
                                 </div>
                             </Radio>

@@ -67,7 +67,7 @@ const Map: React.FC<MapProps> = ({ markers, onMarkerClick }) => {
     }, [markers, onMarkerClick]);
 
     return (
-        <div id="map" style={{ height: "100vh", width: "100%", float: "right" }} />
+        <div id="map" style={{ height: "900px", width: "100%", float: "right" }} />
     );
 };
 

@@ -61,15 +61,15 @@ export default function Home() {
           <h1 className="text-2xl text-[#666089] mt-5 mb-10">Với tư cách là một nhóm gồm những người chủ và người yêu mèo giàu kinh nghiệm, chúng tôi thực sự hiểu rõ bạn và thú cưng của bạn.</h1>
           <ul className="text-2xl text-[#666089] gap-5 flex flex-col">
             <li className="flex items-center">
-              <FontAwesomeIcon icon={faCheck} className="text-[#FF6338] bg-[#FFF2E5] rounded-full p-2 mr-5" />
+              <FontAwesomeIcon icon={faCheck} className="text-[#FF6338] bg-[#FFF2E5] rounded-full p-2 mr-5 w-5 h-5" />
               Kết nối người chăm sóc mèo đáng tin cậy.
             </li>
             <li className="flex items-center">
-              <FontAwesomeIcon icon={faCheck} className="text-[#FF6338] bg-[#FFF2E5] rounded-full p-2 mr-5" />
+              <FontAwesomeIcon icon={faCheck} className="text-[#FF6338] bg-[#FFF2E5] rounded-full p-2 mr-5 w-5 h-5" />
               Gửi mèo đến nơi chăm sóc an toàn.
             </li>
             <li className="flex items-center">
-              <FontAwesomeIcon icon={faCheck} className="text-[#FF6338] bg-[#FFF2E5] rounded-full p-2 mr-5" />
+              <FontAwesomeIcon icon={faCheck} className="text-[#FF6338] bg-[#FFF2E5] rounded-full p-2 mr-5 w-5 h-5" />
               Theo dõi tình hình thú cưng.
             </li>
           </ul>

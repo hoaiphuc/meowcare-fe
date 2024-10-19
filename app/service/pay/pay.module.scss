@@ -17,3 +17,11 @@
 .money {
   @apply pl-3 border border-black;
 }
+
+.paymentHeading1 {
+  @apply text-[20px] font-semibold;
+}
+
+.paymentHeading2 {
+  @apply text-[14px];
+}

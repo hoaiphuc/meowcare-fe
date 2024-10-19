@@ -103,9 +103,9 @@ const Service = () => {
         setPrice(newPrice);
     };
     return (
-        <div className='flex flex-cols-3 m-6 gap-2 justify-center'>
+        <div className='flex flex-cols-3 p-[5px] justify-center'>
             {/* 1 */}
-            <div className='bg-[#FFF6ED] w-[407px] h-[617px] flex flex-col gap-5 pt-10 px-1 rounded-xl shadow-xl'>
+            <div className='bg-[#FFF6ED] w-[310px] h-[617px] flex flex-col gap-5 p-[10px] rounded-xl'>
                 <Select
                     label="Loại dịch vụ"
                     labelPlacement='outside'
@@ -233,8 +233,9 @@ const Service = () => {
                     <Button className='h-12 w-10 font-semibold' variant='bordered'>Tìm kiếm</Button>
                 </div>
             </div>
+
             {/* 2 */}
-            <div className='flex flex-col justify-start items-start w-[590px] text-black p-3 h-[900px] overflow-auto scrollbar-hide'>
+            <div className='flex flex-col justify-start items-start w-[909px] text-black bg-[#FFF6ED] h-[900px] overflow-auto scrollbar-hide px-4'>
                 {
                     catSitters.length > 0 ?
                         (
@@ -249,12 +250,12 @@ const Service = () => {
                                         <div className='flex gap-3 cursor-pointer'>
                                             <Avatar
                                                 src={catSitter.avatarUrl}
-                                                className='h-[52px] w-[52px]'
+                                                className='h-[80px] w-[80px]'
                                             />
                                             <div className='flex flex-col gap-1'>
                                                 <div className='flex items-center gap-3'>
-                                                    <p className='text-[14px] font-semibold'>
-                                                        <span className="text-sm font-bold">{index + 1}. </span>
+                                                    <p className='text-[26px] font-semibold'>
+                                                        <span className="font-bold">{index + 1}. </span>
                                                         {catSitter.name}
                                                     </p>
                                                     <button
@@ -270,10 +271,10 @@ const Service = () => {
                                                         />
                                                     </button>
                                                 </div>
-                                                <p className='text-xs font-semibold'>
+                                                <p className='text-xs'>
                                                     {catSitter.description}
                                                 </p>
-                                                <p className='text-xs font-semibold'>
+                                                <p className='text-xs'>
                                                     Địa chỉ: {catSitter.address}
                                                 </p>
                                             </div>
@@ -286,19 +287,19 @@ const Service = () => {
                                                 </p>
                                             </div>
                                         </div>
-                                        <div className='flex gap-1 text-[#66625F]'>
+                                        <div className='flex gap-1 text-[#66625F] mt-3 mb-2x`'>
                                             <FontAwesomeIcon
                                                 icon={faStar}
-                                                className='text-[#F8B816] size-3'
+                                                className='text-[#F8B816] size-4'
                                             />
-                                            <p className=' text-[10px]'>{catSitter.rating}</p>
+                                            <p className=' text-[14px] font-normal'>{catSitter.rating}</p>
                                             <FontAwesomeIcon
                                                 icon={faCircle}
                                                 className='text-text size-1 self-center px-1'
                                             />
-                                            <p className=' text-[10px]'>{catSitter.reviews} Đánh giá</p>
+                                            <p className=' text-[14px] font-normal'>{catSitter.reviews} Đánh giá</p>
                                         </div>
-                                        <p className='text-[11px] font-semibold my-2'>
+                                        <p className='text-[14px] my-2'>
                                             {catSitter.bio}
                                         </p>
                                         <div className='flex  font-semibold text-[#66625F]'>

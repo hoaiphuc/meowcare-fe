@@ -112,7 +112,7 @@ const Navbar = () => {
                     </NavbarItem>
                     :
                     <NavbarItem className="hidden lg:flex">
-                        <Link href="/login" className='text-[#666089]'>Đăng nhập <FontAwesomeIcon icon={faArrowRightToBracket} className='pl-2' /></Link>
+                        <Link href="/login" className='text-[#666089]'>Đăng nhập <FontAwesomeIcon icon={faArrowRightToBracket} className='pl-2 w-5 h-5' /></Link>
                     </NavbarItem>
                 }
             </NavbarContent>
