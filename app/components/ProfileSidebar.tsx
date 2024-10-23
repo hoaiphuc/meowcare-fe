@@ -36,7 +36,7 @@ const ProfileSidebar = () => {
                                     isIconOnly
                                     radius="full"
                                     size="sm"
-                                    className="absolute bg-[#FF0004]"
+                                    className="absolute bg-[#902C6C]"
                                 //   onPress={onOpen}
                                 >
                                     <FontAwesomeIcon

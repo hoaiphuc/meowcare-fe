@@ -10,7 +10,6 @@ import { faApple } from "@fortawesome/free-brands-svg-icons"
 export default function Home() {
   return (
     <div className="mt-10">
-
       <div className="grid grid-cols-2">
         <div className="flex flex-col items-start justify-center ml-64">
           <h1 className="text-5xl font-semibold">Tìm kiếm người đồng hành đáng tín cậy cho bé cưng của bạn</h1>

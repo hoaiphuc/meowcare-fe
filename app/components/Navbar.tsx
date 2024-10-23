@@ -47,7 +47,7 @@ const Navbar = () => {
                 />
 
                 <NavbarBrand >
-                    <Image src="/meow.png" alt='' width={210} height={100} />
+                    <Image src="/meow.png" alt='' width={210} height={100} priority />
                 </NavbarBrand>
             </NavbarContent>
             <NavbarContent className="hidden md:flex gap-20" justify="center">
@@ -80,7 +80,7 @@ const Navbar = () => {
                                     isBordered
                                     as="button"
                                     className="transition-transform"
-                                    src="https://i.pravatar.cc/150?u=a042581f4e29026704d"
+                                    src="/User-avatar.png"
                                 />
                             </DropdownTrigger>
                             <DropdownMenu aria-label="User Actions" variant="flat">

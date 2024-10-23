@@ -55,10 +55,10 @@ const page = () => {
                         // color=""
                         className='w-full flex flex-col '
                     >
-                        <div className='border border-black'>
+                        <div className='border border-black p-3'>
                             <Radio value="qr" className='px-5'>
-                                <div className='flex'>
-                                    <Image src='/nganhang.png' alt='' width={50} height={50} className='mx-3' />
+                                <div className='flex items-center'>
+                                    <Image src='/nganhang.png' alt='' width={50} height={50} className='mx-3 w-[50px] h-[50px]' />
                                     <div>
                                         <h1 className={styles.paymentHeading1}>Thanh toán qua tài khoản ngân hàng</h1>
                                         <h2 className={styles.paymentHeading2}>Thanh toán bằng mã VietQR</h2>
@@ -66,10 +66,10 @@ const page = () => {
                                 </div>
                             </Radio>
                         </div>
-                        <div className='border border-black mt-[-8px]'>
+                        <div className='border border-black mt-[-8px] p-3'>
                             <Radio value="cash" className='px-5' aria-label='j'>
-                                <div className='flex'>
-                                    <Image src='/cash.png' alt='' width={51} height={44} className='mx-3' />
+                                <div className='flex items-center'>
+                                    <Image src='/cash.png' alt='' width={51} height={44} className='mx-3 w-[51px] h-[44px]' />
                                     <div>
                                         <h1 className={styles.paymentHeading1}>Thanh toán bằng tiền mặt</h1>
                                         <h2 className={styles.paymentHeading2}>Sau khi hoàn thành dịch vụ</h2>

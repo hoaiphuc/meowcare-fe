@@ -1,8 +1,14 @@
+'use client'
+
+import 'yet-another-react-lightbox/styles.css';
 import React, { useState } from 'react';
 import Image from 'next/image';
-import Lightbox from 'yet-another-react-lightbox';
-import 'yet-another-react-lightbox/styles.css'; // Import the styles
-import { Zoom } from 'yet-another-react-lightbox/plugins';
+import dynamic from 'next/dynamic';
+// import Lightbox from 'yet-another-react-lightbox';
+const Lightbox = dynamic(() => import('yet-another-react-lightbox'), {
+    ssr: false, // Disable SSR for this component
+});
+// import { Zoom } from 'yet-another-react-lightbox/plugins';
 
 const PhotoGallery = () => {
 
@@ -65,7 +71,7 @@ const PhotoGallery = () => {
                     close={() => setOpen(false)}
                     slides={photos}
                     index={currentIndex}
-                    plugins={[Zoom]}
+                // plugins={[Zoom]}
 
                 />
             )}

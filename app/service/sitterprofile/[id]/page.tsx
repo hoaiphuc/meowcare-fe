@@ -8,6 +8,7 @@ import React, { useState } from 'react'
 import { Icon } from '@iconify/react';
 import styles from './sitterprofile.module.css'
 import Link from 'next/link';
+import 'yet-another-react-lightbox/styles.css';
 import PhotoGallery from '@/app/components/PhotoGallery';
 const Page = () => {
     const [isClicked, setIsClicked] = useState(false);
@@ -28,16 +29,17 @@ const Page = () => {
                             <Icon icon="mdi:heart" className={`transition-colors w-10 h-10 ${isClicked ? 'text-red-500  ' : ''}`} />
                         </button>
                     </div>
-                    <h1 className="text-[30px] font-semibold">Nguyễn Lê Đức Tấn</h1>
-
-                    <h1 className='text-[16px] font-semibold'>Linh Xuân, Thành phố Thủ Đức, Thành phố Hồ Chí Minh</h1>
-                    <div className='flex gap-1 text-[10px] text-[#3b2f26] items-start'>
-                        <FontAwesomeIcon icon={faStar} className='text-[#F8B816] h-5 w-5' />
-                        <p className='text-[16px]'>5.0</p>
-                        <FontAwesomeIcon icon={faCircle} className='text-text size-1 self-center px-1' />
-                        <p className='text-[16px]'>15 Đánh giá</p>
+                    <div className='gap-2 flex flex-col'>
+                        <h1 className="text-[30px] font-semibold">Nguyễn Lê Đức Tấn</h1>
+                        <h1 className='text-[16px] font-semibold'>Linh Xuân, Thành phố Thủ Đức, Thành phố Hồ Chí Minh</h1>
+                        <div className='flex gap-1 text-[10px] text-[#3b2f26] items-start'>
+                            <FontAwesomeIcon icon={faStar} className='text-[#F8B816] h-5 w-5' />
+                            <p className='text-[16px]'>5.0</p>
+                            <FontAwesomeIcon icon={faCircle} className='text-text size-1 self-center px-1' />
+                            <p className='text-[16px]'>15 Đánh giá</p>
+                        </div>
                     </div>
-                    <div className='flex gap-3 w-full'>
+                    <div className='flex gap-3 w-full mt-7'>
                         <Button as={Link} href='/service/booking' className='w-full rounded-full text-white bg-[#2E67D1] shadow-sm'>Đặt lịch</Button>
                         <Button className='rounded-full bg-[#2E67D1] text-white w-8 h-10 border-0'>
                             <FontAwesomeIcon icon={faMessage} />
@@ -62,7 +64,7 @@ const Page = () => {
                             <div className='text-secondary font-semibold'>
                                 <h1 className='text-text text-xl font-semibold'>Trông tại nhà</h1>
                                 <p className={styles.p}>Tại nhà bạn</p>
-                                <p className={styles.p}>Giá 1<span className='text-[#2B764F]'>150.000đ</span> <span className='font-semibold'>mỗi đêm</span></p>
+                                <p className={styles.p}>Giá <span className='text-[#2B764F]'>150.000đ</span> <span className='font-semibold'>mỗi đêm</span></p>
                             </div>
                         </div>
                         <Button className={styles.button}>Xem chi tiết giá</Button>
@@ -71,10 +73,10 @@ const Page = () => {
                     <div className='my-5 flex flex-col'>
                         <h1 className={styles.h1}>Dịch vụ thêm có phí</h1>
                         <ul className={styles.li}>
-                            <li>Chải lông mèo: 50.000đ</li>
-                            <li>Vệ sinh tai và mắt: 30.000đ</li>
-                            <li>Cho ăn thức ăn đặc biệt: 30.000đ</li>
-                            <li>Bổ sung vitamin: 30.000đ</li>
+                            <li>Chải lông mèo: <span className='text-[#2B764F]'>50.000đ</span></li>
+                            <li>Vệ sinh tai và mắt: <span className='text-[#2B764F]'>30.000đ</span></li>
+                            <li>Cho ăn thức ăn đặc biệt: <span className='text-[#2B764F]'>30.000đ</span></li>
+                            <li>Bổ sung vitamin: <span className='text-[#2B764F]'>30.000đ</span></li>
                         </ul>
                         <Button className={styles.button}>Xem chi tiết yêu cầu thêm </Button>
                     </div>
@@ -87,7 +89,6 @@ const Page = () => {
             {/* 2 */}
             <div className='w-[745px]'>
                 <div className='bg-transparent p-3'>
-                    {/* <Image src="/service/cat1.png" alt='' width={592} height={297} /> */}
                     <PhotoGallery />
                 </div>
                 <div className='mt-20'>
@@ -103,10 +104,11 @@ const Page = () => {
                 <p className={styles.p}>  7:00 - 9:00 AM: Quan sát sức khỏe và chơi với mèo</p>
                 <hr className={styles.hr} />
 
+                {/* Feedback */}
                 <h1 className={styles.h1}>Đánh giá</h1>
-                <div className='grid grid-cols-2 gap-3'>
-                    <div>
-                        <div className='flex items-center gap-3'>
+                <div className='grid grid-cols-2 gap-5'>
+                    <div className=''>
+                        <div className='flex items-center gap-3 mb-3'>
                             <Avatar src='/User-avatar.png' />
                             <h2 className={styles.h2}>Nguyễn Hoài Phúc</h2>
                         </div>
@@ -114,6 +116,7 @@ const Page = () => {
                         <p className={styles.p}>Đức Tấn là một người chăm sóc thú cưng chuyển nghiệp mà tôi yên tâm gửi bé!</p>
                     </div>
                 </div>
+
                 <hr className={styles.hr} />
 
                 <h1 className={styles.h1}>Thông tin về người chăm sóc</h1>

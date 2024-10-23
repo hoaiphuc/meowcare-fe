@@ -11,7 +11,7 @@
 }
 
 .button {
-  @apply bg-transparent border border-black self-center text-xs font-semibold my-3 min-w-60;
+  @apply bg-transparent border border-black self-center text-[16px] font-semibold my-3 min-w-60 rounded-full;
 }
 
 .p {
@@ -19,9 +19,9 @@
 }
 
 .hr {
-  @apply text-[#D9D9D9] mt-2 mb-3;
+  @apply text-[#D9D9D9] mt-10 mb-10;
 }
 
 .li {
-  @apply font-semibold text-xs;
+  @apply font-medium text-[16px] text-black;
 }

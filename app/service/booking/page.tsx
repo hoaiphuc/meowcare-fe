@@ -1,12 +1,11 @@
 'use client'
 
-import { Button, Checkbox, DateRangePicker, Input, RangeCalendar, Select, SelectItem, Textarea } from '@nextui-org/react'
+import { Button, Checkbox, DateRangePicker, Input, Select, SelectItem, Textarea } from '@nextui-org/react'
 import React, { useState } from 'react'
 import './booking.scss'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faClock } from '@fortawesome/free-regular-svg-icons'
 import Link from 'next/link'
-import { today, getLocalTimeZone } from "@internationalized/date";
 import { parseZonedDateTime } from "@internationalized/date";
 const Page = () => {
     const [selectedService, setSelectedService] = useState<string>('1');
@@ -32,17 +31,7 @@ const Page = () => {
         <div className='flex flex-col items-center justify-start my-12'>
             <h1>Đặt lịch</h1>
             <div className='flex flex-row items-start justify-center gap-8 mt-10'>
-                <div>
-                    <RangeCalendar
-                        aria-label="Date (Read Only)"
-                        value={{
-                            start: today(getLocalTimeZone()),
-                            end: today(getLocalTimeZone()).add({ days: 2 }),
-                        }}
-                        isReadOnly
-                    />
-                </div>
-                {/* 2 */}
+                {/* 1 */}
                 <div className='flex flex-col gap-3 w-[486px]'>
                     <div className='flex flex-col gap-3'>
                         <h2>Chọn dịch vụ</h2>

@@ -1,15 +1,15 @@
 export type UserType = {
   userId: number;
-  // userName: string;
-  // password: string;
-  // avatar: string;
-  // url: string;
-  // introduce: string;
-  // position: string;
-  // email: string;
-  // phoneNumber: number;
-  // roleName: string;
-  // status: number;
+  username: string;
+  password: string;
+  avatar: string;
+  url: string;
+  introduce: string;
+  position: string;
+  email: string;
+  phoneNumber: number;
+  roleName: string;
+  status: number;
 };
 
 export interface UserLocal {

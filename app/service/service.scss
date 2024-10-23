@@ -55,10 +55,6 @@ h2 {
   @apply font-bold text-[16px];
 }
 
-button {
-  @apply w-6 h-6 bg-transparent border border-black rounded-full flex justify-center items-center;
-}
-
 /* CSS when button is clicked */
 .btn-clicked {
   @apply fill-red-500 text-red-500;
