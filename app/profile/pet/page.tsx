@@ -1,6 +1,6 @@
 'use client'
 
-import { faCat, faCirclePlus } from '@fortawesome/free-solid-svg-icons'
+import { faCat, faCirclePlus, faEye, faPenClip } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Radio, RadioGroup, Textarea, useDisclosure } from '@nextui-org/react';
 import React from 'react'
@@ -12,12 +12,34 @@ const Page = () => {
         <div className="w-[891px] bg-white rounded-2xl shadow-2xl p-5 flex flex-col items-start justify-start">
             <h1 className='text-2xl font-bold'>Thú cưng của bạn</h1>
             <h2>Thêm mèo cưng của bạn hoặc chỉnh sửa thông tin</h2>
-            <div
-                className='flex flex-col items-center justify-center w-[338px] h-[230px] border-dashed border-2 gap-3 mt-4 cursor-pointer'
-                onClick={onOpenAdd}
-            >
-                <FontAwesomeIcon icon={faCirclePlus} className='fa-2x text-[#902C6C]' />
-                <h1 className='text-xl'>Thêm thú cưng </h1>
+            <div className='grid grid-cols-2 gap-5'>
+                <div
+                    className='flex flex-col w-[416px] h-[290px] border-2 mt-4 rounded-lg'
+                >
+                    <div className="bg-[url('/nocatimage.jpg')] w-full h-full bg-cover text-white flex flex-col items-start justify-end p-3">
+                        <h1 className='text-2xl font-bold'>Tom</h1>
+                        <h2 className='text-[18px]'>Mèo đen</h2>
+                        <h3 className='text-[16px]'>1 năm tuổi, 3,2 kg Đực</h3>
+                    </div>
+                    <div className='flex items-center justify-start'>
+                        <Button className='bg-transparent text-[#902C6C] hover:underline'>
+                            <FontAwesomeIcon icon={faPenClip} />
+                            <h1>Chỉnh sửa</h1>
+                        </Button>
+                        <Button className='bg-transparent text-[#902C6C] hover:underline'>
+                            <FontAwesomeIcon icon={faEye} />
+                            <h1 className=''>Xem</h1>
+                        </Button>
+                    </div>
+                </div>
+
+                <div
+                    className='flex flex-col items-center justify-center w-[416px] h-[290px] border-dashed border-2 gap-3 mt-4 cursor-pointer rounded-lg'
+                    onClick={onOpenAdd}
+                >
+                    <FontAwesomeIcon icon={faCirclePlus} className='fa-2x text-[#902C6C]' />
+                    <h1 className='text-xl'>Thêm thú cưng </h1>
+                </div>
             </div>
 
             <Modal isOpen={isOpenAdd} onOpenChange={onOpenChangeAdd} size='5xl'>

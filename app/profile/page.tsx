@@ -23,7 +23,9 @@ const Profile = () => {
                 // setUserName(res.data.userName)
                 setUserProfile(res.data)
             })
-            .catch()
+            .catch(err => {
+                console.log(err);
+            })
     }, [])
 
     return (

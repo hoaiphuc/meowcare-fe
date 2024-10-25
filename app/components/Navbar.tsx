@@ -46,7 +46,7 @@ const Navbar = () => {
                     className="md:hidden"
                 />
 
-                <NavbarBrand >
+                <NavbarBrand as={Link} href='/'>
                     <Image src="/meow.png" alt='' width={210} height={100} priority />
                 </NavbarBrand>
             </NavbarContent>
