@@ -1,32 +1,72 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { UserType } from '../constants/types/homeType';
+// import { UserType } from '../constants/types/homeType';
 import { Button, Input } from '@nextui-org/react';
-import axiosClient from '../lib/axiosClient';
+// import axiosClient from '../lib/axiosClient';
+import { useAppDispatch, useAppSelector } from '../lib/hooks';
+import { fetchUserProfile, updateUserProfile } from '../lib/slices/userSlice';
+// import axiosClient from '../lib/axiosClient';
 
 const Profile = () => {
-    const [userProfile, setUserProfile] = useState<UserType>();
+    const dispatch = useAppDispatch();
+    const { userProfile, loading, error } = useAppSelector((state) => state.user);
+    // const [userProfile, setUserProfile] = useState<UserType>();
     const [isEditing, setIsEditing] = useState(false);
-    // const [userName, setUserName] = useState("");
-    // const [phoneNumber, setPhoneNumber] = useState("");
-    // let data = {
-    //     userName: userName,
-    //     phoneNumber: phoneNumber,
-    // };
+    const [username, setUsername] = useState(userProfile?.username || '');
+    const [phoneNumber, setPhoneNumber] = useState(userProfile?.phoneNumber || '');
+
+    // useEffect(() => {
+    //     axiosClient('/auth')
+    //         .then((res) => {
+    //             setUserProfile(res.data)
+    //         })
+    //         .catch(err => {
+    //             console.log(err);
+    //         })
+    // }, [])
+
+    // const handleUpdate = () => {
+    //     const updatedData = {
+    //         username,
+    //         phoneNumber,
+    //     };
+    //     axiosClient.put(`/user/${userProfile?.id}`, updatedData)
+    //         .then(() => {
+    //             console.log("x");
+
+    //         })
+    //         .catch(err => {
+    //             console.log(err);
+    //         })
+    // }
+    useEffect(() => {
+        dispatch(fetchUserProfile());
+    }, [dispatch]);
 
     useEffect(() => {
-        axiosClient('/auth')
-            .then((res) => {
-                console.log(res.data);
+        if (userProfile) {
+            setUsername(userProfile.username || '');
+            setPhoneNumber(userProfile.phoneNumber || '');
+        }
+    }, [userProfile]);
 
-                // setUserName(res.data.userName)
-                setUserProfile(res.data)
-            })
-            .catch(err => {
-                console.log(err);
-            })
-    }, [])
+    const handleUpdate = () => {
+        const updatedData = {
+            username,
+            phoneNumber,
+        };
+        dispatch(updateUserProfile(updatedData));
+        setIsEditing(false);
+    };
+
+    if (loading) {
+        return <div>Đang tải...</div>;
+    }
+
+    if (error) {
+        return <div>{error}</div>;
+    }
 
     return (
         <div>
@@ -53,7 +93,7 @@ const Profile = () => {
                                 disabled={!isEditing}
                                 variant="bordered"
                                 defaultValue={userProfile?.phoneNumber?.toString() ?? 0}
-                            // onChange={(e) => setPhoneNumber(e.target.value)}
+                                onChange={(e) => setPhoneNumber(e.target.value)}
                             />
                             {/* </div> */}
                             <h2>Email</h2>
@@ -81,7 +121,7 @@ const Profile = () => {
                         <div>
                             <Button
                                 className="bg-[#902C6C] text-white"
-                            // onClick={() => handleSubmit()}
+                                onClick={() => handleUpdate()}
                             >
                                 Xác nhận
                             </Button>

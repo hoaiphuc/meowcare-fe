@@ -7,9 +7,14 @@ import Image from 'next/image';
 import { faArrowRightToBracket } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { usePathname, useRouter } from 'next/navigation';
+import { useAppDispatch, useAppSelector } from '../lib/hooks';
+import { fetchUserProfile } from '../lib/slices/userSlice';
+
 
 const Navbar = () => {
     const router = useRouter();
+    const dispatch = useAppDispatch();
+    const { userProfile, loading } = useAppSelector((state) => state.user);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const menuItems = [
         { name: "Trang chủ", path: "/" },
@@ -17,13 +22,19 @@ const Navbar = () => {
         { name: "Trở thành người chăm sóc", path: "/besitter" },
     ];
     const pathname = usePathname();
-    const [isUser, setIsUser] = useState<boolean | null>(null);
+    // const [isUser, setIsUser] = useState<boolean | null>(null);
+    // useEffect(() => {
+    //     if (typeof window !== 'undefined') {
+    //         const authToken = localStorage.getItem('auth-token');
+    //         setIsUser(Boolean(authToken));
+    //     }
+    // }, []);
+
     useEffect(() => {
-        if (typeof window !== 'undefined') {
-            const authToken = localStorage.getItem('auth-token');
-            setIsUser(Boolean(authToken));
+        if (!userProfile) {
+            dispatch(fetchUserProfile());
         }
-    }, []);
+    }, [dispatch, userProfile]);
 
     const isActive = (path: string) => {
         if (path === "/") {
@@ -38,6 +49,11 @@ const Navbar = () => {
         }
         router.push('/login')
     }
+    if (loading) {
+        // Hiển thị trạng thái tải hoặc giữ navbar trống
+        return <nav>Đang tải...</nav>;
+    }
+
     return (
         <MyNavbar onMenuOpenChange={setIsMenuOpen} shouldHideOnScroll isBordered maxWidth="full" className='min-h-24 bg-[#fffaf5] '>
             <NavbarContent>
@@ -72,7 +88,7 @@ const Navbar = () => {
                 ))}
             </NavbarContent>
             <NavbarContent justify="end">
-                {isUser ?
+                {userProfile ?
                     <NavbarItem className="hidden lg:flex">
                         <Dropdown placement="bottom-start">
                             <DropdownTrigger>
@@ -85,7 +101,8 @@ const Navbar = () => {
                             </DropdownTrigger>
                             <DropdownMenu aria-label="User Actions" variant="flat">
                                 <DropdownItem key="profile" className="h-14 gap-2">
-                                    <p className="font-bold">Nguyễn Lê Đức Tấn</p>
+                                    <p className="font-bold">{userProfile?.username}</p>
+                                    <p className="font-bold">{userProfile?.phoneNumber}</p>
                                 </DropdownItem>
                                 <DropdownItem key="profile">
                                     <Link
