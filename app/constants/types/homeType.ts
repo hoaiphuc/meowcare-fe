@@ -1,5 +1,5 @@
 export type UserType = {
-  userId: number;
+  id: number;
   username: string;
   password: string;
   avatar: string;
@@ -7,10 +7,16 @@ export type UserType = {
   introduce: string;
   position: string;
   email: string;
-  phoneNumber: number;
+  phoneNumber: string;
   roleName: string;
   status: number;
 };
+
+export interface UserState {
+  userProfile: UserType | null;
+  loading: boolean;
+  error: string | null;
+}
 
 export interface UserLocal {
   // data: {
