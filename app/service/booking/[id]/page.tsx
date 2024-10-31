@@ -1,16 +1,22 @@
 'use client'
 
 import { Button, Checkbox, DateRangePicker, Input, Select, SelectItem, Textarea } from '@nextui-org/react'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import './booking.scss'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faClock } from '@fortawesome/free-regular-svg-icons'
 import Link from 'next/link'
 import { parseZonedDateTime } from "@internationalized/date";
+import { useParams } from 'next/navigation'
+import axiosClient from '@/app/lib/axiosClient'
+import { PetProfile } from '@/app/constants/types/homeType'
 const Page = () => {
+    const params = useParams();
     const [selectedService, setSelectedService] = useState<string>('1');
     const [isSelected, setIsSelected] = useState(false);
     const [isRequireFood, setIsRequireFood] = useState(false);
+    const [pets, setPets] = useState<PetProfile[]>([]);
+
     const services = [
         { id: '1', serviceName: 'Gửi thú cưng' },
         { id: '2', serviceName: 'Trông tại nhà' },
@@ -21,12 +27,29 @@ const Page = () => {
         { id: '2', foodName: 'Thịt' },
     ];
 
-
     // Handle service change
     const handleServiceChange = (serviceId: string) => {
         setSelectedService(serviceId);
     };
 
+    //get pets
+    useEffect(() => {
+        try {
+            axiosClient('pet-profiles')
+                .then((res) => {
+                    setPets(res.data);
+                })
+                .catch((e) => {
+                    console.log(e);
+                })
+        } catch (error) {
+            console.log(error);
+        }
+    }, [])
+
+    // const handleBooking = () => {
+
+    // }
     return (
         <div className='flex flex-col items-center justify-start my-12'>
             <h1>Đặt lịch</h1>
@@ -62,6 +85,21 @@ const Page = () => {
                                 end: parseZonedDateTime("2024-04-08T11:15[America/Los_Angeles]"),
                             }}
                         />
+
+                        <h2>Thêm thú cưng của bạn</h2>
+                        <Select
+                            labelPlacement='outside'
+                            className="select min-w-full"
+                            variant="bordered"
+                            // defaultSelectedKeys={selectedService}
+                            onChange={(event) => handleServiceChange(event.target.value)}
+                        >
+                            {pets.map((pet) => (
+                                <SelectItem key={pet.id} value={pet.id}>
+                                    {pet.petName}
+                                </SelectItem>
+                            ))}
+                        </Select>
 
                         <h2>Chọn thức ăn cho mèo</h2>
                         <Select

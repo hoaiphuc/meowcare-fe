@@ -1,0 +1,8 @@
+.button {
+    background-color: transparent;
+    @apply border border-[#902C6C] text-[#902C6C]
+}
+
+.title {
+    @apply font-bold
+}

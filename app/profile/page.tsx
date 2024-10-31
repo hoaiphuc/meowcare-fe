@@ -13,7 +13,7 @@ const Profile = () => {
     const { userProfile, loading, error } = useAppSelector((state) => state.user);
     // const [userProfile, setUserProfile] = useState<UserType>();
     const [isEditing, setIsEditing] = useState(false);
-    const [username, setUsername] = useState(userProfile?.username || '');
+    const [fullName, setFullName] = useState(userProfile?.fullName || '');
     const [phoneNumber, setPhoneNumber] = useState(userProfile?.phoneNumber || '');
 
     // useEffect(() => {
@@ -46,14 +46,14 @@ const Profile = () => {
 
     useEffect(() => {
         if (userProfile) {
-            setUsername(userProfile.username || '');
+            setFullName(userProfile.username || '');
             setPhoneNumber(userProfile.phoneNumber || '');
         }
     }, [userProfile]);
 
     const handleUpdate = () => {
         const updatedData = {
-            username,
+            fullName,
             phoneNumber,
         };
         dispatch(updateUserProfile(updatedData));
@@ -82,7 +82,7 @@ const Profile = () => {
                                 disabled={!isEditing}
                                 type="text"
                                 variant="bordered"
-                                defaultValue={userProfile?.username}
+                                defaultValue={userProfile?.fullName}
                             // onChange={(e) => setUserName(e.target.value)}
                             />
                             <h2>Số điện thoại</h2>

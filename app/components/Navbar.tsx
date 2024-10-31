@@ -101,8 +101,7 @@ const Navbar = () => {
                             </DropdownTrigger>
                             <DropdownMenu aria-label="User Actions" variant="flat">
                                 <DropdownItem key="profile" className="h-14 gap-2">
-                                    <p className="font-bold">{userProfile?.username}</p>
-                                    <p className="font-bold">{userProfile?.phoneNumber}</p>
+                                    <p className="font-bold">{userProfile?.fullName}</p>
                                 </DropdownItem>
                                 <DropdownItem key="profile">
                                     <Link

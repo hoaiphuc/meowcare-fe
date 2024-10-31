@@ -8,9 +8,10 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCircle, faStar } from '@fortawesome/free-solid-svg-icons';
 import { faCircleCheck } from '@fortawesome/free-regular-svg-icons';
 import { Icon } from '@iconify/react';
-import user from '@/app/lib/user.json';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
+import axiosClient from '../lib/axiosClient';
+import { CatSitter } from '../constants/types/homeType';
 const Map = dynamic(() => import('../components/Map'), { ssr: false });
 
 interface Province {
@@ -24,14 +25,6 @@ interface District {
     name: string;
 }
 
-// interface Marker {
-//     id: string;
-//     lat: number;
-//     lng: number;
-//     title: string;
-//     price: string;
-// }
-
 const Service = () => {
     const [selectedService, setSelectedService] = useState<string>('1');
     const [selectedProvince, setSelectedProvince] = useState<string>('');
@@ -40,15 +33,9 @@ const Service = () => {
     const provinces: Province[] = data.province;
     const districts: District[] = data.district;
 
-    const [price, setPrice] = useState<number[]>([20000, 2000000]);
+    const [catSitters, setCatSitters] = useState<CatSitter[]>([]);
 
-    //data
-    // const markers: Marker[] = [
-    //     { id: 'item-1', lat: 10.77584, lng: 106.70098, title: 'Hoài Phúc', price: '$55/đêm' }, // District 1
-    //     { id: 'item-2', lat: 10.82310, lng: 106.62968, title: 'Samantha & Laura K.', price: '$80/night' }, // Phu Nhuan District
-    //     { id: 'item-3', lat: 10.762622, lng: 106.660172, title: 'Edgar P.', price: '$75/night' }, // District 3
-    // ];
-    // Create refs for list items
+    const [price, setPrice] = useState<number[]>([20000, 2000000]);
     const listItemRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
     // Function to scroll to a list item
@@ -60,11 +47,6 @@ const Service = () => {
     };
 
     const services = [
-        { id: '1', serviceName: 'Gửi thú cưng' },
-        { id: '2', serviceName: 'Trông tại nhà' },
-    ];
-
-    const catSitters = [
         { id: '1', serviceName: 'Gửi thú cưng' },
         { id: '2', serviceName: 'Trông tại nhà' },
     ];
@@ -102,6 +84,22 @@ const Service = () => {
         newPrice[index] = Number(value);
         setPrice(newPrice);
     };
+
+    //get cat sitters
+    useEffect(() => {
+        try {
+            axiosClient('sitter-profiles')
+                .then((res) => {
+                    setCatSitters(res.data);
+                })
+                .catch((e) => {
+                    console.log(e);
+                })
+        } catch (error) {
+            console.log(error);
+
+        }
+    }, [])
     return (
         <div className='flex flex-cols-3 p-[5px] justify-center'>
             {/* 1 */}
@@ -239,7 +237,7 @@ const Service = () => {
                 {
                     catSitters.length > 0 ?
                         (
-                            user.map((catSitter, index) => (
+                            catSitters.map((catSitter, index) => (
                                 <div
                                     key={catSitter.id}
                                     ref={(el) => {
@@ -249,14 +247,14 @@ const Service = () => {
                                     <Link href={`/service/sitterprofile/${catSitter.id}`}>
                                         <div className='flex gap-3 cursor-pointer'>
                                             <Avatar
-                                                src={catSitter.avatarUrl}
+                                                // src={catSitter.avatarUrl}
                                                 className='h-[80px] w-[80px]'
                                             />
                                             <div className='flex flex-col gap-1'>
                                                 <div className='flex items-center gap-3'>
                                                     <p className='text-[26px] font-semibold'>
                                                         <span className="font-bold">{index + 1}. </span>
-                                                        {catSitter.name}
+                                                        {catSitter.fullName}
                                                     </p>
                                                     <button
                                                         onClick={(e) => {
@@ -272,10 +270,10 @@ const Service = () => {
                                                     </button>
                                                 </div>
                                                 <p className='text-xs'>
-                                                    {catSitter.description}
+                                                    {catSitter.bio}
                                                 </p>
                                                 <p className='text-xs'>
-                                                    Địa chỉ: {catSitter.address}
+                                                    Địa chỉ: {catSitter.location}
                                                 </p>
                                             </div>
                                             <div className='ml-auto flex flex-col text-right'>
@@ -283,7 +281,8 @@ const Service = () => {
                                                     Giá mỗi đêm
                                                 </p>
                                                 <p className='text-[20px] font-semibold text-[#2B764F]'>
-                                                    {catSitter.price}
+                                                    {/* {catSitter.price} */}
+                                                    20000
                                                 </p>
                                             </div>
                                         </div>
@@ -292,12 +291,13 @@ const Service = () => {
                                                 icon={faStar}
                                                 className='text-[#F8B816] size-4'
                                             />
-                                            <p className=' text-[14px] font-normal'>{catSitter.rating}</p>
+                                            <p className=' text-[14px] font-normal'>{catSitter.rating ? catSitter.rating : 'Chưa có đánh giá'}</p>
                                             <FontAwesomeIcon
                                                 icon={faCircle}
                                                 className='text-text size-1 self-center px-1'
                                             />
-                                            <p className=' text-[14px] font-normal'>{catSitter.reviews} Đánh giá</p>
+                                            {/* <p className=' text-[14px] font-normal'>{catSitter.reviews} Đánh giá</p> */}
+                                            <p className=' text-[14px] font-normal'>20 Đánh giá</p>
                                         </div>
                                         <p className='text-[14px] my-2'>
                                             {catSitter.bio}
@@ -307,7 +307,7 @@ const Service = () => {
                                                 icon={faCircleCheck}
                                                 className='text-green-600 size-4 self-center px-1'
                                             />
-                                            <p className='text-[10px]'>Đã cập nhật {catSitter.lastUpdated} ngày trước</p>
+                                            <p className='text-[10px]'>Đã cập nhật 2 ngày trước</p>
                                         </div>
                                     </Link>
 
@@ -326,7 +326,7 @@ const Service = () => {
             </div >
             {/* 3 */}
             <div className='w-[735px] flex'>
-                <Map markers={user} onMarkerClick={scrollToListItem} />
+                <Map markers={catSitters} onMarkerClick={scrollToListItem} />
             </div>
         </div >
     )

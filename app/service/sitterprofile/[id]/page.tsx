@@ -4,13 +4,22 @@ import { faCircle, faMessage, faStar } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Avatar, Button } from '@nextui-org/react';
 // import Image from 'next/image';
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Icon } from '@iconify/react';
 import styles from './sitterprofile.module.css'
 import Link from 'next/link';
 import 'yet-another-react-lightbox/styles.css';
 import PhotoGallery from '@/app/components/PhotoGallery';
+import axiosClient from '@/app/lib/axiosClient';
+import { useParams } from 'next/navigation';
+import { CatSitter } from '@/app/constants/types/homeType';
+
+
+
 const Page = () => {
+    const params = useParams();
+    // const { sitterId } = params;
+    const [sitterProfile, setSitterProfile] = useState<CatSitter | undefined>();
     const [isClicked, setIsClicked] = useState(false);
 
 
@@ -18,6 +27,20 @@ const Page = () => {
         setIsClicked(!isClicked); // Toggle the state
     };
 
+    useEffect(() => {
+        try {
+            axiosClient(`sitter-profiles/${params.id}`)
+                .then((res) => {
+                    setSitterProfile(res.data);
+                    console.log(res.data);
+                })
+                .catch((e) => {
+                    console.log(e);
+                })
+        } catch (error) {
+            console.log(error);
+        }
+    }, [params])
 
     return (
         <div className='flex flex-cols-2 my-10 gap-10 px-16 justify-center'>
@@ -30,7 +53,7 @@ const Page = () => {
                         </button>
                     </div>
                     <div className='gap-2 flex flex-col'>
-                        <h1 className="text-[30px] font-semibold">Nguyễn Lê Đức Tấn</h1>
+                        <h1 className="text-[30px] font-semibold">{sitterProfile?.user?.fullName}</h1>
                         <h1 className='text-[16px] font-semibold'>Linh Xuân, Thành phố Thủ Đức, Thành phố Hồ Chí Minh</h1>
                         <div className='flex gap-1 text-[10px] text-[#3b2f26] items-start'>
                             <FontAwesomeIcon icon={faStar} className='text-[#F8B816] h-5 w-5' />
@@ -40,7 +63,7 @@ const Page = () => {
                         </div>
                     </div>
                     <div className='flex gap-3 w-full mt-7'>
-                        <Button as={Link} href='/service/booking' className='w-full rounded-full text-white bg-[#2E67D1] shadow-sm'>Đặt lịch</Button>
+                        <Button as={Link} href={`/service/booking/${params.id}`} className='w-full rounded-full text-white bg-[#2E67D1] shadow-sm'>Đặt lịch</Button>
                         <Button className='rounded-full bg-[#2E67D1] text-white w-8 h-10 border-0'>
                             <FontAwesomeIcon icon={faMessage} />
                         </Button>

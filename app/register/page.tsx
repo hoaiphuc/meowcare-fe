@@ -26,20 +26,18 @@ const Register = () => {
     const handleSubmit = async () => {
         try {
             await axiosClient
-                .post('auth/registerNewUser', dataRegister)
+                .post('users', dataRegister)
                 .then(() => {
-
                     router.push('/login');
-
                 })
                 .catch((error) => {
                     console.log(error);
-                }
-                )
+                })
         } catch (error) {
             console.log(error);
         }
     };
+
     return (
         <div className='flex bg-login-bg bg-cover items-center justify-center'>
             <div className='bg-white w-[1360px] h-[700px] m-5  rounded-[70px] grid grid-cols-1 md:grid-cols-2 md:m-[82px]'>

@@ -23,35 +23,29 @@ const Login = () => {
     const handleSubmit = async () => {
         try {
             await axiosClient
-                .post('auth/generateToken', dataLogin)
+                .post('auth/token', dataLogin)
                 .then((response) => {
+                    // console.log(response.data.user);
+
                     localStorage.setItem(
                         'auth-token',
-                        JSON.stringify(response)
+                        JSON.stringify(response.data.token)
                     );
-                    // router.push('/');
-
-                    // axiosClient
-                    //     .get('/auth')
-                    //     .then((response) => {
-                    //         console.log(response);
-
-                    //         switch (response.data.roles[0].name) {
-                    //             case 'ROLE_ADMIN':
-                    //                 router.push('/admin');
-                    //                 break;
-                    //             case 'ROLE_MANAGER':
-                    //                 router.push('/dashboard');
-                    //                 break;
-                    //             case 'ROLE_STAFF':
-                    //                 router.push('/dashboardStaff');
-                    //                 break;
-                    //             case 'ROLE_USER':
-                    //                 router.push('/');
-                    //                 break;
-                    //         }
-                    //     })
-
+                    // toast.success('Đăng nhập thành công');
+                    switch (response.data.user.roles[0].roleName) {
+                        case 'ADMIN':
+                            router.push('/admin');
+                            break;
+                        case 'MANAGER':
+                            router.push('/manager');
+                            break;
+                        case 'SITTER':
+                            router.push('/');
+                            break;
+                        case 'USER':
+                            router.push('/');
+                            break;
+                    }
                 })
                 .catch((error) => {
                     console.log(error);
@@ -59,28 +53,28 @@ const Login = () => {
                 )
 
             // toast.success('Đăng nhập thành công');
-            await axiosClient
-                .get('/auth')
-                .then((response) => {
-                    localStorage.setItem(
-                        'user',
-                        JSON.stringify(response)
-                    );
-                    switch (response.data.roles[0].name) {
-                        case 'ROLE_ADMIN':
-                            router.push('/admin');
-                            break;
-                        case 'ROLE_MANAGER':
-                            router.push('/dashboard');
-                            break;
-                        case 'ROLE_STAFF':
-                            router.push('/dashboardStaff');
-                            break;
-                        case 'ROLE_USER':
-                            router.push('/');
-                            break;
-                    }
-                })
+            // await axiosClient
+            //     .get('/auth')
+            //     .then((response) => {
+            //         localStorage.setItem(
+            //             'user',
+            //             JSON.stringify(response)
+            //         );
+            //         switch (response.data.roles[0].name) {
+            //             case 'ROLE_ADMIN':
+            //                 router.push('/admin');
+            //                 break;
+            //             case 'ROLE_MANAGER':
+            //                 router.push('/dashboard');
+            //                 break;
+            //             case 'ROLE_STAFF':
+            //                 router.push('/dashboardStaff');
+            //                 break;
+            //             case 'ROLE_USER':
+            //                 router.push('/');
+            //                 break;
+            //         }
+            //     })
 
         } catch (error) {
             console.log(error);
