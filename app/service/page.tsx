@@ -10,9 +10,10 @@ import { faCircleCheck } from '@fortawesome/free-regular-svg-icons';
 import { Icon } from '@iconify/react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
+const Map = dynamic(() => import('../components/Map'), { ssr: false });
 import axiosClient from '../lib/axiosClient';
 import { CatSitter } from '../constants/types/homeType';
-const Map = dynamic(() => import('../components/Map'), { ssr: false });
+// import Map from '../components/Map';
 
 interface Province {
     idProvince: string;
@@ -118,41 +119,41 @@ const Service = () => {
                         </SelectItem>
                     ))}
                 </Select>
-                <div className='flex items-end'>
-                    <Select
-                        label="Địa điểm"
-                        labelPlacement='outside'
-                        placeholder="Tỉnh/Thành Phố"
-                        className="select"
-                        variant="bordered"
-                        onChange={(event) => handleProvinceChange(event.target.value)}
-                    >
-                        {provinces.map((province) => (
-                            <SelectItem key={province.idProvince} value={province.idProvince}>
-                                {province.name}
-                            </SelectItem>
-                        ))}
-                    </Select>
 
-                    {/* District Select (filtered by province) */}
-                    <Select
-                        aria-label="Quận/Huyện"
-                        placeholder="Quận/Huyện"
-                        className="select"
-                        variant="bordered"
-                        disabled={!selectedProvince} // Disable if no province is selected
-                    >
-                        {filteredDistricts.length > 0 ? (
-                            filteredDistricts.map((district) => (
-                                <SelectItem key={district.idDistrict} value={district.idDistrict}>
-                                    {district.name}
-                                </SelectItem>
-                            ))
-                        ) : (
-                            <SelectItem isDisabled key="no-districts">Vui lòng chọn Tỉnh/Thành phố</SelectItem>
-                        )}
-                    </Select>
-                </div>
+                <Select
+                    label="Địa điểm"
+                    labelPlacement='outside'
+                    placeholder="Tỉnh/Thành Phố"
+                    className="select"
+                    variant="bordered"
+                    onChange={(event) => handleProvinceChange(event.target.value)}
+                >
+                    {provinces.map((province) => (
+                        <SelectItem key={province.idProvince} value={province.idProvince}>
+                            {province.name}
+                        </SelectItem>
+                    ))}
+                </Select>
+
+                {/* District Select (filtered by province) */}
+                <Select
+                    aria-label="Quận/Huyện"
+                    placeholder="Quận/Huyện"
+                    className="select"
+                    variant="bordered"
+                    disabled={!selectedProvince} // Disable if no province is selected
+                >
+                    {filteredDistricts.length > 0 ? (
+                        filteredDistricts.map((district) => (
+                            <SelectItem key={district.idDistrict} value={district.idDistrict}>
+                                {district.name}
+                            </SelectItem>
+                        ))
+                    ) : (
+                        <SelectItem isDisabled key="no-districts">Vui lòng chọn Tỉnh/Thành phố</SelectItem>
+                    )}
+                </Select>
+
 
                 <div>
                     <h2>Đặt lịch</h2>

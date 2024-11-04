@@ -5,7 +5,7 @@
 import AdminProtect from '@/app/components/protect/AdminProtect'
 import NavbarAdmin from '@/app/components/admin/NavbarAdmin'
 // import { useEffect } from "react";
-import Sidebar from "../components/admin/SidebarAdmin";
+// import Sidebar from "../../components/adminSidebar/adminSidebar";
 // import { BreadcrumbItem, Breadcrumbs } from "@nextui-org/breadcrumbs";
 // import "react-toastify/dist/ReactToastify.css";
 // import { usePathname, useRouter } from "next/navigation";
@@ -16,7 +16,7 @@ import { UserLocal } from "@/app/constants/types/homeType";
 // export const dynamic = "force-dynamic";
 
 type LayoutProps = {
-    children: React.ReactNode;
+    children: React.ReactNode; // Typing the children prop
 };
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
@@ -29,7 +29,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
     const user: UserLocal | null = getUserFromStorage();
     const userRole = user?.roles[0].roleName;
-    if (userRole != "ADMIN") return <AdminProtect>{<></>}</AdminProtect>;
+    if (userRole != "MANAGER") return <AdminProtect>{<></>}</AdminProtect>;
 
     return (
         <AdminProtect>
@@ -38,7 +38,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     <NavbarAdmin />
                 </div>
                 <div className="flex flex-cow">
-                    <Sidebar />
+                    {/* <Sidebar /> */}
                     {children}
                 </div>
             </div>

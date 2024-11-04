@@ -8,6 +8,7 @@ import Link from 'next/link'
 import React, { useState } from 'react'
 import axiosClient from '../lib/axiosClient'
 import { useRouter } from 'next/navigation';
+import { toast } from 'react-toastify';
 
 const Login = () => {
     const router = useRouter();
@@ -25,13 +26,19 @@ const Login = () => {
             await axiosClient
                 .post('auth/token', dataLogin)
                 .then((response) => {
-                    // console.log(response.data.user);
+                    console.log(response.data.user.roles[0].roleName);
 
-                    localStorage.setItem(
-                        'auth-token',
-                        JSON.stringify(response.data.token)
-                    );
-                    // toast.success('Đăng nhập thành công');
+                    toast.success('Đăng nhập thành công');
+                    if (typeof window !== "undefined") {
+                        localStorage.setItem(
+                            'auth-token',
+                            JSON.stringify(response.data.token)
+                        );
+                        localStorage.setItem(
+                            'user',
+                            JSON.stringify(response.data.user)
+                        );
+                    }
                     switch (response.data.user.roles[0].roleName) {
                         case 'ADMIN':
                             router.push('/admin');
@@ -48,6 +55,7 @@ const Login = () => {
                     }
                 })
                 .catch((error) => {
+                    toast.error('Tài khoản hoặc mật khẩu không chính xác');
                     console.log(error);
                 }
                 )
@@ -132,9 +140,8 @@ const Login = () => {
                         Đăng nhập
                     </Button>
                 </div>
-
             </div>
-        </div >
+        </div>
     )
 }
 

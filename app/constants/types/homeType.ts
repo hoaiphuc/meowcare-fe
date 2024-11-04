@@ -20,19 +20,14 @@ export interface UserState {
 }
 
 export interface UserLocal {
-  // data: {
-  data: {
-    userId: number;
-    // roleName: string;
-    token: string;
-    // };
-    roles: [
-      {
-        name: string;
-        description: string;
-      }
-    ];
-  };
+  userId: number;
+  token: string;
+  roles: [
+    {
+      roleName: string;
+      description: string;
+    }
+  ];
 }
 
 export type ProfileSidebarItem = {
@@ -79,4 +74,22 @@ export type CatSitter = {
     gender: string;
     address: string;
   };
+};
+
+export type SideNavItem = {
+  title: string;
+  path: string;
+  icon?: JSX.Element;
+  subMenu?: boolean;
+  subMenuItems?: SideNavItem[];
+};
+
+export type Service = {
+  id: string;
+  serviceName: string;
+  serviceType: string;
+  actionDescription: string;
+  price: number;
+  duration: number;
+  startTime: number;
 };

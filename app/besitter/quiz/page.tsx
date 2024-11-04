@@ -1,7 +1,7 @@
 'use client'
 
-import { Button } from '@nextui-org/react';
 import React, { useState } from 'react'
+// import { Button } from '@nextui-org/react';
 
 const Page = () => {
     const questions = [
@@ -73,13 +73,13 @@ const Page = () => {
     };
 
     return (
-        <div className='app'>
+        <div className=''>
             {showScore ? (
                 <div className='score-section'>
                     You scored {score} out of {questions.length}
                 </div>
             ) : (
-                <>
+                <div>
                     {questions.map((question, questionIndex) => (
                         <div key={questionIndex} className='question-section'>
                             <div className='question-count'>
@@ -104,10 +104,10 @@ const Page = () => {
                             </div>
                         </div>
                     ))}
-                    <Button onClick={handleSubmit} className='submit-button'>
+                    <button onClick={handleSubmit} className='submit-button'>
                         Submit
-                    </Button>
-                </>
+                    </button>
+                </div>
             )}
         </div>
     )

@@ -1,4 +1,5 @@
 "use client";
+
 import {
     Navbar,
     Button,
@@ -12,13 +13,13 @@ import { useRouter } from "next/navigation";
 
 const DashboardNavbar = () => {
     const router = useRouter();
-
     const logout = () => {
         if (typeof window !== 'undefined') {
             localStorage.clear();
         }
         router.push("/login");
     };
+
     return (
         <Navbar maxWidth="full" isBordered className="px-8 min-h-24">
             <NavbarBrand className="">
@@ -45,9 +46,7 @@ const DashboardNavbar = () => {
                     </Button>
 
                     <Button
-                        as={Link}
                         color="primary"
-                        href="/"
                         variant="flat"
                         onClick={() => logout()}
                     >

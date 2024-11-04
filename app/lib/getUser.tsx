@@ -18,27 +18,29 @@ const GetUser = () => {
     };
 
     const user: UserLocal | null = getUserFromStorage();
-    const userId = user?.data.userId;
+    const userId = user?.userId;
 
-    const getUserById = async () => {
-        if (!user) return;
-        try {
-            await axios
-                .get(`${process.env.NEXT_PUBLIC_BASE_API}user/getUserById/${userId}`)
-                .then((res) => {
-                    setUserData(res.data.data);
-                })
-                .catch((error) => {
-                    console.log(error);
-                });
-        } catch (error) {
-            console.log(error);
-        }
-    };
+
 
     useEffect(() => {
+        const getUserById = async () => {
+            if (!user) return;
+            try {
+                await axios
+                    .get(`${process.env.NEXT_PUBLIC_BASE_API}user/getUserById/${userId}`)
+                    .then((res) => {
+                        setUserData(res.data.data);
+                    })
+                    .catch((error) => {
+                        console.log(error);
+                    });
+            } catch (error) {
+                console.log(error);
+            }
+        };
+
         getUserById();
-    }, [])
+    }, [user, userId])
 
     return (
         userData

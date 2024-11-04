@@ -52,7 +52,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     };
 
     const user: UserLocal | null = getUserFromStorage();
-    const userRole = user?.data?.roles[0].name;
+    const userRole = user?.roles[0].roleName;
 
     // Check if the user role is not admin
     // useEffect(() => {
@@ -77,11 +77,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     // }, [])
 
     useEffect(() => {
-        if (userRole !== "ROLE_ADMIN") {
+        if (userRole !== "ADMIN") {
             // Redirect non-admin users to the home page or login page
             router.push("/");
         }
-    }, [userRole]);
+    }, [router, userRole]);
 
     //   if (userRole !== "ROLE_ADMIN") {
     //     return <></>;

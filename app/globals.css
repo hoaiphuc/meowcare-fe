@@ -2,7 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-
 /* Custom scrollbar styles */
 ::-webkit-scrollbar {
     width: 12px;

@@ -3,11 +3,11 @@
 import 'yet-another-react-lightbox/styles.css';
 import React, { useState } from 'react';
 import Image from 'next/image';
-import dynamic from 'next/dynamic';
-// import Lightbox from 'yet-another-react-lightbox';
-const Lightbox = dynamic(() => import('yet-another-react-lightbox'), {
-    ssr: false, // Disable SSR for this component
-});
+import Lightbox from 'yet-another-react-lightbox';
+// import dynamic from 'next/dynamic';
+// const Lightbox = dynamic(() => import('yet-another-react-lightbox'), {
+//     ssr: false, // Disable SSR for this component
+// });
 // import { Zoom } from 'yet-another-react-lightbox/plugins';
 
 const PhotoGallery = () => {

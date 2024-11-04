@@ -30,7 +30,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         if (!user) {
             router.push("/");
         }
-    }, [user]);
+    }, [router, user]);
 
     return <>{children}</>;
 };

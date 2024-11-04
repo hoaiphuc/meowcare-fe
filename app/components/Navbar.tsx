@@ -31,6 +31,11 @@ const Navbar = () => {
     // }, []);
 
     useEffect(() => {
+        if (typeof window !== 'undefined') {
+            if (!localStorage.getItem('auth-token')) {
+                return;
+            }
+        }
         if (!userProfile) {
             dispatch(fetchUserProfile());
         }

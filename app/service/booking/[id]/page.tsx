@@ -1,26 +1,34 @@
 'use client'
 
-import { Button, Checkbox, DateRangePicker, Input, Select, SelectItem, Textarea } from '@nextui-org/react'
+import { Button, Checkbox, DateRangePicker, Input, Modal, ModalBody, ModalContent, ModalFooter, Radio, RadioGroup, Select, SelectItem, Textarea, useDisclosure } from '@nextui-org/react'
 import React, { useEffect, useState } from 'react'
-import './booking.scss'
+import styles from './booking.module.css'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faClock } from '@fortawesome/free-regular-svg-icons'
-import Link from 'next/link'
+// import Link from 'next/link'
 import { parseZonedDateTime } from "@internationalized/date";
 import { useParams } from 'next/navigation'
 import axiosClient from '@/app/lib/axiosClient'
-import { PetProfile } from '@/app/constants/types/homeType'
+import { PetProfile, Service } from '@/app/constants/types/homeType'
+import Image from 'next/image'
+
 const Page = () => {
     const params = useParams();
     const [selectedService, setSelectedService] = useState<string>('1');
     const [isSelected, setIsSelected] = useState(false);
     const [isRequireFood, setIsRequireFood] = useState(false);
     const [pets, setPets] = useState<PetProfile[]>([]);
+    const { isOpen, onOpen, onOpenChange } = useDisclosure();
+    const [data, setData] = useState({
+        id: params.id,
+        service: 2,
+    })
 
-    const services = [
-        { id: '1', serviceName: 'Gửi thú cưng' },
-        { id: '2', serviceName: 'Trông tại nhà' },
-    ];
+    const [services, setServices] = useState<Service[]>([])
+    // const services = [
+    //     { id: '1', serviceName: 'Gửi thú cưng' },
+    //     { id: '2', serviceName: 'Trông tại nhà' },
+    // ];
 
     const catFoods = [
         { id: '1', foodName: 'Cá' },
@@ -30,7 +38,23 @@ const Page = () => {
     // Handle service change
     const handleServiceChange = (serviceId: string) => {
         setSelectedService(serviceId);
+
+        setData((prevData) => ({ ...prevData, service: Number(serviceId) }))
     };
+
+    useEffect(() => {
+        try {
+            axiosClient('services')
+                .then((res) => {
+                    setServices(res.data)
+                })
+                .catch((e) => {
+                    console.log(e);
+                })
+        } catch (error) {
+            console.log(error);
+        }
+    })
 
     //get pets
     useEffect(() => {
@@ -45,11 +69,23 @@ const Page = () => {
         } catch (error) {
             console.log(error);
         }
-    }, [])
+    }, [data])
 
     // const handleBooking = () => {
 
     // }
+
+    const handlePay = () => {
+        try {
+            axiosClient.post(`booking-orders/with-details`, data)
+                .then(() => { })
+                .catch(() => { })
+        } catch (error) {
+
+        }
+    }
+
+
     return (
         <div className='flex flex-col items-center justify-start my-12'>
             <h1>Đặt lịch</h1>
@@ -63,7 +99,8 @@ const Page = () => {
                             className="select min-w-full"
                             variant="bordered"
                             defaultSelectedKeys={selectedService}
-                            onChange={(event) => handleServiceChange(event.target.value)}
+                            name='service'
+                            onChange={(e) => handleServiceChange(e.target.value)}
                         >
                             {services.map((service) => (
                                 <SelectItem key={service.id} value={service.id}>
@@ -172,9 +209,104 @@ const Page = () => {
             </div>
 
             <div className='mt-10'>
-                <h1></h1>
-                <Button as={Link} href='/service/pay' className='bg-[#2E67D1] text-white text-[16px] font-semibold rounded-full w-[483px]'>Đặt lịch và thanh toán</Button>
+                <Button onPress={onOpen} className='bg-[#2E67D1] text-white text-[16px] font-semibold rounded-full w-[483px]'>Đặt lịch và thanh toán</Button>
             </div>
+            <div className='mt-10'>
+                <Button className='bg-[#2E67D1] text-white text-[16px] font-semibold rounded-full w-[483px]'>Đặt lịch (test)</Button>
+            </div>
+
+            {/* Modal payment */}
+            <Modal isOpen={isOpen} onOpenChange={onOpenChange} size='4xl' className='mt-32'>
+                <ModalContent>
+                    {() => (
+                        <>
+                            {/* <ModalHeader className="flex flex-col gap-1">Modal Title</ModalHeader> */}
+                            <ModalBody>
+                                <div className="flex justify-center items-center mt-3">
+                                    <div className='flex flex-col justify-center items-center border border-black rounded-lg w-[650px] p-5 gap-5'>
+                                        <h1 className={styles.h1}>Thanh toán dịch vụ</h1>
+                                        <p className={styles.p}>Cảm ơn quý khách đã đặt lịch dich vụ của MeowCare. Xin vui lòng xem kỹ chi tiết đặt dịch vụ dưới đây và chọn phương thức thanh toán.</p>
+                                        <div className='flex items-start justify-start flex-col w-full'>
+                                            <h2 className={styles.h2}>Thông tin quý khách</h2>
+                                            <div className={`${styles.h3} grid grid-cols-2 w-80`}>
+                                                <h3 className={styles.h3}>Họ và tên: </h3>
+                                                <h3 >phuc</h3>
+                                                <h3 className={styles.h3}>Điện thoại: </h3>
+                                                <h3 >03232323</h3>
+                                                <h3 className={styles.h3}>Email:</h3>
+                                                <h3 > hoaiphuc@gmail.com</h3>
+                                            </div>
+                                        </div>
+                                        <div className='flex items-start justify-start flex-col w-full'>
+                                            <h2 className={styles.h2}>Thông tin đặt lịch của bạn</h2>
+                                            <div className='grid grid-cols-2 w-80'>
+                                                <h3 className={styles.h3}>Mã đặt hàng</h3> <h3>123</h3>
+                                                <h3 className={styles.h3}>Dịch vụ</h3> <h3>Gửi thú cưng</h3>
+                                                <h3 className={styles.h3}>Ngày gửi</h3> <h3>04/09/2024   8:00</h3>
+                                                <h3 className={styles.h3}>Ngày Nhận</h3> <h3>05/09/2024   15:00</h3>
+                                                <h3 className={styles.h3}>Người chăm sóc</h3> <h3>Đức Tấn</h3>
+                                                <h3 className={styles.h3}>Số lượng thú cưng</h3> <h3>1</h3>
+                                            </div>
+                                        </div>
+
+                                        <div className='flex flex-col items-start justify-start w-full'>
+                                            <h2 className={styles.h2}>Tổng giá dịch vụ</h2>
+                                            <div className='grid grid-cols-5 w-full'>
+                                                <div className={styles.money}>123</div>
+                                                <div className={`${styles.money} col-span-2`}>Đức Tấn</div>
+                                                <div className={styles.money}>150.000</div>
+                                                <div className={styles.money}>VND</div>
+
+                                                <div className={`${styles.money} col-span-3`}>Tổng cộng</div>
+                                                <div className={styles.money}>150.000</div>
+                                                <div className={styles.money}>VND</div>
+                                            </div>
+                                        </div>
+
+                                        <div className='flex flex-col items-start justify-start w-full gap-3'>
+                                            <h2 className={styles.h2}>Chọn phương thức thanh toán</h2>
+                                            <RadioGroup
+                                                aria-label="Select payment"
+                                                // color=""
+                                                className='w-full flex flex-col '
+                                            >
+                                                <div className='border border-black p-3'>
+                                                    <Radio value="qr" className='px-5'>
+                                                        <div className='flex items-center'>
+                                                            <Image src='/nganhang.png' alt='' width={50} height={50} className='mx-3 w-[50px] h-[50px]' />
+                                                            <div>
+                                                                <h1 className={styles.paymentHeading1}>Thanh toán qua tài khoản ngân hàng</h1>
+                                                                <h2 className={styles.paymentHeading2}>Thanh toán bằng mã VietQR</h2>
+                                                            </div>
+                                                        </div>
+                                                    </Radio>
+                                                </div>
+                                                <div className='border border-black mt-[-8px] p-3'>
+                                                    <Radio value="cash" className='px-5' aria-label='j'>
+                                                        <div className='flex items-center'>
+                                                            <Image src='/cash.png' alt='' width={51} height={44} className='mx-3 w-[51px] h-[44px]' />
+                                                            <div>
+                                                                <h1 className={styles.paymentHeading1}>Thanh toán bằng tiền mặt</h1>
+                                                                <h2 className={styles.paymentHeading2}>Sau khi hoàn thành dịch vụ</h2>
+                                                            </div>
+                                                        </div>
+                                                    </Radio>
+                                                </div>
+                                            </RadioGroup>
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </ModalBody>
+                            <ModalFooter className='w-full flex justify-center'>
+                                <Button className='bg-btnbg text-white w-[206px] rounded-full h-[42px]' onPress={() => handlePay()}>
+                                    Thanh toán
+                                </Button>
+                            </ModalFooter>
+                        </>
+                    )}
+                </ModalContent>
+            </Modal>
         </div>
     )
 }

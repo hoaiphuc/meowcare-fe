@@ -39,7 +39,8 @@ const Map: React.FC<MapProps> = ({ markers, onMarkerClick }) => {
         // Add markers to map
         markers.forEach((markerData, index) => {
             // Parse the location string
-            const locationParts = markerData.location.split(",");
+            // const locationParts = markerData.location.split(",");
+            const locationParts = "Ho Chi Minh city"
             const lat = parseFloat(locationParts[0].trim());
             const lng = parseFloat(locationParts[1].trim());
 

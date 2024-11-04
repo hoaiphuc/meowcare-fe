@@ -9,6 +9,9 @@ import { Providers } from "./providers";
 //make icon size not display the default size
 import { config } from '@fortawesome/fontawesome-svg-core';
 import '@fortawesome/fontawesome-svg-core/styles.css';
+import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer } from "react-toastify";
+
 config.autoAddCss = false;
 
 export default function RootLayout({
@@ -34,8 +37,9 @@ export default function RootLayout({
       <body
       // className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <ToastContainer />
+
         <Providers>
-          {/* {!shouldHideNavbar && <Navbar />} */}
           <NavbarVisibility />
           {children}
           <Footer />
