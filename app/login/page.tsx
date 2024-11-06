@@ -9,6 +9,7 @@ import React, { useState } from 'react'
 import axiosClient from '../lib/axiosClient'
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
+import { Role } from '../constants/types/homeType'
 
 const Login = () => {
     const router = useRouter();
@@ -39,19 +40,20 @@ const Login = () => {
                             JSON.stringify(response.data.user)
                         );
                     }
-                    switch (response.data.user.roles[0].roleName) {
-                        case 'ADMIN':
-                            router.push('/admin');
-                            break;
-                        case 'MANAGER':
-                            router.push('/manager');
-                            break;
-                        case 'SITTER':
-                            router.push('/');
-                            break;
-                        case 'USER':
-                            router.push('/');
-                            break;
+                    const userRoles: Role[] = response.data.user.roles;
+
+                    // Define the redirection logic
+                    if (userRoles.some(role => role.roleName === 'ADMIN')) {
+                        router.push('/admin');
+                    } else if (userRoles.some(role => role.roleName === 'MANAGER')) {
+                        router.push('/manager');
+                    } else if (userRoles.some(role => role.roleName === 'SITTER')) {
+                        router.push('/');
+                    } else if (userRoles.some(role => role.roleName === 'USER')) {
+                        router.push('/');
+                    } else {
+                        console.error('User has no valid roles');
+                        toast.error('User has no valid roles');
                     }
                 })
                 .catch((error) => {
@@ -59,31 +61,6 @@ const Login = () => {
                     console.log(error);
                 }
                 )
-
-            // toast.success('Đăng nhập thành công');
-            // await axiosClient
-            //     .get('/auth')
-            //     .then((response) => {
-            //         localStorage.setItem(
-            //             'user',
-            //             JSON.stringify(response)
-            //         );
-            //         switch (response.data.roles[0].name) {
-            //             case 'ROLE_ADMIN':
-            //                 router.push('/admin');
-            //                 break;
-            //             case 'ROLE_MANAGER':
-            //                 router.push('/dashboard');
-            //                 break;
-            //             case 'ROLE_STAFF':
-            //                 router.push('/dashboardStaff');
-            //                 break;
-            //             case 'ROLE_USER':
-            //                 router.push('/');
-            //                 break;
-            //         }
-            //     })
-
         } catch (error) {
             console.log(error);
         }

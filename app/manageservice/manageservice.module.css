@@ -1,0 +1,7 @@
+.h1 {
+    @apply font-bold text-5xl
+}
+
+.h1:hover {
+    @apply underline
+}

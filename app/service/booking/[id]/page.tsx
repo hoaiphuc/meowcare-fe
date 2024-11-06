@@ -14,33 +14,63 @@ import Image from 'next/image'
 
 const Page = () => {
     const params = useParams();
-    const [selectedService, setSelectedService] = useState<string>('1');
+    const [selectedService, setSelectedService] = useState<string>('');
+    const [selectedPet, setSelectedPet] = useState<string>('');
     const [isSelected, setIsSelected] = useState(false);
     const [isRequireFood, setIsRequireFood] = useState(false);
     const [pets, setPets] = useState<PetProfile[]>([]);
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
-    const [data, setData] = useState({
-        id: params.id,
-        service: 2,
-    })
+    const [sitterId, setSitterId] = useState();
 
     const [services, setServices] = useState<Service[]>([])
-    // const services = [
-    //     { id: '1', serviceName: 'Gửi thú cưng' },
-    //     { id: '2', serviceName: 'Trông tại nhà' },
-    // ];
 
     const catFoods = [
         { id: '1', foodName: 'Cá' },
         { id: '2', foodName: 'Thịt' },
     ];
 
+    const [userId, setUserId] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const user = localStorage.getItem('user');
+            if (user !== null) {
+                try {
+                    const userObj = JSON.parse(user);
+                    setUserId(userObj.id);
+                    console.log(userObj.id);
+
+                } catch (e) {
+                    console.error('Failed to parse user from localStorage', e);
+                }
+            }
+        }
+    }, []);
+
+    //get Sitter id
+    useEffect(() => {
+        try {
+            axiosClient(`sitter-profiles/${params.id}`)
+                .then((res) => {
+                    console.log(res.data.user.id);
+                    setSitterId(res.data.user.id)
+                })
+                .catch((e) => {
+                    console.log(e);
+                })
+        } catch (error) {
+            console.log(error);
+        }
+    }, [params])
+
     // Handle service change
     const handleServiceChange = (serviceId: string) => {
         setSelectedService(serviceId);
-
-        setData((prevData) => ({ ...prevData, service: Number(serviceId) }))
     };
+
+    const handlePetChange = (petId: string) => {
+        setSelectedPet(petId)
+    }
 
     useEffect(() => {
         try {
@@ -54,12 +84,12 @@ const Page = () => {
         } catch (error) {
             console.log(error);
         }
-    })
+    }, [])
 
     //get pets
     useEffect(() => {
         try {
-            axiosClient('pet-profiles')
+            axiosClient(`/pet-profiles/user/${userId}`)
                 .then((res) => {
                     setPets(res.data);
                 })
@@ -69,13 +99,31 @@ const Page = () => {
         } catch (error) {
             console.log(error);
         }
-    }, [data])
-
-    // const handleBooking = () => {
-
-    // }
+    }, [userId])
 
     const handlePay = () => {
+        // try {
+        //     axiosClient.post(`booking-orders/with-details`, data)
+        //         .then(() => { })
+        //         .catch(() => { })
+        // } catch (error) {
+
+        // }
+    }
+
+    const handleBooking = () => {
+        const data = {
+            bookingDetails: [{
+                quantity: 1,
+                petProfileId: selectedPet,
+                serviceId: selectedService,
+            }],
+            sitterId: sitterId,
+            name: "string",
+            phoneNumber: "string",
+            address: "string",
+        }
+
         try {
             axiosClient.post(`booking-orders/with-details`, data)
                 .then(() => { })
@@ -84,7 +132,6 @@ const Page = () => {
 
         }
     }
-
 
     return (
         <div className='flex flex-col items-center justify-start my-12'>
@@ -95,6 +142,7 @@ const Page = () => {
                     <div className='flex flex-col gap-3'>
                         <h2>Chọn dịch vụ</h2>
                         <Select
+                            aria-label='service'
                             labelPlacement='outside'
                             className="select min-w-full"
                             variant="bordered"
@@ -125,11 +173,12 @@ const Page = () => {
 
                         <h2>Thêm thú cưng của bạn</h2>
                         <Select
+                            aria-label='pet'
                             labelPlacement='outside'
                             className="select min-w-full"
                             variant="bordered"
-                            // defaultSelectedKeys={selectedService}
-                            onChange={(event) => handleServiceChange(event.target.value)}
+                            defaultSelectedKeys={selectedPet}
+                            onChange={(event) => handlePetChange(event.target.value)}
                         >
                             {pets.map((pet) => (
                                 <SelectItem key={pet.id} value={pet.id}>
@@ -212,7 +261,7 @@ const Page = () => {
                 <Button onPress={onOpen} className='bg-[#2E67D1] text-white text-[16px] font-semibold rounded-full w-[483px]'>Đặt lịch và thanh toán</Button>
             </div>
             <div className='mt-10'>
-                <Button className='bg-[#2E67D1] text-white text-[16px] font-semibold rounded-full w-[483px]'>Đặt lịch (test)</Button>
+                <Button className='bg-[#2E67D1] text-white text-[16px] font-semibold rounded-full w-[483px]' onClick={() => handleBooking()}>Đặt lịch (test)</Button>
             </div>
 
             {/* Modal payment */}

@@ -3,7 +3,7 @@
 import { faCat, faCirclePlus, faEye, faPenClip } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Radio, RadioGroup, Textarea, useDisclosure } from '@nextui-org/react';
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import styles from './pet.module.css';
 import axiosClient from '@/app/lib/axiosClient';
 import { PetProfile } from '@/app/constants/types/homeType';
@@ -20,21 +20,39 @@ const Page = () => {
         gender: '',
         description: '',
     });
+    const [userId, setUserId] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const user = localStorage.getItem('user');
+            if (user !== null) {
+                try {
+                    const userObj = JSON.parse(user);
+                    setUserId(userObj.id);
+                } catch (e) {
+                    console.error('Failed to parse user from localStorage', e);
+                }
+            }
+        }
+    }, []);
 
     //get data
-    useEffect(() => {
-        try {
-            axiosClient('/pet-profiles')
+    const fetchPets = useCallback(() => {
+        if (userId != null) {
+            axiosClient(`/pet-profiles/user/${userId}`)
                 .then((res) => {
-                    setPets(res.data)
+                    console.log('API Response:', res.data);
+                    setPets(res.data);
                 })
                 .catch((e) => {
                     console.log(e);
-                })
-        } catch (error) {
-            console.log(error);
+                });
         }
-    }, [])
+    }, [userId]);
+
+    useEffect(() => {
+        fetchPets();
+    }, [fetchPets])
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
@@ -58,6 +76,7 @@ const Page = () => {
                         gender: '',
                         description: '',
                     });
+                    fetchPets();
                 })
                 .catch((e) => {
                     console.log(e);

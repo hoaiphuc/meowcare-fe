@@ -37,6 +37,9 @@ const Service = () => {
     const [catSitters, setCatSitters] = useState<CatSitter[]>([]);
 
     const [price, setPrice] = useState<number[]>([20000, 2000000]);
+
+
+
     const listItemRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
     // Function to scroll to a list item

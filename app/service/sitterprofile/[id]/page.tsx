@@ -21,7 +21,15 @@ const Page = () => {
     // const { sitterId } = params;
     const [sitterProfile, setSitterProfile] = useState<CatSitter | undefined>();
     const [isClicked, setIsClicked] = useState(false);
+    const [isUser, setIsUser] = useState<boolean>();
 
+    // check user
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const authToken = localStorage.getItem('auth-token');
+            setIsUser(Boolean(authToken));
+        }
+    }, []);
 
     const handleClick = () => {
         setIsClicked(!isClicked); // Toggle the state
@@ -63,7 +71,7 @@ const Page = () => {
                         </div>
                     </div>
                     <div className='flex gap-3 w-full mt-7'>
-                        <Button as={Link} href={`/service/booking/${params.id}`} className='w-full rounded-full text-white bg-[#2E67D1] shadow-sm'>Đặt lịch</Button>
+                        <Button as={Link} href={isUser ? `/service/booking/${params.id}` : `/login`} className='w-full rounded-full text-white bg-[#2E67D1] shadow-sm'>Đặt lịch</Button>
                         <Button className='rounded-full bg-[#2E67D1] text-white w-8 h-10 border-0'>
                             <FontAwesomeIcon icon={faMessage} />
                         </Button>

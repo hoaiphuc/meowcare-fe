@@ -1,6 +1,6 @@
 export type UserType = {
   fullName: string;
-  id: number;
+  id: string;
   username: string;
   password: string;
   avatar: string;
@@ -20,7 +20,7 @@ export interface UserState {
 }
 
 export interface UserLocal {
-  userId: number;
+  id: number;
   token: string;
   roles: [
     {
@@ -92,4 +92,84 @@ export type Service = {
   price: number;
   duration: number;
   startTime: number;
+};
+
+export interface Role {
+  id: string;
+  roleName: string;
+}
+
+export type Order = {
+  id: string;
+  time: number;
+  startDate: number;
+  endDate: number;
+  numberOfPet: number;
+  name: string;
+  phoneNumber: string;
+  address: string;
+  paymentStatus: number;
+  status: number;
+  createdAt: string;
+  updatedAt: string;
+  note: string;
+  bookingDetails: string;
+  bookingDetailWithPetAndServices: [
+    {
+      id: string;
+      quantity: number;
+      pet: {
+        id: string;
+        description: string;
+        petName: string;
+        breed: string;
+        age: string;
+        gender: string;
+        weight: string;
+        profilePicture: string;
+        status: string;
+        createdAt: string;
+        updatedAt: string;
+        medicalConditions: [];
+      };
+      service: {
+        id: string;
+        serviceName: string;
+        serviceType: string;
+        actionDescription: string;
+        price: string;
+        duration: string;
+        startTime: number;
+        status: number;
+        configServiceId: string;
+      };
+    }
+  ];
+  sitterId: string;
+  user: {
+    id: string;
+    email: number;
+    password: string;
+    fullName: number;
+    avatar: string;
+    phoneNumber: string;
+    dob: number;
+    gender: string;
+    address: string;
+    registrationDate: string;
+    status: number;
+  };
+  sitter: {
+    id: number;
+    email: number;
+    password: string;
+    fullName: number;
+    avatar: string;
+    phoneNumber: string;
+    dob: number;
+    gender: string;
+    address: string;
+    registrationDate: string;
+    status: number;
+  };
 };

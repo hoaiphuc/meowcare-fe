@@ -9,6 +9,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '../lib/hooks';
 import { fetchUserProfile } from '../lib/slices/userSlice';
+import { UserLocal } from '../constants/types/homeType';
 
 
 const Navbar = () => {
@@ -16,19 +17,35 @@ const Navbar = () => {
     const dispatch = useAppDispatch();
     const { userProfile, loading } = useAppSelector((state) => state.user);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const menuItems = [
-        { name: "Trang chủ", path: "/" },
-        { name: "Dịch vụ", path: "/service" },
-        { name: "Trở thành người chăm sóc", path: "/besitter" },
-    ];
     const pathname = usePathname();
-    // const [isUser, setIsUser] = useState<boolean | null>(null);
-    // useEffect(() => {
-    //     if (typeof window !== 'undefined') {
-    //         const authToken = localStorage.getItem('auth-token');
-    //         setIsUser(Boolean(authToken));
-    //     }
-    // }, []);
+    const [isSitter, setIsSitter] = useState<boolean | null>(null);
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const userJson = localStorage.getItem('user');
+            const user: UserLocal | null = userJson ? JSON.parse(userJson) : null;
+
+            const userRoles = user?.roles ?? [];
+
+            if (userRoles.some(role => role.roleName === 'SITTER')) {
+                setIsSitter(true);
+            } else {
+                setIsSitter(false);
+            }
+        }
+    }, []);
+
+    //Items on Navbar
+    const menuItems = [
+        { name: 'Trang chủ', path: '/' },
+        { name: 'Dịch vụ', path: '/service' },
+    ];
+
+    if (isSitter === true) {
+        menuItems.push({ name: 'Quản lí dịch vụ', path: '/sitter' });
+    } else if (isSitter === false) {
+        menuItems.push({ name: 'Trở thành người chăm sóc', path: '/besitter' });
+    }
 
     useEffect(() => {
         if (typeof window !== 'undefined') {
@@ -54,11 +71,13 @@ const Navbar = () => {
         }
         router.push('/login')
     }
+
+
+
     if (loading) {
         // Hiển thị trạng thái tải hoặc giữ navbar trống
         return <nav>Đang tải...</nav>;
     }
-
     return (
         <MyNavbar onMenuOpenChange={setIsMenuOpen} shouldHideOnScroll isBordered maxWidth="full" className='min-h-24 bg-[#fffaf5] '>
             <NavbarContent>
