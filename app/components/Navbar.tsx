@@ -11,7 +11,6 @@ import { useAppDispatch, useAppSelector } from '../lib/hooks';
 import { fetchUserProfile } from '../lib/slices/userSlice';
 import { UserLocal } from '../constants/types/homeType';
 
-
 const Navbar = () => {
     const router = useRouter();
     const dispatch = useAppDispatch();

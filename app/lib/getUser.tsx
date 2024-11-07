@@ -18,7 +18,7 @@ const GetUser = () => {
     };
 
     const user: UserLocal | null = getUserFromStorage();
-    const userId = user?.userId;
+    const userId = user?.id;
 
 
 

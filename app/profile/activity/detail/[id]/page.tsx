@@ -21,7 +21,7 @@ const Page = () => {
         } catch (error) {
             console.log(error);
         }
-    }, [])
+    }, [param.id])
 
     return (
         <div className='w-[891px]  bg-white rounded-2xl shadow-2xl'>
@@ -51,8 +51,6 @@ const Page = () => {
                     </div>
                 </div>
             }
-
-
         </div>
     )
 }
