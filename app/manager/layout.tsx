@@ -1,33 +1,59 @@
 "use client";
 
-import ManagerProtect from '@/app/components/protect/ManagerProtect'
-import NavbarAdmin from '@/app/components/admin/NavbarAdmin'
-import { UserLocal } from "@/app/constants/types/homeType";
+import React, { useState, useEffect } from "react";
+import ManagerProtect from '@/app/components/protect/ManagerProtect';
+import NavbarAdmin from '@/app/components/admin/NavbarAdmin';
+import Sidebar from "../components/admin/SidebarAdmin";
+import { Role } from "@/app/constants/types/homeType";
 
 type LayoutProps = {
-    children: React.ReactNode; // Typing the children prop
+    children: React.ReactNode;
 };
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
-    const getUserFromStorage = () => {
-        if (typeof window !== "undefined") {
+    const [userRole, setUserRole] = useState<string | null>(null);
+
+    useEffect(() => {
+        const getUserFromStorage = () => {
             const storedUser = localStorage.getItem("user");
             return storedUser ? JSON.parse(storedUser) : null;
-        }
-    };
+        };
 
-    const user: UserLocal | null = getUserFromStorage();
-    const userRole = user?.roles[0].roleName;
-    if (userRole != "MANAGER") return <ManagerProtect>{<></>}</ManagerProtect>;
+        const user = getUserFromStorage();
+
+        if (user && user.roles) {
+            const userRoles: Role[] = user.roles;
+            const hasManagerRole = userRoles.some((role) => role.roleName === "MANAGER");
+
+            if (hasManagerRole) {
+                setUserRole("MANAGER");
+            } else {
+                setUserRole("USER");
+            }
+        } else {
+            setUserRole(null);
+        }
+    }, []);
+
+    console.log(userRole);
+
+    if (userRole === null) {
+        // Render a loading state or nothing during the initial render
+        return null;
+    }
+
+    if (userRole !== "MANAGER") {
+        return <ManagerProtect>{<></>}</ManagerProtect>;
+    }
 
     return (
         <ManagerProtect>
             <div className="flex flex-col">
-                <div className="flex flex-cow">
+                <div className="flex flex-row">
                     <NavbarAdmin />
                 </div>
-                <div className="flex flex-cow">
-                    {/* <Sidebar /> */}
+                <div className="flex flex-row">
+                    <Sidebar />
                     {children}
                 </div>
             </div>

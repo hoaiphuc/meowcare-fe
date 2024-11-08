@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import AdminProtect from '@/app/components/protect/AdminProtect';
 import NavbarAdmin from '@/app/components/admin/NavbarAdmin';
 import Sidebar from "../components/admin/SidebarAdmin";
-import { UserLocal } from "@/app/constants/types/homeType";
+import { Role, UserLocal } from "@/app/constants/types/homeType";
 
 type LayoutProps = {
     children: React.ReactNode;
@@ -19,9 +19,20 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             return storedUser ? JSON.parse(storedUser) : null;
         };
 
-        const user: UserLocal | null = getUserFromStorage();
-        const role = user?.roles[0].roleName || null;
-        setUserRole(role);
+        const user = getUserFromStorage();
+
+        if (user && user.roles) {
+            const userRoles: Role[] = user.roles;
+            const hasManagerRole = userRoles.some((role) => role.roleName === "ADMIN");
+
+            if (hasManagerRole) {
+                setUserRole("ADMIN");
+            } else {
+                setUserRole("USER");
+            }
+        } else {
+            setUserRole(null);
+        }
     }, []);
 
     if (userRole === null) {

@@ -21,7 +21,7 @@ const DashboardNavbar = () => {
     return (
         <Navbar maxWidth="full" isBordered className="px-8 min-h-24">
             <NavbarBrand className="">
-                <a href="/admin">
+                <a href="/manager">
                     <Image
                         src="/meow.png"
                         alt=""
