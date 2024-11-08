@@ -1,43 +1,45 @@
 "use client";
-// import dynamic from "next/dynamic";
-// const AdminProtect = dynamic(() => import("@/app/components/protect/AdminProtect"));
-// const NavbarAdmin = dynamic(() => import("@/app/components/admin/NavbarAdmin"));
-import AdminProtect from '@/app/components/protect/AdminProtect'
-import NavbarAdmin from '@/app/components/admin/NavbarAdmin'
-// import { useEffect } from "react";
+
+import React, { useState, useEffect } from "react";
+import AdminProtect from '@/app/components/protect/AdminProtect';
+import NavbarAdmin from '@/app/components/admin/NavbarAdmin';
 import Sidebar from "../components/admin/SidebarAdmin";
-// import { BreadcrumbItem, Breadcrumbs } from "@nextui-org/breadcrumbs";
-// import "react-toastify/dist/ReactToastify.css";
-// import { usePathname, useRouter } from "next/navigation";
 import { UserLocal } from "@/app/constants/types/homeType";
-// import { getPathByURL } from "@/lib/path-link";
-// import Link from "next/link";
-// import ExampleClientComponent from "../clientComponent";
-// export const dynamic = "force-dynamic";
 
 type LayoutProps = {
     children: React.ReactNode;
 };
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
-    const getUserFromStorage = () => {
-        if (typeof window !== "undefined") {
+    const [userRole, setUserRole] = useState<string | null>(null);
+
+    useEffect(() => {
+        const getUserFromStorage = () => {
             const storedUser = localStorage.getItem("user");
             return storedUser ? JSON.parse(storedUser) : null;
-        }
-    };
+        };
 
-    const user: UserLocal | null = getUserFromStorage();
-    const userRole = user?.roles[0].roleName;
-    if (userRole != "ADMIN") return <AdminProtect>{<></>}</AdminProtect>;
+        const user: UserLocal | null = getUserFromStorage();
+        const role = user?.roles[0].roleName || null;
+        setUserRole(role);
+    }, []);
+
+    if (userRole === null) {
+        // Render a loading state or nothing during the initial render
+        return null;
+    }
+
+    if (userRole !== "ADMIN") {
+        return <AdminProtect>{<></>}</AdminProtect>;
+    }
 
     return (
         <AdminProtect>
             <div className="flex flex-col">
-                <div className="flex flex-cow">
+                <div className="flex flex-row">
                     <NavbarAdmin />
                 </div>
-                <div className="flex flex-cow">
+                <div className="flex flex-row">
                     <Sidebar />
                     {children}
                 </div>

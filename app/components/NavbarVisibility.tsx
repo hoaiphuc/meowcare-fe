@@ -13,6 +13,7 @@ const NavbarVisibility = () => {
         '/admin',
         '/forgetPassword',
         '/sendOTP',
+        '/manager'
     ];
 
     const shouldHideNavbar = noNav.some((path) => pathname.startsWith(path));

@@ -16,7 +16,8 @@ const Footer = () => {
         "/dashboard",
         "/admin",
         "/forgetPassword",
-        "/sendOTP"
+        "/sendOTP",
+        "/manager"
     ];
 
     const shouldHideFirstFooter = noFooter.some((path) => pathname.startsWith(path));

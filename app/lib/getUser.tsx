@@ -20,8 +20,6 @@ const GetUser = () => {
     const user: UserLocal | null = getUserFromStorage();
     const userId = user?.id;
 
-
-
     useEffect(() => {
         const getUserById = async () => {
             if (!user) return;

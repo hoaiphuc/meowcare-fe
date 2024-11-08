@@ -1,19 +1,8 @@
 "use client";
-// import dynamic from "next/dynamic";
-// const AdminProtect = dynamic(() => import("@/app/components/protect/AdminProtect"));
-// const NavbarAdmin = dynamic(() => import("@/app/components/admin/NavbarAdmin"));
-import AdminProtect from '@/app/components/protect/AdminProtect'
+
+import ManagerProtect from '@/app/components/protect/ManagerProtect'
 import NavbarAdmin from '@/app/components/admin/NavbarAdmin'
-// import { useEffect } from "react";
-// import Sidebar from "../../components/adminSidebar/adminSidebar";
-// import { BreadcrumbItem, Breadcrumbs } from "@nextui-org/breadcrumbs";
-// import "react-toastify/dist/ReactToastify.css";
-// import { usePathname, useRouter } from "next/navigation";
 import { UserLocal } from "@/app/constants/types/homeType";
-// import { getPathByURL } from "@/lib/path-link";
-// import Link from "next/link";
-// import ExampleClientComponent from "../clientComponent";
-// export const dynamic = "force-dynamic";
 
 type LayoutProps = {
     children: React.ReactNode; // Typing the children prop
@@ -29,10 +18,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
     const user: UserLocal | null = getUserFromStorage();
     const userRole = user?.roles[0].roleName;
-    if (userRole != "MANAGER") return <AdminProtect>{<></>}</AdminProtect>;
+    if (userRole != "MANAGER") return <ManagerProtect>{<></>}</ManagerProtect>;
 
     return (
-        <AdminProtect>
+        <ManagerProtect>
             <div className="flex flex-col">
                 <div className="flex flex-cow">
                     <NavbarAdmin />
@@ -42,7 +31,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     {children}
                 </div>
             </div>
-        </AdminProtect>
+        </ManagerProtect>
     );
 };
 

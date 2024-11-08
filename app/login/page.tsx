@@ -48,7 +48,7 @@ const Login = () => {
                     } else if (userRoles.some(role => role.roleName === 'MANAGER')) {
                         router.push('/manager');
                     } else if (userRoles.some(role => role.roleName === 'SITTER')) {
-                        router.push('/');
+                        router.push('/sitter');
                     } else if (userRoles.some(role => role.roleName === 'USER')) {
                         router.push('/');
                     } else {
