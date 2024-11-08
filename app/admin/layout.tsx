@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import AdminProtect from '@/app/components/protect/AdminProtect';
 import NavbarAdmin from '@/app/components/admin/NavbarAdmin';
 import Sidebar from "../components/admin/SidebarAdmin";
-import { Role, UserLocal } from "@/app/constants/types/homeType";
+import { Role } from "@/app/constants/types/homeType";
 
 type LayoutProps = {
     children: React.ReactNode;
