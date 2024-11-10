@@ -11,6 +11,7 @@ export type UserType = {
   phoneNumber: string;
   roleName: string;
   status: number;
+  gender: string;
 };
 
 export interface UserState {

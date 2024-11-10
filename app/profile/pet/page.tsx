@@ -9,10 +9,10 @@ import axiosClient from '@/app/lib/axiosClient';
 import { PetProfile } from '@/app/constants/types/homeType';
 import CatBreed from '@/app/lib/CatBreed.json';
 import { toast } from 'react-toastify';
-import Swal from 'sweetalert2';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { v4 as uuidv4 } from 'uuid';
 import { storage } from '@/app/utils/firebase';
+import { showConfirmationDialog } from '@/app/components/confirmationDialog';
 
 const Page = () => {
     const { isOpen: isOpenAdd, onOpen: onOpenAdd, onOpenChange: onOpenChangeAdd } = useDisclosure();
@@ -22,6 +22,10 @@ const Page = () => {
     const [selectedImage, setSelectedImage] = useState<File | null>(null);
     const [previewImage, setPreviewImage] = useState<string | null>(null);
     const hiddenFileInput = useRef<HTMLInputElement>(null);
+    //update image
+    const [selectedUpdateImage, setSelectedUpdateImage] = useState<File | null>(null);
+    const [previewUpdateImage, setPreviewUpdateImage] = useState<string | null>(null);
+    const hiddenUpdateFileInput = useRef<HTMLInputElement>(null);
 
     const [pets, setPets] = useState<PetProfile[]>([]);
     const [petData, setPetData] = useState({
@@ -37,6 +41,7 @@ const Page = () => {
     const [updatePet, setUpdatePet] = useState({
         id: '',
         petName: '',
+        profilePicture: '',
         age: '',
         breed: '',
         species: '',
@@ -152,13 +157,70 @@ const Page = () => {
         }
     }
 
-    const handleUpdatePet = () => {
-        try {
+    const handleUpdateInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const { name, value } = e.target;
+        setUpdatePet({
+            ...updatePet,
+            [name]: value,
+        });
+    };
 
+    const handleUpdateGenderChange = (value: string) => {
+        setUpdatePet({
+            ...updatePet,
+            gender: value,
+        });
+    };
+
+    //update pet
+    const handleUpdatePet = async () => {
+        try {
+            let profilePictureUrl = updatePet.profilePicture; // Keep existing image URL by default
+
+            // If a new image has been selected
+            if (selectedUpdateImage) {
+                const storageRef = ref(storage, `petProfiles/${uuidv4()}_${selectedUpdateImage.name}`);
+
+                // Upload the new image
+                await uploadBytes(storageRef, selectedUpdateImage);
+
+                // Get the download URL
+                profilePictureUrl = await getDownloadURL(storageRef);
+            }
+
+            // Prepare updated pet data with the new or existing profile picture URL
+            const updatedPetData = {
+                ...updatePet,
+                profilePicture: profilePictureUrl,
+            };
+
+            // Send PUT request to update the pet profile
+            await axiosClient.put(`/pet-profiles/${updatePet.id}`, updatedPetData);
+
+            toast.success('Hồ sơ đã được cập nhật');
+            onOpenChangeUpdate(); // Close the update modal
+            fetchPets(); // Refresh the pet list
+
+            // Reset state variables
+            setUpdatePet({
+                id: '',
+                petName: '',
+                age: '',
+                breed: '',
+                species: '',
+                weight: '',
+                gender: '',
+                description: '',
+                profilePicture: '',
+            });
+            setSelectedUpdateImage(null);
+            setPreviewUpdateImage(null);
         } catch (error) {
             console.log(error);
+            toast.error('Đã xảy ra lỗi khi cập nhật hồ sơ');
         }
-    }
+    };
+
 
     //handle breed change
     const handleBreedChange = (breedId: string) => {
@@ -166,33 +228,32 @@ const Page = () => {
     };
 
     //delete pet profile
-    const handleDelete = (petId: string) => {
-        Swal.fire({
+    const handleDelete = async (petId: string) => {
+        const isConfirmed = await showConfirmationDialog({
             title: 'Bạn có muốn xóa hồ sơ này không?',
-            showDenyButton: true,
             confirmButtonText: 'Có',
+            denyButtonText: 'Không',
             confirmButtonColor: '#00BB00',
-            denyButtonText: `Không`,
-        }).then((result) => {
-            if (result.isConfirmed) {
-                try {
-                    axiosClient.delete(`pet-profiles/${petId}`)
-                        .then(() => {
-                            toast.success('Bạn đã xóa hồ sơ này');
-                        })
-                        .catch((e) => {
-                            console.log(e);
-                            if (e.response.data.status === 2003) {
-                                toast.error('Bé mèo này hiện tại đang trong dịch vụ!')
-                            }
-                        })
-                } catch (error) {
-                    console.log(error);
-                }
-            } else if (result.isDenied) {
-                return;
+        });
+        if (isConfirmed) {
+            try {
+                axiosClient.delete(`pet-profiles/${petId}`)
+                    .then(() => {
+                        toast.success('Bạn đã xóa hồ sơ này');
+                        fetchPets();
+                    })
+                    .catch((e) => {
+                        console.log(e);
+                        if (e.response.data.status === 2003) {
+                            toast.error('Bé mèo này hiện tại đang trong dịch vụ!')
+                        }
+                    })
+            } catch (error) {
+                console.log(error);
             }
-        })
+        } else if (isConfirmed) {
+            return;
+        }
 
     }
 
@@ -204,6 +265,15 @@ const Page = () => {
             }
         };
     }, [previewImage]);
+
+    // Clean up the previewUpdateImage when the component unmounts or when the image changes
+    useEffect(() => {
+        return () => {
+            if (previewUpdateImage) {
+                URL.revokeObjectURL(previewUpdateImage);
+            }
+        };
+    }, [previewUpdateImage]);
 
     //image upload
     const handleImageClick = () => {
@@ -217,6 +287,23 @@ const Page = () => {
         if (file) {
             setSelectedImage(file);
             setPreviewImage(URL.createObjectURL(file));
+        }
+    };
+
+    //update image
+    // Function to handle the image click
+    const handleUpdateImageClick = () => {
+        if (hiddenUpdateFileInput.current) {
+            hiddenUpdateFileInput.current.click();
+        }
+    };
+
+    // Function to handle image change
+    const handleUpdateImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (file) {
+            setSelectedUpdateImage(file);
+            setPreviewUpdateImage(URL.createObjectURL(file));
         }
     };
 
@@ -303,40 +390,44 @@ const Page = () => {
                                             style={{ display: 'none' }}
                                         />
                                     </div>
-                                    <div className='flex gap-5'>
-                                        <Input label={<h1 className={styles.heading1}>Tên bé mèo</h1>} placeholder='Tên' labelPlacement='outside' name='petName' value={petData.petName} onChange={handleInputChange} />
-                                        <Input label={<h1 className={styles.heading1}>Tuổi</h1>} placeholder='Nhập tuổi cho bé mèo' labelPlacement='outside' name='age' value={petData.age} onChange={handleInputChange} />
+                                    <div className='flex flex-col gap-5'>
+                                        <div className='flex gap-5'>
+                                            <Input label={<h1 className={styles.heading1}>Tên bé mèo</h1>} placeholder='Tên' labelPlacement='outside' name='petName' value={petData.petName} onChange={handleInputChange} />
+                                            <Input label={<h1 className={styles.heading1}>Tuổi</h1>} placeholder='Nhập tuổi cho bé mèo' labelPlacement='outside' name='age' value={petData.age} onChange={handleInputChange} />
+                                            <RadioGroup
+                                                label={<h1 className={styles.heading1}>Giới tính</h1>}
+                                                className='w-full'
+                                                value={petData.gender}
+                                                onValueChange={handleGenderChange}
+                                            >
+                                                <div className='flex gap-3'>
+                                                    <Radio value="Bé đực">Bé đực</Radio>
+                                                    <Radio value="Bé cái">Bé cái</Radio>
+                                                </div>
+                                            </RadioGroup>
+                                        </div>
+                                        <div className='flex gap-5'>
+                                            <Select
+                                                label="Giống loài"
+                                                labelPlacement='outside'
+                                                placeholder="Giống mèo của bạn"
+                                                className="select"
+                                                variant="bordered"
+                                                onChange={(event) => handleBreedChange(event.target.value)}
+                                            >
+                                                {CatBreed.map((breed) => (
+                                                    <SelectItem key={breed.id} value={breed.id}>
+                                                        {breed.breed}
+                                                    </SelectItem>
+                                                ))}
+                                            </Select>
+                                            <Input label={<h1 className={styles.heading1}>Cân nặng</h1>} placeholder='Kg' labelPlacement='outside' name='weight' value={petData.weight} onChange={handleInputChange} />
+
+                                        </div>
                                     </div>
                                 </div>
 
-                                <div className='flex gap-5'>
-                                    <Select
-                                        label="Giống loài"
-                                        labelPlacement='outside'
-                                        placeholder="Giống mèo của bạn"
-                                        className="select"
-                                        variant="bordered"
-                                        onChange={(event) => handleBreedChange(event.target.value)}
-                                    >
-                                        {CatBreed.map((breed) => (
-                                            <SelectItem key={breed.id} value={breed.id}>
-                                                {breed.breed}
-                                            </SelectItem>
-                                        ))}
-                                    </Select>
-                                    <Input label={<h1 className={styles.heading1}>Cân nặng</h1>} placeholder='Kg' labelPlacement='outside' name='weight' value={petData.weight} onChange={handleInputChange} />
-                                    <RadioGroup
-                                        label={<h1 className={styles.heading1}>Giới tính</h1>}
-                                        className='w-full'
-                                        value={petData.gender}
-                                        onValueChange={handleGenderChange}
-                                    >
-                                        <div className='flex gap-3'>
-                                            <Radio value="Bé đực">Bé đực</Radio>
-                                            <Radio value="Bé cái">Bé cái</Radio>
-                                        </div>
-                                    </RadioGroup>
-                                </div>
+
                                 <Textarea label={<h1 className={styles.heading1}>Những thông tin mà người chăm sóc mèo cần lưu ý</h1>} placeholder='Thêm hướng dẫn chăm sóc để phù hợp với bé mèo của bạn' labelPlacement='outside' />
                             </ModalBody>
                             <ModalFooter className='flex justify-center items-center'>
@@ -359,23 +450,64 @@ const Page = () => {
                                 <h1 className='text-2xl font-bold'>Bé mèo của bạn</h1>
                             </ModalHeader>
                             <ModalBody className='gap-5 flex'>
-                                <div className='flex gap-5'>
-                                    <Input label={<h1 className={styles.heading1}>Tên bé mèo</h1>} placeholder='Tên' labelPlacement='outside' name='petName' value={updatePet.petName} onChange={handleInputChange} />
-                                    <Input label={<h1 className={styles.heading1}>Tuổi</h1>} placeholder='Nhập tuổi cho bé mèo' labelPlacement='outside' name='age' value={updatePet.age} onChange={handleInputChange} />
-                                </div>
-                                <div className='flex gap-5'>
-                                    <Input label={<h1 className={styles.heading1}>Giống loài</h1>} placeholder='Tên giống mèo của bạn' labelPlacement='outside' name='species' value={updatePet.species} onChange={handleInputChange} />
-                                    <Input label={<h1 className={styles.heading1}>Cân nặng</h1>} placeholder='Kg' labelPlacement='outside' />
-                                    <RadioGroup
-                                        label={<h1 className={styles.heading1}>Giới tính</h1>}
-                                    >
-                                        <div className='flex gap-3'>
-                                            <Radio value="buenos-aires">Bé đực</Radio>
-                                            <Radio value="sydney">Bé cái</Radio>
+                                <div className='flex gap-10'>
+                                    <div className='relative group w-[200px] h-[200px]'>
+                                        <Avatar
+                                            className='w-full h-full'
+                                            radius="sm"
+                                            src={previewUpdateImage || updatePet.profilePicture || '/noimagecat.jpg'}
+                                        />
+                                        <div className="absolute inset-0 flex items-center justify-center">
+                                            <Button
+                                                onClick={handleUpdateImageClick}
+                                                className='bg-black bg-opacity-50 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300'
+                                            >
+                                                Chọn ảnh mới
+                                            </Button>
                                         </div>
-                                    </RadioGroup>
+                                        <input
+                                            type="file"
+                                            accept='image/*'
+                                            ref={hiddenUpdateFileInput}
+                                            onChange={handleUpdateImageChange}
+                                            style={{ display: 'none' }}
+                                        />
+                                    </div>
+                                    <div className='flex flex-col gap-5'>
+                                        <div className='flex gap-5'>
+                                            <Input label={<h1 className={styles.heading1}>Tên bé mèo</h1>} placeholder='Tên' labelPlacement='outside' name='petName' value={updatePet.petName} onChange={handleUpdateInputChange} />
+                                            <Input label={<h1 className={styles.heading1}>Tuổi</h1>} placeholder='Nhập tuổi cho bé mèo' labelPlacement='outside' name='age' value={updatePet.age} onChange={handleUpdateInputChange} />
+                                            <RadioGroup
+                                                label={<h1 className={styles.heading1}>Giới tính</h1>}
+                                                className='w-full'
+                                                value={updatePet.gender}
+                                                onValueChange={handleUpdateGenderChange}
+                                            >
+                                                <div className='flex gap-3'>
+                                                    <Radio value="buenos-aires">Bé đực</Radio>
+                                                    <Radio value="sydney">Bé cái</Radio>
+                                                </div>
+                                            </RadioGroup>
+                                        </div>
+                                        <div className='flex gap-5'>
+                                            <Select
+                                                label={<h1 className={styles.heading1}>Giống loài</h1>}
+                                                labelPlacement='outside'
+                                                placeholder="Giống mèo của bạn"
+                                                className="select"
+                                                variant="bordered"
+                                                onChange={(event) => handleBreedChange(event.target.value)}
+                                            >
+                                                {CatBreed.map((breed) => (
+                                                    <SelectItem key={breed.id} value={breed.id}>
+                                                        {breed.breed}
+                                                    </SelectItem>
+                                                ))}
+                                            </Select>
+                                            <Input label={<h1 className={styles.heading1}>Cân nặng</h1>} placeholder='Kg' labelPlacement='outside' />
+                                        </div>
+                                    </div>
                                 </div>
-                                <Textarea label={<h1 className={styles.heading1}>Thông tin về mèo của bạn</h1>} placeholder='Thêm mô tả mèo của bạn' labelPlacement='outside' />
                                 <Textarea label={<h1 className={styles.heading1}>Những thông tin mà người chăm sóc mèo cần lưu ý</h1>} placeholder='Thêm hướng dẫn chăm sóc để phù hợp với bé mèo của bạn' labelPlacement='outside' />
                             </ModalBody>
                             <ModalFooter className='flex justify-center items-center flex-col'>
