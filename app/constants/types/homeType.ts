@@ -95,6 +95,16 @@ export type Service = {
   isBasicService: boolean;
 };
 
+export type ConfigService = {
+  id: string;
+  ceilPrice: number;
+  floorPrice: number;
+  createdAt: Date;
+  updatedAt: Date;
+  name: string;
+  isBasicService: boolean;
+};
+
 export interface Role {
   id: string;
   roleName: string;

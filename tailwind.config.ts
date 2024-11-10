@@ -27,6 +27,7 @@ const config: Config = {
     },
     extend: {
       colors: {
+        maincolor: "#902C6C",
         secondary: "#666089",
         text: "#000857",
         btnbg: "#2E67D1",
