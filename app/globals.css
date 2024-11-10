@@ -33,6 +33,13 @@
     scrollbar-color: #934677 #fffaf5;
 }
 
+/* hide arrow of input type number */
+.no-spinner input[type='number']::-webkit-outer-spin-button,
+.no-spinner input[type='number']::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
 :root {
     --background: #fffaf5;
     --foreground: #171717;

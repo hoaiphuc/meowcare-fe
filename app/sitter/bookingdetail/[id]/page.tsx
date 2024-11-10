@@ -26,6 +26,20 @@ const Page = () => {
         }
     }, [param.id])
 
+    //denied request
+    const handleDenied = (bookingId) => {
+        try {
+            axiosClient
+        } catch (error) {
+
+        }
+    }
+    //accept request
+    const handleAccept = (bookingId) => {
+
+    }
+
+
     return (
         <div className='flex justify-center items-center my-5 '>
             {data &&
@@ -60,8 +74,8 @@ const Page = () => {
                             </div>
 
                             <h1>Đặt lịch và thanh toán trên Meowcare bắt buộc tuân theo <Link href='/termsofservice' className='underline font-semibold'>điều khoản của Meowcare</Link>.</h1>
-                            <Button className='text-red-500 bg-white font-semibold text-[16px] border-b-red-500' >Từ chối</Button>
-                            <Button className='bg-btnbg text-white text-[16px]'>Chấp nhận</Button>
+                            <Button className='text-red-500 bg-white font-semibold text-[16px] border-b-red-500' onClick={() => handleDenied(data.id)}>Từ chối</Button>
+                            <Button className='bg-btnbg text-white text-[16px]' onClick={() => handleAccept(data.id)}>Chấp nhận</Button>
                         </div>
                     </div>
                     <div className=' flex flex-col gap-3 w-[850px]'>

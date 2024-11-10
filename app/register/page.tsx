@@ -14,6 +14,8 @@ const Register = () => {
     const router = useRouter();
     const [isVisible, setIsVisible] = useState(false);
     const toggleVisibility = () => setIsVisible(!isVisible);
+    const [isVisibleRepeat, setIsVisibleRepeat] = useState(false);
+    const toggleVisibilityRepeat = () => setIsVisibleRepeat(!isVisibleRepeat);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [username, setUserName] = useState('');
@@ -86,13 +88,13 @@ const Register = () => {
                         }
                     />
                     <Input
-                        type={isVisible ? "text" : "password"}
+                        type={isVisibleRepeat ? "text" : "password"}
                         size='lg'
                         placeholder="Nhập lại mật khẩu"
                         labelPlacement="outside"
                         endContent={
-                            <button className="focus:outline-none" type="button" onClick={toggleVisibility} aria-label="toggle password visibility">
-                                {isVisible ? (
+                            <button className="focus:outline-none" type="button" onClick={toggleVisibilityRepeat} aria-label="toggle password visibility">
+                                {isVisibleRepeat ? (
                                     <FontAwesomeIcon icon={faEye} className="size-6 text-default-400 pointer-events-none" />
                                 ) : (
                                     <FontAwesomeIcon icon={faEyeSlash} className="size-6 text-default-400 pointer-events-none" />

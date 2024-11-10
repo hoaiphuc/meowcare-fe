@@ -5,7 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Button, Input } from '@nextui-org/react'
 import Image from 'next/image'
 import Link from 'next/link'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import axiosClient from '../lib/axiosClient'
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
@@ -20,7 +20,15 @@ const Login = () => {
     const dataLogin = {
         email: email,
         password: password,
+        deviceId: "123",
+        deviceName: "web"
     };
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            localStorage.clear();
+        }
+    }, []);
 
     const handleSubmit = async () => {
         try {

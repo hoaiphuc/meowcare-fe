@@ -133,6 +133,7 @@ const Profile = () => {
                             </Button>
                         </div>
                     )}
+                    <Button>Đổi mật khẩu</Button>
                 </div>
             </div>
         </div>

@@ -1,7 +1,6 @@
 import { ProfileSidebarItem } from '@/app/constants/types/homeType';
 import {
     faAddressCard,
-    faLock,
     faWallet,
     faFileSignature,
     faClockRotateLeft,
@@ -18,11 +17,6 @@ export const profileSidebar: ProfileSidebarItem[] = [
                 className="h-7 w-7 text-[#902C6C]"
             />
         ),
-    },
-    {
-        title: 'Đổi mật khẩu',
-        path: '/profile/changepassword',
-        icon: <FontAwesomeIcon icon={faLock} className="h-7 w-7 text-[#902C6C]" />,
     },
     {
         title: 'Hoạt động',

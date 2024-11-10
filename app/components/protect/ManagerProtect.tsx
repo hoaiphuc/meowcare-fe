@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { UserLocal } from "@/app/constants/types/homeType";
+import { Role } from "@/app/constants/types/homeType";
 
 
 type LayoutProps = {
@@ -11,28 +11,46 @@ type LayoutProps = {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
     const router = useRouter();
-
-    const getUserFromStorage = () => {
-        if (typeof window !== "undefined") {
-            const storedUser = localStorage.getItem("user");
-            return storedUser ? JSON.parse(storedUser) : null;
-        }
-    };
-
-    const user: UserLocal | null = getUserFromStorage();
-    const userRole = user?.roles[0].roleName;
-
-
+    const [userRole, setUserRole] = useState<string | null>(null);
 
     useEffect(() => {
-        if (userRole !== "MANAGER") {
-            router.push("/");
-        }
-    }, [router, userRole]);
+        const getUserFromStorage = () => {
+            const storedUser = localStorage.getItem("user");
+            return storedUser ? JSON.parse(storedUser) : null;
+        };
 
-    //   if (userRole !== "ROLE_ADMIN") {
-    //     return <></>;
-    //   }
+        const user = getUserFromStorage();
+
+        if (user && user.roles) {
+            const userRoles: Role[] = user.roles;
+            const hasManagerRole = userRoles.some((role) => role.roleName === "MANAGER");
+
+            if (hasManagerRole) {
+                setUserRole("MANAGER");
+            } else {
+                setUserRole("OTHER");
+            }
+        } else {
+            setUserRole(null);
+        }
+    }, []);
+
+    if (userRole === null) {
+        // Render a loading state or nothing during the initial render
+        return null;
+    }
+
+    if (userRole !== "MANAGER") {
+        router.push("/");
+
+    }
+
+    // useEffect(() => {
+    //     if (userRole !== "MANAGER") {
+    //         router.push("/");
+    //     }
+    // }, [router, userRole]);
+
 
     return <>{children}</>;
 };

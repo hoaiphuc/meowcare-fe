@@ -92,6 +92,7 @@ export type Service = {
   price: number;
   duration: number;
   startTime: number;
+  isBasicService: boolean;
 };
 
 export interface Role {
