@@ -11,7 +11,7 @@ import { useState } from "react";
 
 const Sidebar = () => {
     return (
-        <Navbar className="flex items-start bg-[#2B2B2B] text-white w-[350px] h-[800px] pt-10">
+        <Navbar className="flex items-start bg-transparent w-[350px] h-[800px] pt-10 border-r">
             <NavbarContent className="flex flex-col gap-8 items-start ">
                 <NavbarItem className="text-xl">
                     <div className="flex flex-col space-y-2 ">
@@ -40,7 +40,7 @@ const MenuItem = ({ item }: { item: SideNavItem }) => {
                 <>
                     <div
                         onClick={toggleSubMenu}
-                        className={` cursor-pointer flex flex-row items-center p-2 rounded-lg w-full justify-between hover:text-[#FF0004] ${pathname.includes(item.path) ? "text-[#FF0004]" : ""
+                        className={` cursor-pointer flex flex-row items-center p-2 rounded-lg w-full justify-between hover:text-maincolor ${pathname.includes(item.path) ? "text-[#FF0004]" : ""
                             }`}
                     >
                         <div className=" flex-1  flex flex-row space-x-4 items-center">
@@ -61,11 +61,11 @@ const MenuItem = ({ item }: { item: SideNavItem }) => {
                                         key={idx}
                                         href={subItem.path}
                                         className={`${subItem.path === pathname
-                                            ? "font-bold text-[#FF0004]"
+                                            ? "font-bold text-maincolor"
                                             : ""
                                             }`}
                                     >
-                                        <span className="hover:text-[#FF0004]">
+                                        <span className="hover:text-maincolor">
                                             {subItem.title}
                                         </span>
                                     </Link>
@@ -77,7 +77,7 @@ const MenuItem = ({ item }: { item: SideNavItem }) => {
             ) : (
                 <Link
                     href={item.path}
-                    className={`flex flex-row space-x-4 items-center p-2 rounded-lg hover:text-[#FF0004] ${item.path === pathname ? "text-[#FF0004]" : ""
+                    className={`flex flex-row space-x-4 items-center p-2 rounded-lg hover:text-maincolor ${item.path === pathname ? "text-maincolor" : ""
                         }`}
                 >
                     {item.icon}
