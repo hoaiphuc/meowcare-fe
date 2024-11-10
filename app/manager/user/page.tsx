@@ -12,7 +12,7 @@ const Page = () => {
 
     useEffect(() => {
         try {
-            axiosClient('sitter-form-register')
+            axiosClient('users')
                 .then((res) => {
                     setData(res.data)
                 })
@@ -34,7 +34,7 @@ const Page = () => {
 
     return (
         <div className='flex flex-col justify-start w-full mx-10 gap-5 my-3'>
-            <h1 className='font-semibold text-3xl'>Đơn đăng ký trở thành người chăm sóc</h1>
+            <h1 className='font-semibold text-3xl'>Người Dùng Trên Hệ Thống</h1>
             <Table
                 aria-label="Example table with client side pagination"
                 bottomContent={
@@ -55,8 +55,10 @@ const Page = () => {
                 }}
             >
                 <TableHeader>
-                    <TableColumn key="name">Người đăng ký</TableColumn>
+                    <TableColumn key="name">Tên</TableColumn>
                     <TableColumn key="role">Email</TableColumn>
+                    <TableColumn key="status">Số điện thoại</TableColumn>
+                    <TableColumn key="status">Giới tính</TableColumn>
                     <TableColumn key="status">Hành động</TableColumn>
                 </TableHeader>
                 <TableBody items={items}>
@@ -64,6 +66,8 @@ const Page = () => {
                         <TableRow key={item.id}>
                             <TableCell>{item.fullName}</TableCell>
                             <TableCell>{item.email}</TableCell>
+                            <TableCell>{item.phoneNumber}</TableCell>
+                            <TableCell>{item.gender}</TableCell>
                             <TableCell>
                                 <Button>Xem chi tiết</Button>
                             </TableCell>

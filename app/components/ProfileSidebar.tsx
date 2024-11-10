@@ -73,7 +73,7 @@ const ProfileSidebar = () => {
                         </div>
                         <div className="ml-3">
                             <p>Chào mừng bạn,</p>
-                            {/* <h2 className="font-bold">{profileData?.userName}</h2> */}
+                            <h2 className="font-bold">{userProfile?.fullName}</h2>
                             {/* <Button
                                 className="border bg-[#F2F2F2]"
                                 onClick={() => router.push('/profile/wallet')}
