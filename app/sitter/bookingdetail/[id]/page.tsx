@@ -27,16 +27,20 @@ const Page = () => {
     }, [param.id])
 
     //denied request
-    const handleDenied = (bookingId) => {
+    const handleDenied = (bookingId: string) => {
         try {
-            axiosClient
+            axiosClient(`${bookingId}`)
         } catch (error) {
 
         }
     }
     //accept request
-    const handleAccept = (bookingId) => {
+    const handleAccept = (bookingId: string) => {
+        try {
+            axiosClient(`${bookingId}`)
+        } catch (error) {
 
+        }
     }
 
 
