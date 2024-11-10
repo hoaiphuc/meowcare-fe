@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import ManagerProtect from '@/app/components/protect/ManagerProtect';
-import NavbarAdmin from '@/app/components/admin/NavbarAdmin';
-import Sidebar from "../components/admin/SidebarAdmin";
+import NavbarManager from '@/app/components/manager/NavbarManager';
+import Sidebar from "../components/manager/SidebarManager";
 import { Role } from "@/app/constants/types/homeType";
 
 type LayoutProps = {
@@ -28,14 +28,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             if (hasManagerRole) {
                 setUserRole("MANAGER");
             } else {
-                setUserRole("USER");
+                setUserRole("OTHER");
             }
         } else {
             setUserRole(null);
         }
     }, []);
-
-    console.log(userRole);
 
     if (userRole === null) {
         // Render a loading state or nothing during the initial render
@@ -50,7 +48,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         <ManagerProtect>
             <div className="flex flex-col">
                 <div className="flex flex-row">
-                    <NavbarAdmin />
+                    <NavbarManager />
                 </div>
                 <div className="flex flex-row">
                     <Sidebar />

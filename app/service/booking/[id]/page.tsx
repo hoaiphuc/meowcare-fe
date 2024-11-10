@@ -23,6 +23,10 @@ const Page = () => {
     const [sitterId, setSitterId] = useState();
 
     const [services, setServices] = useState<Service[]>([])
+    const [name, setName] = useState('');
+    const [phoneNumber, setPhoneNumber] = useState('');
+    const [address, setAddress] = useState('')
+    const [note, setNote] = useState('')
 
     const catFoods = [
         { id: '1', foodName: 'Cá' },
@@ -72,11 +76,15 @@ const Page = () => {
         setSelectedPet(petId)
     }
 
+    //get basic service
     useEffect(() => {
         try {
             axiosClient('services')
                 .then((res) => {
-                    setServices(res.data)
+                    const filteredServices = res.data.filter(
+                        (service: Service) => service.isBasicService === true
+                    );
+                    setServices(filteredServices)
                 })
                 .catch((e) => {
                     console.log(e);
@@ -119,9 +127,10 @@ const Page = () => {
                 serviceId: selectedService,
             }],
             sitterId: sitterId,
-            name: "string",
-            phoneNumber: "string",
-            address: "string",
+            name: name,
+            phoneNumber: phoneNumber,
+            address: address,
+            note: note
         }
 
         try {
@@ -208,11 +217,12 @@ const Page = () => {
                         <Input placeholder='Nhập loại thức ăn cụ thể' isDisabled={!isSelected} variant="bordered" className='input' />
 
                         <h2>Thông tin cá nhân</h2>
-                        <Input placeholder='Họ và tên' variant='bordered' />
-                        <Input placeholder='Số điện thoại' variant='bordered' />
+                        <Input placeholder='Họ và tên' variant='bordered' onChange={(e) => setName(e.target.value)} />
+                        <Input type='number' placeholder='Số điện thoại' variant='bordered' onChange={(e) => setPhoneNumber(e.target.value)} className="no-spinner" />
+                        <Input placeholder='Địa chỉ của bạn' variant='bordered' onChange={(e) => setAddress(e.target.value)} />
 
                         <h2>Lời nhắn</h2>
-                        <Textarea placeholder='VD: chia sẽ về sở thích của mèo' variant='bordered' />
+                        <Textarea placeholder='VD: chia sẽ về sở thích của mèo' variant='bordered' onChange={(e) => setNote(e.target.value)} />
 
                     </div>
                 </div>

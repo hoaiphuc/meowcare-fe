@@ -63,24 +63,27 @@ const Page = () => {
                     </NavbarContent>
                 </Navbar>
                 <div className='w-[804px] flex flex-col gap-5 bg-transparent'>
-                    {data ? (data.map((activity) => (
-                        <Link href={`/sitter/bookingdetail/${activity.id}`} key={activity.id} className='flex flex-col gap-3 p-3 cursor-pointer'>
+                    {data.length ? (data.map((activity) => (
+                        <Link href={`/sitter/bookingdetail/${activity.id}`} key={activity.id} className='flex flex-col gap-3 p-3 cursor-pointer rounded-md hover:bg-[#ecf0f1]'>
                             <div className='flex justify-between '>
                                 <div className='flex gap-3'>
                                     <Avatar src='' className='w-14 h-14 ' />
                                     <div className=''>
                                         <h1 className='font-bold'>{activity.user.fullName}</h1>
-                                        <h1 className='text-secondary'>{activity.user.address}</h1>
+                                        <h1 className='text-secondary'>{activity.address}</h1>
                                     </div>
                                 </div>
                                 <div className='text-secondary'>Hôm nay</div>
                             </div>
-                            <div>Chăm sóc mèo tại nhà: <span className='text-green-500'>15 tháng 10</span> - <span className='text-green-500'>21 tháng 10</span></div>
+                            <h1 className='mb-5'>{activity.user.fullName}: {activity.note}</h1>
+                            <div>Chăm sóc mèo tại nhà: <span >15 tháng 10</span> - <span className=''>21 tháng 10</span></div>
+
+                            <h1 className='text-green-500'>Yêu cầu đang chờ xác nhận</h1>
                             <hr />
                         </Link>
                     ))) : (
-                        <div>
-                            <h1>Hiện tại chưa có lịch</h1>
+                        <div className='flex justify-center items-center'>
+                            <h1 className='text-2xl font-semibold'>Hiện tại chưa có lịch</h1>
                         </div>
                     )
 

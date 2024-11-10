@@ -1,7 +1,7 @@
 "use client";
 
 import { SideNavItem } from "@/app/constants/types/homeType";
-import { navbarAdmin } from "@/app/lib/navbarAdmin";
+import { navbarManager } from "@/app/lib/navbarManager";
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Navbar, NavbarContent, NavbarItem } from "@nextui-org/react";
@@ -15,7 +15,7 @@ const Sidebar = () => {
             <NavbarContent className="flex flex-col gap-8 items-start ">
                 <NavbarItem className="text-xl">
                     <div className="flex flex-col space-y-2 ">
-                        {navbarAdmin.map((item, idx: number) => {
+                        {navbarManager.map((item, idx: number) => {
                             return <MenuItem key={idx} item={item} />;
                         })}
                     </div>

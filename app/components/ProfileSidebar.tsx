@@ -3,14 +3,36 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Navbar, NavbarContent, NavbarItem, useDisclosure } from '@nextui-org/react';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import React from 'react'
+import React, { useEffect } from 'react'
 import { profileSidebar } from '../lib/profileSidebar';
 import { ProfileSidebarItem } from '../constants/types/homeType';
 import Link from 'next/link';
+import { useAppDispatch, useAppSelector } from '../lib/hooks';
+import { fetchUserProfile } from '../lib/slices/userSlice';
+import Loading from './Loading';
 
 const ProfileSidebar = () => {
     // const router = useRouter();
     const { isOpen, onOpenChange } = useDisclosure();
+    const dispatch = useAppDispatch();
+    const { userProfile, loading } = useAppSelector((state) => state.user);
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            if (!localStorage.getItem('auth-token')) {
+                return;
+            }
+        }
+        if (!userProfile) {
+            dispatch(fetchUserProfile());
+        }
+
+    }, [dispatch, userProfile]);
+
+    if (loading) {
+        return <Loading />;
+    }
+
     return (
         <div className="h-full">
             <div className="flex w-[387px] flex-col gap-2 ">
@@ -18,11 +40,14 @@ const ProfileSidebar = () => {
                     <div className="flex flex-row">
                         <div className="relative ml-5 flex w-[100px] flex-col -space-x-2 overflow-hidden">
                             <Image
-                                //   key={avatar}
-                                //   src={
-                                //       profileData?.avatar ? profileData.avatar : '/User-avatar.png'
-                                //   }
-                                src='/User-avatar.png'
+                                src={
+                                    userProfile?.avatar &&
+                                        (userProfile.avatar.startsWith('http://') ||
+                                            userProfile.avatar.startsWith('https://') ||
+                                            userProfile.avatar.startsWith('/'))
+                                        ? userProfile.avatar
+                                        : '/User-avatar.png'
+                                }
                                 alt=""
                                 width="0"
                                 height="0"

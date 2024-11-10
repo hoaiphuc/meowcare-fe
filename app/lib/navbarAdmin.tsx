@@ -1,5 +1,6 @@
 import { SideNavItem } from "@/app/constants/types/homeType";
 import {
+  faClipboardList,
   faHouse,
   faSliders,
 } from "@fortawesome/free-solid-svg-icons";
@@ -16,6 +17,13 @@ export const navbarAdmin: SideNavItem[] = [
     path: "/admin/setting",
     icon: (
       <FontAwesomeIcon icon={faSliders} className="w-7 h-7 text-[#FF0004]" />
+    ),
+  },
+  {
+    title: "Cài đặt dịch vụ",
+    path: "/admin/service",
+    icon: (
+      <FontAwesomeIcon icon={faClipboardList} className="w-7 h-7 text-[#FF0004]" />
     ),
   },
 ];

@@ -16,6 +16,20 @@ const Page = () => {
             return storedUser ? JSON.parse(storedUser) : null;
         }
     };
+    const statusColors: { [key: string]: string } = {
+        AWAITING_PAYMENT: 'text-[#9E9E9E]', // Chờ duyệt - gray
+        CONFIRMED: 'text-[#2E67D1]',        // Xác nhận - blue
+        IN_PROGRESS: 'text-[#FFC107]',      // yellow
+        COMPLETED: 'text-[#4CAF50]',        // Hoàn thành - green
+        CANCELLED: 'text-[#DC3545]',        // Đã hủy - Red
+    };
+    const statusLabels: { [key: string]: string } = {
+        AWAITING_PAYMENT: 'Chờ xác nhận',
+        CONFIRMED: 'Đã xác nhận',
+        IN_PROGRESS: 'Đang diễn ra',
+        COMPLETED: 'Hoàn thành',
+        CANCELLED: 'Đã hủy',
+    };
 
     const user: UserLocal | null = getUserFromStorage();
     const userId = user?.id;
@@ -53,13 +67,12 @@ const Page = () => {
                                 </div>
                                 <Button as={Link} href={`/profile/activity/detail/${activity.id}`} className='bg-btnbg text-white rounded-lg mt-3'>Theo dõi lịch</Button>
                             </div>
-                            <div>
-                                {/* <h2 className='text-[#FFC107]'>Chờ xác nhận</h2> */}
-                                <h2 className='text-[#9E9E9E]'>Chờ xác nhận</h2>
-                            </div>
+                            <h2 className={`${statusColors[activity.status] || 'text-black'}`}>
+                                {statusLabels[activity.status] || 'Trạng thái không xác định'}
+                            </h2>
                         </div>
                     ))) : (
-                        <div>
+                        <div className='flex justify-center items-center'>
                             <h1>Hiện tại không có hoạt động nào</h1>
                         </div>
                     )}
