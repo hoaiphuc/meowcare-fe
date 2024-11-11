@@ -11,6 +11,7 @@ import { useParams } from 'next/navigation'
 import axiosClient from '@/app/lib/axiosClient'
 import { PetProfile, Service } from '@/app/constants/types/homeType'
 import Image from 'next/image'
+import { toast } from 'react-toastify'
 
 const Page = () => {
     const params = useParams();
@@ -135,7 +136,9 @@ const Page = () => {
 
         try {
             axiosClient.post(`booking-orders/with-details`, data)
-                .then(() => { })
+                .then(() => {
+                    toast.success("Đặt lịch thành công vui lòng chờ xác nhận")
+                })
                 .catch(() => { })
         } catch (error) {
 

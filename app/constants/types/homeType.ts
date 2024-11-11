@@ -121,7 +121,7 @@ export type Order = {
   phoneNumber: string;
   address: string;
   paymentStatus: number;
-  status: number;
+  status: string;
   createdAt: string;
   updatedAt: string;
   note: string;
