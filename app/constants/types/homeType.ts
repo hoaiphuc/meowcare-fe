@@ -100,10 +100,8 @@ export type ConfigService = {
   id: string;
   ceilPrice: number;
   floorPrice: number;
-  createdAt: Date;
-  updatedAt: Date;
   name: string;
-  isBasicService: boolean;
+  isBasicService: boolean | null;
 };
 
 export interface Role {
