@@ -2,7 +2,10 @@
 
 import { Order } from '@/app/constants/types/homeType';
 import axiosClient from '@/app/lib/axiosClient';
-import { Button, Pagination, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from '@nextui-org/react';
+import { faQuestionCircle } from '@fortawesome/free-regular-svg-icons';
+import { faFlag } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Button, Pagination, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Tooltip } from '@nextui-org/react';
 import React, { useEffect, useMemo, useState } from 'react'
 
 const Page = () => {
@@ -34,7 +37,26 @@ const Page = () => {
 
     return (
         <div className='flex flex-col justify-start w-full mx-10 gap-5 my-3'>
-            <h1 className='font-semibold text-3xl'>Báo cáo</h1>
+            <div className='flex gap-5 items-center'>
+                <h1 className='font-semibold text-3xl'>Báo cáo</h1>
+                <Tooltip
+                    content={
+                        <div className="px-1 py-2 gap-3 flex flex-col">
+                            <div className="flex gap-3">
+                                <FontAwesomeIcon icon={faFlag} size='xl' className='text-yellow-400' />
+                                <h1 className='font-semibold text-[14px]'>Báo cáo lỗi hệ thống</h1>
+                            </div>
+                            <div className="flex gap-3">
+                                <FontAwesomeIcon icon={faFlag} size='xl' className='text-red-500' />
+                                <h1 className='font-semibold text-[14px]'>Báo cáo có người vi phạm</h1>
+                            </div>
+                        </div>
+                    }
+                    placement="right-start"
+                >
+                    <FontAwesomeIcon icon={faQuestionCircle} size='xl' className='' />
+                </Tooltip>
+            </div>
             <Table
                 aria-label="Example table with client side pagination"
                 bottomContent={
@@ -55,8 +77,8 @@ const Page = () => {
                 }}
             >
                 <TableHeader>
-                    <TableColumn key="name">Người báo cáo</TableColumn>
                     <TableColumn key="role">Loại báo cáo</TableColumn>
+                    <TableColumn key="name">Người báo cáo</TableColumn>
                     <TableColumn key="status">Vấn đề</TableColumn>
                     <TableColumn key="status">Ngày gửi báo cáo</TableColumn>
                     <TableColumn key="status">Hành động</TableColumn>
@@ -64,7 +86,7 @@ const Page = () => {
                 <TableBody items={items}>
                     {(item) => (
                         <TableRow key={item.id}>
-                            <TableCell>{item.id}</TableCell>
+                            <TableCell><FontAwesomeIcon icon={faFlag} size='xl' className='text-yellow-400' /></TableCell>
                             <TableCell>{item.id}</TableCell>
                             <TableCell>{item.id}</TableCell>
                             <TableCell>{item.id}</TableCell>

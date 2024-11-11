@@ -30,6 +30,21 @@ const Page = () => {
         { name: 'Đã hủy', status: 'CANCELLED' },
         // Add more menu items as needed
     ];
+    const statusColors: { [key: string]: string } = {
+        AWAITING_PAYMENT: 'text-[#9E9E9E]', // Chờ duyệt - gray
+        CONFIRMED: 'text-[#2E67D1]',        // Xác nhận - blue
+        IN_PROGRESS: 'text-[#FFC107]',      // yellow
+        COMPLETED: 'text-[#4CAF50]',        // Hoàn thành - green
+        CANCELLED: 'text-[#DC3545]',        // Đã hủy - Red
+    };
+    const statusLabels: { [key: string]: string } = {
+        AWAITING_PAYMENT: 'Chờ xác nhận',
+        CONFIRMED: 'Đã xác nhận',
+        IN_PROGRESS: 'Đang diễn ra',
+        COMPLETED: 'Hoàn thành',
+        CANCELLED: 'Đã hủy',
+    };
+
     useEffect(() => {
         axiosClient(`booking-orders/sitter?id=${userId}`)
             .then((res) => {
@@ -39,6 +54,7 @@ const Page = () => {
                 console.log(e);
             })
     }, [userId])
+
 
     return (
         <div className='flex flex-col mt-12 justify-center items-center text-black'>
@@ -84,7 +100,9 @@ const Page = () => {
                             <h1 className='mb-5'>{activity.user.fullName}: {activity.note}</h1>
                             <div>Chăm sóc mèo tại nhà: <span >15 tháng 10</span> - <span className=''>21 tháng 10</span></div>
 
-                            <h1 className='text-green-500'>Yêu cầu đang chờ xác nhận</h1>
+                            <h2 className={`${statusColors[activity.status] || 'text-black'}`}>
+                                {statusLabels[activity.status] || ""}
+                            </h2>
                             <hr />
                         </Link>
                     ))) : (
