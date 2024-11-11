@@ -6,3 +6,7 @@
 .title {
     @apply font-bold
 }
+
+.activeButton {
+    @apply bg-maincolor text-white
+}

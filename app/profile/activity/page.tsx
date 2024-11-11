@@ -10,6 +10,8 @@ import Link from 'next/link'
 
 const Page = () => {
     const [data, setData] = useState<Order[]>([]);
+    const [filterStatus, setFilterStatus] = useState<string>('ALL');
+
     const getUserFromStorage = () => {
         if (typeof window !== "undefined") {
             const storedUser = localStorage.getItem("user");
@@ -49,11 +51,45 @@ const Page = () => {
             <div className="ml-20 w-full gap-5 flex flex-col">
                 <h1 className="text-2xl font-bold pt-10">Hoạt động</h1>
                 <div className='flex gap-3'>
-                    <Button className={styles.button}>Tất cả</Button>
-                    <Button className={styles.button}>Chờ xác nhận</Button>
+                    <Button
+                        className={`${styles.button} ${filterStatus === 'ALL' ? styles.activeButton : ''}`}
+                        onClick={() => setFilterStatus('ALL')}
+                    >
+                        Tất cả
+                    </Button>
+                    <Button
+                        className={`${styles.button} ${filterStatus === 'AWAITING_PAYMENT' ? styles.activeButton : ''}`}
+                        onClick={() => setFilterStatus('AWAITING_PAYMENT')}
+                    >
+                        Chờ xác nhận
+                    </Button>
+                    <Button
+                        className={`${styles.button} ${filterStatus === 'CONFIRMED' ? styles.activeButton : ''}`}
+                        onClick={() => setFilterStatus('CONFIRMED')}
+                    >
+                        Đã xác nhận
+                    </Button>
+                    <Button
+                        className={`${styles.button} ${filterStatus === 'IN_PROGRESS' ? styles.activeButton : ''}`}
+                        onClick={() => setFilterStatus('IN_PROGRESS')}
+                    >
+                        Đã diễn ra
+                    </Button>
+                    <Button
+                        className={`${styles.button} ${filterStatus === 'COMPLETED' ? styles.activeButton : ''}`}
+                        onClick={() => setFilterStatus('COMPLETED')}
+                    >
+                        Đã hoàn thành
+                    </Button>
+                    <Button
+                        className={`${styles.button} ${filterStatus === 'CANCELLED' ? styles.activeButton : ''}`}
+                        onClick={() => setFilterStatus('CANCELLED')}
+                    >
+                        Đã hủy
+                    </Button>
                 </div>
                 <div>
-                    {data ? (data.map((activity) => (
+                    {data ? (data.filter((activity) => filterStatus === 'ALL' || activity.status === filterStatus).map((activity) => (
                         <div key={activity.id} className='border w-[700px] p-3 rounded-lg flex justify-between my-3'>
                             <div>
                                 <div className='flex'>
@@ -78,7 +114,7 @@ const Page = () => {
                     )}
                 </div>
             </div>
-        </div>
+        </div >
     )
 }
 

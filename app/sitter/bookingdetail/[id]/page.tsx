@@ -8,6 +8,7 @@ import { Button, Textarea } from '@nextui-org/react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import React, { useEffect, useState } from 'react'
+import { toast } from 'react-toastify';
 
 const Page = () => {
     const param = useParams();
@@ -29,7 +30,13 @@ const Page = () => {
     //denied request
     const handleDenied = (bookingId: string) => {
         try {
-            axiosClient(`${bookingId}`)
+            axiosClient(`booking-orders/status/${bookingId}?status=CANCELLED`)
+                .then(() => {
+                    toast.success('Bạn đã từ chối')
+                })
+                .catch(() => {
+                    toast.error('Có lỗi xảy ra vui lòng thử lại sau')
+                })
         } catch (error) {
 
         }
@@ -37,8 +44,15 @@ const Page = () => {
     //accept request
     const handleAccept = (bookingId: string) => {
         try {
-            axiosClient(`${bookingId}`)
+            axiosClient(`booking-orders/status/${bookingId}?status=CONFIRMED`)
+                .then(() => {
+                    toast.success('Bạn đã chấp nhận yêu cầu này, vui lòng chăm sóc theo lịch')
+                })
+                .catch(() => {
+                    toast.error('Có lỗi xảy ra vui lòng thử lại sau')
+                })
         } catch (error) {
+            console.log(error);
 
         }
     }

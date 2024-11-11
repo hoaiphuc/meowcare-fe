@@ -37,7 +37,6 @@ const Login = () => {
                 .then((response) => {
                     console.log(response.data.user.roles[0].roleName);
 
-                    toast.success('Đăng nhập thành công');
                     if (typeof window !== "undefined") {
                         localStorage.setItem(
                             'auth-token',
@@ -49,7 +48,7 @@ const Login = () => {
                         );
                     }
                     const userRoles: Role[] = response.data.user.roles;
-
+                    toast.success('Đăng nhập thành công');
                     // Define the redirection logic
                     if (userRoles.some(role => role.roleName === 'ADMIN')) {
                         router.push('/admin');
