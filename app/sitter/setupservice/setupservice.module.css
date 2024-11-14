@@ -1,13 +1,17 @@
 .h1 {
-    @apply text-[20px] font-semibold my-2;
+    @apply text-[20px] font-semibold my-2 pb-2 border-b;
 }
 
 .h2 {
-    @apply text-[15px] font-semibold;
+    @apply text-[17px] font-semibold;
 }
 
 .h3 {
-    @apply text-[13px] font-semibold;
+    @apply text-[18px] text-blue-500;
+}
+
+.h3:hover {
+    @apply underline
 }
 
 .button {

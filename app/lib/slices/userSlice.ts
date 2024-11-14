@@ -40,7 +40,7 @@ export const updateUserProfile = createAsyncThunk<
   }
 
   try {
-    const response = await axiosClient.put(`/user/${userId}`, updatedData);
+    const response = await axiosClient.put(`/users/${userId}`, updatedData);
     return response.data as UserType;
   } catch (error) {
     let errorMessage = "Đã xảy ra lỗi không xác định";

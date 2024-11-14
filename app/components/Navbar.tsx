@@ -10,6 +10,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '../lib/hooks';
 import { fetchUserProfile } from '../lib/slices/userSlice';
 import { UserLocal } from '../constants/types/homeType';
+import Loading from './Loading';
 
 const Navbar = () => {
     const router = useRouter();
@@ -74,9 +75,9 @@ const Navbar = () => {
 
 
     if (loading) {
-        // Hiển thị trạng thái tải hoặc giữ navbar trống
-        return <nav>Đang tải...</nav>;
+        return Loading;
     }
+
     return (
         <MyNavbar onMenuOpenChange={setIsMenuOpen} shouldHideOnScroll isBordered maxWidth="full" className='min-h-24 bg-[#fffaf5] '>
             <NavbarContent>
@@ -119,7 +120,7 @@ const Navbar = () => {
                                     isBordered
                                     as="button"
                                     className="transition-transform"
-                                    src="/User-avatar.png"
+                                    src={userProfile?.avatar || '/User-avatar.png'}
                                 />
                             </DropdownTrigger>
                             <DropdownMenu aria-label="User Actions" variant="flat">

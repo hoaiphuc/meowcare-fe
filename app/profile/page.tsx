@@ -92,7 +92,7 @@ const Profile = () => {
                                 type="text"
                                 variant="bordered"
                                 defaultValue={userProfile?.fullName}
-                            // onChange={(e) => setUserName(e.target.value)}
+                                onChange={(e) => setFullName(e.target.value)}
                             />
                             <h2>Số điện thoại</h2>
                             {/* <div className="flex justify-center items-center mb-4"> */}

@@ -9,7 +9,7 @@ import { faClock } from '@fortawesome/free-regular-svg-icons'
 import { parseZonedDateTime } from "@internationalized/date";
 import { useParams } from 'next/navigation'
 import axiosClient from '@/app/lib/axiosClient'
-import { PetProfile, Service } from '@/app/constants/types/homeType'
+import { ConfigService, PetProfile } from '@/app/constants/types/homeType'
 import Image from 'next/image'
 import { toast } from 'react-toastify'
 
@@ -23,7 +23,7 @@ const Page = () => {
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
     const [sitterId, setSitterId] = useState();
 
-    const [services, setServices] = useState<Service[]>([])
+    const [services, setServices] = useState<ConfigService[]>([])
     const [name, setName] = useState('');
     const [phoneNumber, setPhoneNumber] = useState('');
     const [address, setAddress] = useState('')
@@ -80,10 +80,10 @@ const Page = () => {
     //get basic service
     useEffect(() => {
         try {
-            axiosClient('services')
+            axiosClient('config-services')
                 .then((res) => {
                     const filteredServices = res.data.filter(
-                        (service: Service) => service.isBasicService === true
+                        (service: ConfigService) => service.isBasicService === true
                     );
                     setServices(filteredServices)
                 })
@@ -147,7 +147,7 @@ const Page = () => {
 
     return (
         <div className='flex flex-col items-center justify-start my-12'>
-            <h1>Đặt lịch</h1>
+            <h1 className='text-4xl font-semibold'>Đặt lịch</h1>
             <div className='flex flex-row items-start justify-center gap-8 mt-10'>
                 {/* 1 */}
                 <div className='flex flex-col gap-3 w-[486px]'>
@@ -164,7 +164,7 @@ const Page = () => {
                         >
                             {services.map((service) => (
                                 <SelectItem key={service.id} value={service.id}>
-                                    {service.serviceName}
+                                    {service.name}
                                 </SelectItem>
                             ))}
                         </Select>

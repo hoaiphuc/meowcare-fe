@@ -251,7 +251,7 @@ const Service = () => {
                                     <Link href={`/service/sitterprofile/${catSitter.id}`}>
                                         <div className='flex gap-3 cursor-pointer'>
                                             <Avatar
-                                                // src={catSitter.avatarUrl}
+                                                src={catSitter?.avatar || '/User-avatar.png'}
                                                 className='h-[80px] w-[80px]'
                                             />
                                             <div className='flex flex-col gap-1'>
