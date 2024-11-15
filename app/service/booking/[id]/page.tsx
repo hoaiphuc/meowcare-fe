@@ -9,10 +9,9 @@ import { faClock } from '@fortawesome/free-regular-svg-icons'
 import { parseZonedDateTime } from "@internationalized/date";
 import { useParams } from 'next/navigation'
 import axiosClient from '@/app/lib/axiosClient'
-import { ConfigService, PetProfile } from '@/app/constants/types/homeType'
+import { PetProfile, Service } from '@/app/constants/types/homeType'
 import Image from 'next/image'
 import { toast } from 'react-toastify'
-
 const Page = () => {
     const params = useParams();
     const [selectedService, setSelectedService] = useState<string>('');
@@ -21,9 +20,9 @@ const Page = () => {
     const [isRequireFood, setIsRequireFood] = useState(false);
     const [pets, setPets] = useState<PetProfile[]>([]);
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
-    const [sitterId, setSitterId] = useState();
+    const [bookingId, setBookingId] = useState();
 
-    const [services, setServices] = useState<ConfigService[]>([])
+    const [services, setServices] = useState<Service[]>([])
     const [name, setName] = useState('');
     const [phoneNumber, setPhoneNumber] = useState('');
     const [address, setAddress] = useState('')
@@ -33,6 +32,7 @@ const Page = () => {
         { id: '1', foodName: 'Cá' },
         { id: '2', foodName: 'Thịt' },
     ];
+
 
     const [userId, setUserId] = useState<string | null>(null);
 
@@ -53,20 +53,20 @@ const Page = () => {
     }, []);
 
     //get Sitter id
-    useEffect(() => {
-        try {
-            axiosClient(`sitter-profiles/${params.id}`)
-                .then((res) => {
-                    console.log(res.data.user.id);
-                    setSitterId(res.data.user.id)
-                })
-                .catch((e) => {
-                    console.log(e);
-                })
-        } catch (error) {
-            console.log(error);
-        }
-    }, [params])
+    // useEffect(() => {
+    //     try {
+    //         axiosClient(`sitter-profiles/${params.id}`)
+    //             .then((res) => {
+    //                 console.log(res.data.user.id);
+    //                 setSitterId(res.data.user.id)
+    //             })
+    //             .catch((e) => {
+    //                 console.log(e);
+    //             })
+    //     } catch (error) {
+    //         console.log(error);
+    //     }
+    // }, [params])
 
     // Handle service change
     const handleServiceChange = (serviceId: string) => {
@@ -80,10 +80,10 @@ const Page = () => {
     //get basic service
     useEffect(() => {
         try {
-            axiosClient('config-services')
+            axiosClient(`services/sitter/${params.id}`)
                 .then((res) => {
                     const filteredServices = res.data.filter(
-                        (service: ConfigService) => service.isBasicService === true
+                        (service: Service) => service.isBasicService === true
                     );
                     setServices(filteredServices)
                 })
@@ -110,16 +110,6 @@ const Page = () => {
         }
     }, [userId])
 
-    const handlePay = () => {
-        // try {
-        //     axiosClient.post(`booking-orders/with-details`, data)
-        //         .then(() => { })
-        //         .catch(() => { })
-        // } catch (error) {
-
-        // }
-    }
-
     const handleBooking = () => {
         const data = {
             bookingDetails: [{
@@ -127,7 +117,7 @@ const Page = () => {
                 petProfileId: selectedPet,
                 serviceId: selectedService,
             }],
-            sitterId: sitterId,
+            sitterId: params.id,
             name: name,
             phoneNumber: phoneNumber,
             address: address,
@@ -136,14 +126,33 @@ const Page = () => {
 
         try {
             axiosClient.post(`booking-orders/with-details`, data)
-                .then(() => {
+                .then((res) => {
+                    setBookingId(res.data.id)
+                    onOpen();
                     toast.success("Đặt lịch thành công vui lòng chờ xác nhận")
                 })
-                .catch(() => { })
+                .catch((e) => {
+                    console.log(e);
+                })
         } catch (error) {
-
+            console.log(error);
         }
     }
+
+    const handlePay = () => {
+        try {
+            axiosClient.post(`booking-orders/payment-url?id=${bookingId}&requestType=PAY_WITH_ATM`)
+                .then((res) => {
+                    window.open(res.data.payUrl, '_self');
+                })
+                .catch(() => {
+                    toast.error("Thanh toán thất bại, vui lòng thử lại sau")
+                })
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
 
     return (
         <div className='flex flex-col items-center justify-start my-12'>
@@ -164,7 +173,7 @@ const Page = () => {
                         >
                             {services.map((service) => (
                                 <SelectItem key={service.id} value={service.id}>
-                                    {service.name}
+                                    {service.serviceName}
                                 </SelectItem>
                             ))}
                         </Select>
@@ -271,10 +280,7 @@ const Page = () => {
             </div>
 
             <div className='mt-10'>
-                <Button onPress={onOpen} className='bg-[#2E67D1] text-white text-[16px] font-semibold rounded-full w-[483px]'>Đặt lịch và thanh toán</Button>
-            </div>
-            <div className='mt-10'>
-                <Button className='bg-[#2E67D1] text-white text-[16px] font-semibold rounded-full w-[483px]' onClick={() => handleBooking()}>Đặt lịch (test)</Button>
+                <Button onPress={handleBooking} className='bg-[#2E67D1] text-white text-[16px] font-semibold rounded-full w-[483px]'>Đặt lịch và thanh toán</Button>
             </div>
 
             {/* Modal payment */}

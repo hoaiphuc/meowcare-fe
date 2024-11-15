@@ -75,6 +75,7 @@ export type CatSitter = {
   environment: string;
   maximumQuantity: number;
   user: {
+    id: string;
     email: string;
     password: string;
     fullName: string;
