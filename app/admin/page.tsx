@@ -8,15 +8,34 @@ import axiosClient from '../lib/axiosClient';
 const data = [{ name: 'Page A', uv: 400, pv: 2400, amt: 2400 }]
 
 const Page = () => {
-    const [users, setUsers] = useState<number>();
-    // const [totalUser, setTotalUser] = useState();
+    const [totalUser, setTotalUser] = useState<number>();
+    const [catOwner, setCatOwner] = useState<number>();
+    const [sitter, setSitter] = useState<number>();
     // const [totalSitter, setTotalSitter] = useState();
 
     useEffect(() => {
         try {
+            //total
             axiosClient('/users/count')
                 .then((res) => {
-                    setUsers(res.data)
+                    setTotalUser(res.data)
+                })
+                .catch(() => { })
+            //catOwners
+            axiosClient(`users/count/USER`)
+                .then((res) => {
+                    setCatOwner(res.data)
+                })
+                .catch((e) => {
+                    console.log(e);
+                })
+            //sitter
+            axiosClient(`users/count/SITTER`)
+                .then((res) => {
+                    setSitter(res.data)
+                })
+                .catch((e) => {
+                    console.log(e);
                 })
         } catch (error) {
             console.log(error);
@@ -49,23 +68,23 @@ const Page = () => {
             <div className='grid grid-cols-3 gap-5'>
                 <div >
                     <CardChart
-                        number={users || 0}
-                        title="Người dùng"
+                        number={totalUser || 0}
+                        title="Tổng người dùng"
                         icon={faUsersLine}
                         date="10/11/2024"
                         className="bg-gradient-to-r from-indigo-500 to-blue-500"
                     />
                 </div>
                 <CardChart
-                    number={20}
-                    title="Người dùng"
+                    number={catOwner || 0}
+                    title="Người nuôi mèo"
                     icon={faUsersLine}
                     date="10/11/2024"
                     className="bg-gradient-to-r from-lime-500 to-lime-300"
                 />
                 <CardChart
-                    number={20}
-                    title="Người dùng"
+                    number={sitter || 0}
+                    title="Người chăm sóc mèo"
                     icon={faUsersLine}
                     date="10/11/2024"
                     className="bg-gradient-to-r from-amber-500 to-amber-300"
