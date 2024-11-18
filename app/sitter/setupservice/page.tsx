@@ -20,8 +20,6 @@ const Page = () => {
     const [showAll, setShowAll] = useState(false);
     const { userProfile, loading } = useAppSelector((state) => state.user);
 
-
-
     useEffect(() => {
         try {
             axiosClient(`services/sitter/${userProfile?.id}`)
@@ -90,20 +88,26 @@ const Page = () => {
                     <h1 className={styles.h1}>Cài đặt dịch vụ</h1>
                     <div className="flex flex-col gap-5">
                         {displayedServices.map((service) => {
-                            const isActivated = createdServices.some(
+                            const createdService = createdServices.find(
                                 (createdService) => createdService.serviceName === service.name
                             );
+                            const isActivated = Boolean(createdService);
+
+                            // Use the id from createdService if it exists, otherwise fallback to service.id
+                            const idToUse = createdService ? createdService.id : service.id;
                             return (
-                                <div key={service.id} className="flex justify-between border-b py-4 cursor-pointer">
-                                    <div className="flex gap-3">
-                                        <Image src='/noimage.jpg' alt="" width={50} height={50} className="rounded-md" />
-                                        <div>
-                                            <h2 className={styles.h2}>{service.name}</h2>
-                                            {isActivated ? <h2 className="text-[#A46950]">Chưa kích hoạt</h2> : <h2 className="text-green-500">Đã kích hoạt</h2>}
+                                <Link href={`/sitter/servicedetail/${idToUse}`} key={service.id}>
+                                    <div className="flex justify-between border-b py-4 cursor-pointer">
+                                        <div className="flex gap-3">
+                                            <Image src='/noimage.jpg' alt="" width={50} height={50} className="rounded-md" />
+                                            <div>
+                                                <h2 className={styles.h2}>{service.name}</h2>
+                                                {isActivated ? <h2 className="text-green-500">Đã kích hoạt</h2> : <h2 className="text-[#A46950]">Chưa kích hoạt</h2>}
+                                            </div>
                                         </div>
+                                        <FontAwesomeIcon icon={faChevronRight} />
                                     </div>
-                                    <FontAwesomeIcon icon={faChevronRight} />
-                                </div>
+                                </Link>
                             )
                         })}
                         {services.length > 2 && (
@@ -128,7 +132,7 @@ const Page = () => {
                     </div>
                 </div>
             </div>
-        </div>
+        </div >
     )
 }
 
