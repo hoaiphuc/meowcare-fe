@@ -1,6 +1,6 @@
 'use client'
 
-import { Order } from '@/app/constants/types/homeType';
+import { Report } from '@/app/constants/types/homeType';
 import axiosClient from '@/app/lib/axiosClient';
 import { faQuestionCircle } from '@fortawesome/free-regular-svg-icons';
 import { faFlag } from '@fortawesome/free-solid-svg-icons';
@@ -10,12 +10,12 @@ import React, { useEffect, useMemo, useState } from 'react'
 
 const Page = () => {
     const [page, setPage] = useState(1);
-    const [data, setData] = useState<Order[]>([]);
+    const [data, setData] = useState<Report[]>([]);
     const rowsPerPage = 10;
 
     useEffect(() => {
         try {
-            axiosClient('booking-orders')
+            axiosClient('reports')
                 .then((res) => {
                     setData(res.data)
                 })

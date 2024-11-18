@@ -1,14 +1,16 @@
 'use client'
 
-import { UserType } from '@/app/constants/types/homeType';
+import { FormRegister } from '@/app/constants/types/homeType';
 import axiosClient from '@/app/lib/axiosClient';
-import { Button, Pagination, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from '@nextui-org/react';
+import { Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Pagination, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, useDisclosure } from '@nextui-org/react';
 import React, { useEffect, useMemo, useState } from 'react'
 
 const Page = () => {
     const [page, setPage] = useState(1);
-    const [data, setData] = useState<UserType[]>([]);
+    const [data, setData] = useState<FormRegister[]>([]);
     const rowsPerPage = 10;
+    const { isOpen, onOpen, onOpenChange } = useDisclosure();
+    const [selectedForm, setSelectedForm] = useState<FormRegister>();
 
     useEffect(() => {
         try {
@@ -31,6 +33,12 @@ const Page = () => {
 
         return data.slice(start, end);
     }, [page, data]);
+
+    //open detail
+    const handleDetail = async (item: FormRegister) => {
+        setSelectedForm(item);
+        onOpen();
+    }
 
     return (
         <div className='flex flex-col justify-start w-full mx-10 gap-5 my-3'>
@@ -65,12 +73,42 @@ const Page = () => {
                             <TableCell>{item.fullName}</TableCell>
                             <TableCell>{item.email}</TableCell>
                             <TableCell>
-                                <Button>Xem chi tiết</Button>
+                                <Button onClick={() => handleDetail(item)}>
+                                    Xem chi tiết
+                                </Button>
                             </TableCell>
                         </TableRow>
                     )}
                 </TableBody>
             </Table>
+
+            <Modal isOpen={isOpen} onOpenChange={onOpenChange} size='2xl'>
+                <ModalContent>
+                    {(onClose) => (
+                        <>
+                            <ModalHeader className="flex flex-col gap-1">Đơn đăng ký của {selectedForm?.fullName}</ModalHeader>
+                            <ModalBody>
+                                <div className="grid grid-cols-6 gap-3">
+                                    <div className="col-span-2">Email</div>
+                                    <div className="col-span-4">{selectedForm?.email}</div>
+                                    <div className="col-span-2">Số điện thoại</div>
+                                    <div className="col-span-4">{selectedForm?.phoneNumber}</div>
+                                    <div className="col-span-2">Địa chỉ</div>
+                                    <div className="col-span-4">{selectedForm?.address}</div>
+                                </div>
+                            </ModalBody>
+                            <ModalFooter>
+                                <Button color="danger" variant="light" onPress={onClose}>
+                                    Không duyệt
+                                </Button>
+                                <Button color="primary" onPress={() => onClose}>
+                                    Duyệt
+                                </Button>
+                            </ModalFooter>
+                        </>
+                    )}
+                </ModalContent>
+            </Modal>
         </div>
     )
 }

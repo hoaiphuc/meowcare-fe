@@ -19,14 +19,16 @@ const Page = () => {
         }
     };
     const statusColors: { [key: string]: string } = {
-        AWAITING_PAYMENT: 'text-[#9E9E9E]', // Chờ duyệt - gray
+        AWAITING_PAYMENT: 'text-[#e67e22]', // Chờ duyệt - gray
+        AWAITING_CONFIRM: 'text-[#9E9E9E]', // Chờ duyệt - gray
         CONFIRMED: 'text-[#2E67D1]',        // Xác nhận - blue
         IN_PROGRESS: 'text-[#FFC107]',      // yellow
         COMPLETED: 'text-[#4CAF50]',        // Hoàn thành - green
         CANCELLED: 'text-[#DC3545]',        // Đã hủy - Red
     };
     const statusLabels: { [key: string]: string } = {
-        AWAITING_PAYMENT: 'Chờ xác nhận',
+        AWAITING_PAYMENT: 'Chờ thanh toán',
+        AWAITING_CONFIRM: 'Chờ xác nhận',
         CONFIRMED: 'Đã xác nhận',
         IN_PROGRESS: 'Đang diễn ra',
         COMPLETED: 'Hoàn thành',

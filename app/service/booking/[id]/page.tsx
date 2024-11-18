@@ -1,7 +1,7 @@
 'use client'
 
 import { Button, Checkbox, DateRangePicker, Input, Modal, ModalBody, ModalContent, ModalFooter, Radio, RadioGroup, Select, SelectItem, Textarea, useDisclosure } from '@nextui-org/react'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import styles from './booking.module.css'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faClock } from '@fortawesome/free-regular-svg-icons'
@@ -12,18 +12,21 @@ import axiosClient from '@/app/lib/axiosClient'
 import { PetProfile, Service } from '@/app/constants/types/homeType'
 import Image from 'next/image'
 import { toast } from 'react-toastify'
-
+import { faMinus, faPlus } from '@fortawesome/free-solid-svg-icons'
 const Page = () => {
     const params = useParams();
     const [selectedService, setSelectedService] = useState<string>('');
+    const [selectedAdditionalServices, setSelectedAdditionalServices] = useState<string[]>([]);
     const [selectedPet, setSelectedPet] = useState<string>('');
     const [isSelected, setIsSelected] = useState(false);
     const [isRequireFood, setIsRequireFood] = useState(false);
     const [pets, setPets] = useState<PetProfile[]>([]);
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
-    const [sitterId, setSitterId] = useState();
+    const [bookingId, setBookingId] = useState();
 
     const [services, setServices] = useState<Service[]>([])
+    const [additionServices, setAdditionServices] = useState<Service[]>([])
+    const [isShowAdditionService, setIsShowAdditionService] = useState<boolean>(false)
     const [name, setName] = useState('');
     const [phoneNumber, setPhoneNumber] = useState('');
     const [address, setAddress] = useState('')
@@ -33,6 +36,7 @@ const Page = () => {
         { id: '1', foodName: 'Cá' },
         { id: '2', foodName: 'Thịt' },
     ];
+
 
     const [userId, setUserId] = useState<string | null>(null);
 
@@ -52,25 +56,19 @@ const Page = () => {
         }
     }, []);
 
-    //get Sitter id
-    useEffect(() => {
-        try {
-            axiosClient(`sitter-profiles/${params.id}`)
-                .then((res) => {
-                    console.log(res.data.user.id);
-                    setSitterId(res.data.user.id)
-                })
-                .catch((e) => {
-                    console.log(e);
-                })
-        } catch (error) {
-            console.log(error);
-        }
-    }, [params])
-
     // Handle service change
     const handleServiceChange = (serviceId: string) => {
         setSelectedService(serviceId);
+    };
+
+    const handleAdditionalServiceChange = (serviceId: string, isChecked: boolean) => {
+        setSelectedAdditionalServices((prevSelected) => {
+            if (isChecked) {
+                return [...prevSelected, serviceId];
+            } else {
+                return prevSelected.filter((id) => id !== serviceId);
+            }
+        });
     };
 
     const handlePetChange = (petId: string) => {
@@ -80,12 +78,16 @@ const Page = () => {
     //get basic service
     useEffect(() => {
         try {
-            axiosClient('services')
+            axiosClient(`services/sitter/${params.id}`)
                 .then((res) => {
                     const filteredServices = res.data.filter(
                         (service: Service) => service.isBasicService === true
                     );
-                    setServices(filteredServices)
+                    setServices(filteredServices);
+                    const filteredAdditionServices = res.data.filter(
+                        (service: Service) => service.isBasicService === false
+                    )
+                    setAdditionServices(filteredAdditionServices)
                 })
                 .catch((e) => {
                     console.log(e);
@@ -93,7 +95,7 @@ const Page = () => {
         } catch (error) {
             console.log(error);
         }
-    }, [])
+    }, [params.id])
 
     //get pets
     useEffect(() => {
@@ -110,24 +112,28 @@ const Page = () => {
         }
     }, [userId])
 
-    const handlePay = () => {
-        // try {
-        //     axiosClient.post(`booking-orders/with-details`, data)
-        //         .then(() => { })
-        //         .catch(() => { })
-        // } catch (error) {
-
-        // }
-    }
-
     const handleBooking = () => {
-        const data = {
-            bookingDetails: [{
+        const bookingDetails = [];
+
+        // Add the basic service
+        bookingDetails.push({
+            quantity: 1,
+            petProfileId: selectedPet,
+            serviceId: selectedService,
+        });
+
+        // Add the selected additional services
+        selectedAdditionalServices.forEach((serviceId) => {
+            bookingDetails.push({
                 quantity: 1,
-                petProfileId: selectedPet,
-                serviceId: selectedService,
-            }],
-            sitterId: sitterId,
+                petProfileId: selectedPet, // Adjust if petProfileId is not needed for additional services
+                serviceId: serviceId,
+            });
+        });
+
+        const data = {
+            bookingDetails: bookingDetails,
+            sitterId: params.id,
             name: name,
             phoneNumber: phoneNumber,
             address: address,
@@ -136,23 +142,66 @@ const Page = () => {
 
         try {
             axiosClient.post(`booking-orders/with-details`, data)
-                .then(() => {
+                .then((res) => {
+                    setBookingId(res.data.id)
+                    onOpen();
                     toast.success("Đặt lịch thành công vui lòng chờ xác nhận")
                 })
-                .catch(() => { })
+                .catch((e) => {
+                    console.log(e);
+                })
         } catch (error) {
-
+            console.log(error);
         }
     }
 
+    const handlePay = () => {
+        try {
+            axiosClient.post(`booking-orders/payment-url?id=${bookingId}&requestType=PAY_WITH_ATM&redirectUrl=${process.env.NEXT_PUBLIC_BASE_URL}/payment-result`)
+                .then((res) => {
+                    window.open(res.data.payUrl, '_self');
+                })
+                .catch(() => {
+                    toast.error("Thanh toán thất bại, vui lòng thử lại sau")
+                })
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    //calculate price
+    const totalPrice = useMemo(() => {
+        let totalPerNight = 0;
+
+        // Get the selected basic service
+        const basicService = services.find(service => service.id === selectedService);
+        if (basicService) {
+            totalPerNight += basicService.price;
+        }
+
+        // Add prices of selected additional services
+        selectedAdditionalServices.forEach(serviceId => {
+            const additionalService = additionServices.find(service => service.id === serviceId);
+            if (additionalService) {
+                totalPerNight += additionalService.price;
+            }
+        });
+
+        // Calculate the number of nights
+        // const nights = numberOfNights > 0 ? numberOfNights : 1; // Ensure at least 1 night
+
+        return totalPerNight * 1;
+    }, [selectedService, selectedAdditionalServices, services, additionServices]);
+
+
     return (
         <div className='flex flex-col items-center justify-start my-12'>
-            <h1>Đặt lịch</h1>
+            <h1 className={styles.h1}>Đặt lịch</h1>
             <div className='flex flex-row items-start justify-center gap-8 mt-10'>
                 {/* 1 */}
                 <div className='flex flex-col gap-3 w-[486px]'>
                     <div className='flex flex-col gap-3'>
-                        <h2>Chọn dịch vụ</h2>
+                        <h2 className={styles.h2}>Chọn dịch vụ</h2>
                         <Select
                             aria-label='service'
                             labelPlacement='outside'
@@ -172,7 +221,27 @@ const Page = () => {
                             Dịch vụ đưa đón mèo (1-10km)
                         </Checkbox>
                         <Input placeholder='Nhập địa chỉ đưa đoán mèo' isDisabled={!isSelected} variant="bordered" className='input' />
-                        <h2>Chọn ngày</h2>
+
+                        <h2 className={styles.h2}>Chọn dịch vụ thêm</h2>
+                        {additionServices.map((service: Service) => (
+                            <div key={service.id} className={isShowAdditionService ? `flex flex-col` : `hidden`}>
+                                <Checkbox
+                                    size="sm"
+                                    isSelected={selectedAdditionalServices.includes(service.id)}
+                                    onValueChange={(isChecked) => handleAdditionalServiceChange(service.id, isChecked)}
+                                >
+                                    {service.serviceName}
+                                </Checkbox>
+                            </div>
+                        ))}
+
+                        <Button onClick={() => setIsShowAdditionService(!isShowAdditionService)}>
+                            <FontAwesomeIcon icon={isShowAdditionService ? faMinus : faPlus} />
+                            Dịch vụ thêm
+                        </Button>
+
+
+                        <h2 className={styles.h2}>Chọn ngày</h2>
                         <DateRangePicker
                             label="Event duration"
                             hideTimeZone
@@ -183,7 +252,7 @@ const Page = () => {
                             }}
                         />
 
-                        <h2>Thêm thú cưng của bạn</h2>
+                        <h2 className={styles.h2}>Thêm thú cưng của bạn</h2>
                         <Select
                             aria-label='pet'
                             labelPlacement='outside'
@@ -199,11 +268,12 @@ const Page = () => {
                             ))}
                         </Select>
 
-                        <h2>Chọn thức ăn cho mèo</h2>
+                        <h2 className={styles.h2}>Chọn thức ăn cho mèo</h2>
                         <Select
                             labelPlacement='outside'
                             className="select min-w-full"
                             variant="bordered"
+                            aria-label='food'
                             defaultSelectedKeys={selectedService}
                             onChange={(event) => handleServiceChange(event.target.value)}
                         >
@@ -219,12 +289,12 @@ const Page = () => {
                         </Checkbox>
                         <Input placeholder='Nhập loại thức ăn cụ thể' isDisabled={!isSelected} variant="bordered" className='input' />
 
-                        <h2>Thông tin cá nhân</h2>
+                        <h2 className={styles.h2}>Thông tin cá nhân</h2>
                         <Input placeholder='Họ và tên' variant='bordered' onChange={(e) => setName(e.target.value)} />
                         <Input type='number' placeholder='Số điện thoại' variant='bordered' onChange={(e) => setPhoneNumber(e.target.value)} className="no-spinner" />
                         <Input placeholder='Địa chỉ của bạn' variant='bordered' onChange={(e) => setAddress(e.target.value)} />
 
-                        <h2>Lời nhắn</h2>
+                        <h2 className={styles.h2}>Lời nhắn</h2>
                         <Textarea placeholder='VD: chia sẽ về sở thích của mèo' variant='bordered' onChange={(e) => setNote(e.target.value)} />
 
                     </div>
@@ -232,13 +302,15 @@ const Page = () => {
                 <div className='w-[327px]'>
                     <div className='border flex flex-col p-3 rounded-lg gap-3 mb-10'>
                         <h2>Bảng giá dịch vụ</h2>
-                        <div className='flex justify-between'>
-                            <h3>Gửi thú cưng</h3>
-                            <div className='flex flex-col left-0'>
-                                <h3 className='text-[#2B764F]'>100.000đ</h3>
-                                <h4>giá mỗi đêm</h4>
+                        {services.map((service) => (
+                            <div className='flex justify-between' key={service.id}>
+                                <h3>{service.serviceName}</h3>
+                                <div className='flex flex-col left-0'>
+                                    <h3 className='text-[#2B764F]'>{service.price.toLocaleString()}</h3>
+                                    <h4>giá mỗi đêm</h4>
+                                </div>
                             </div>
-                        </div>
+                        ))}
                     </div>
 
                     {/* Final price */}
@@ -259,22 +331,19 @@ const Page = () => {
                                 <h3>02/10/2024</h3>
                             </div>
                         </div>
-                        <h3>Số lượng mèo: 2</h3>
-                        <h3>Số ngày lễ: 1</h3>
+                        <h3>Số lượng mèo: 1</h3>
+                        <h3>Số ngày lễ: 0</h3>
                         <hr className='text-[#66696]' />
                         <div className='flex justify-between'>
                             <h3>Tổng giá:</h3>
-                            <h3 className='text-[#2B764F]'>150.000đ</h3>
+                            <h3 className='text-[#2B764F]'>{totalPrice.toLocaleString()}</h3>
                         </div>
                     </div>
                 </div>
             </div>
 
             <div className='mt-10'>
-                <Button onPress={onOpen} className='bg-[#2E67D1] text-white text-[16px] font-semibold rounded-full w-[483px]'>Đặt lịch và thanh toán</Button>
-            </div>
-            <div className='mt-10'>
-                <Button className='bg-[#2E67D1] text-white text-[16px] font-semibold rounded-full w-[483px]' onClick={() => handleBooking()}>Đặt lịch (test)</Button>
+                <Button onPress={handleBooking} className='bg-[#2E67D1] text-white text-[16px] font-semibold rounded-full w-[483px]'>Đặt lịch và thanh toán</Button>
             </div>
 
             {/* Modal payment */}
@@ -335,10 +404,10 @@ const Page = () => {
                                                 <div className='border border-black p-3'>
                                                     <Radio value="qr" className='px-5'>
                                                         <div className='flex items-center'>
-                                                            <Image src='/nganhang.png' alt='' width={50} height={50} className='mx-3 w-[50px] h-[50px]' />
+                                                            <Image src='/momo.png' alt='' width={90} height={50} className='mx-3 w-[70px] h-[40px]' />
                                                             <div>
-                                                                <h1 className={styles.paymentHeading1}>Thanh toán qua tài khoản ngân hàng</h1>
-                                                                <h2 className={styles.paymentHeading2}>Thanh toán bằng mã VietQR</h2>
+                                                                <h1 className={styles.paymentHeading1}>Thanh toán qua Momo</h1>
+                                                                <h2 className={styles.paymentHeading2}>Thanh toán bằng số tài khoản</h2>
                                                             </div>
                                                         </div>
                                                     </Radio>
@@ -346,7 +415,7 @@ const Page = () => {
                                                 <div className='border border-black mt-[-8px] p-3'>
                                                     <Radio value="cash" className='px-5' aria-label='j'>
                                                         <div className='flex items-center'>
-                                                            <Image src='/cash.png' alt='' width={51} height={44} className='mx-3 w-[51px] h-[44px]' />
+                                                            <Image src='/cash.png' alt='' width={51} height={44} className='mx-3 w-[71px] h-[54px]' />
                                                             <div>
                                                                 <h1 className={styles.paymentHeading1}>Thanh toán bằng tiền mặt</h1>
                                                                 <h2 className={styles.paymentHeading2}>Sau khi hoàn thành dịch vụ</h2>

@@ -1,21 +1,27 @@
+'use client'
+
 import { faCamera } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Navbar, NavbarContent, NavbarItem, useDisclosure } from '@nextui-org/react';
-import Image from 'next/image';
+import { Avatar, Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Navbar, NavbarContent, NavbarItem, useDisclosure } from '@nextui-org/react';
 import { usePathname } from 'next/navigation';
-import React, { useEffect } from 'react'
+import React, { useEffect, useRef } from 'react'
 import { profileSidebar } from '../lib/profileSidebar';
 import { ProfileSidebarItem } from '../constants/types/homeType';
 import Link from 'next/link';
 import { useAppDispatch, useAppSelector } from '../lib/hooks';
-import { fetchUserProfile } from '../lib/slices/userSlice';
+import { fetchUserProfile, updateUserProfile } from '../lib/slices/userSlice';
 import Loading from './Loading';
+import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
+import { storage } from '../utils/firebase';
+import { v4 as uuidv4 } from 'uuid';
 
 const ProfileSidebar = () => {
     // const router = useRouter();
     const { isOpen, onOpenChange } = useDisclosure();
     const dispatch = useAppDispatch();
     const { userProfile, loading } = useAppSelector((state) => state.user);
+    // const [selectedImage, setSelectedImage] = useState<File | null>(null);
+    const hiddenFileInput = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         if (typeof window !== 'undefined') {
@@ -33,13 +39,36 @@ const ProfileSidebar = () => {
         return <Loading />;
     }
 
+    //image upload
+    const handleImageClick = () => {
+        if (hiddenFileInput.current) {
+            hiddenFileInput.current.click();
+        }
+    };
+
+    const handleImageChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        let profilePictureUrl = '';
+
+        if (file) {
+            const storageRef = ref(storage, `avatar/${uuidv4()}_${file.name}`);
+
+            // Upload the file
+            await uploadBytes(storageRef, file);
+
+            // Get the download URL
+            profilePictureUrl = await getDownloadURL(storageRef);
+            dispatch(updateUserProfile({ avatar: profilePictureUrl }));
+        }
+    };
+
     return (
         <div className="h-full">
             <div className="flex w-[387px] flex-col gap-2 ">
                 <div className="rounded-2xl bg-white py-3 shadow-md">
                     <div className="flex flex-row">
                         <div className="relative ml-5 flex w-[100px] flex-col -space-x-2 overflow-hidden">
-                            <Image
+                            <Avatar
                                 src={
                                     userProfile?.avatar &&
                                         (userProfile.avatar.startsWith('http://') ||
@@ -48,11 +77,8 @@ const ProfileSidebar = () => {
                                         ? userProfile.avatar
                                         : '/User-avatar.png'
                                 }
+                                // src={userProfile?.avatar || '/User-avatar.png'}
                                 alt=""
-                                width="0"
-                                height="0"
-                                sizes="100vw"
-                                priority
                                 className="h-[80px] w-[80px] rounded-full"
                             />
 
@@ -62,13 +88,20 @@ const ProfileSidebar = () => {
                                     radius="full"
                                     size="sm"
                                     className="absolute bg-[#902C6C]"
-                                //   onPress={onOpen}
+                                    onClick={handleImageClick}
                                 >
                                     <FontAwesomeIcon
                                         icon={faCamera}
                                         className="size-4 text-white"
                                     />
                                 </Button>
+                                <input
+                                    type="file"
+                                    accept='image/*'
+                                    ref={hiddenFileInput}
+                                    onChange={handleImageChange}
+                                    style={{ display: 'none' }}
+                                />
                             </div>
                         </div>
                         <div className="ml-3">

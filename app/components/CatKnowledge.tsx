@@ -31,7 +31,7 @@ const CatKnowledge = () => {
 
             <h1 className='text-[20px] font-semibold py-10 text-center'>Bạn tự tin hiểu rõ về mèo cưng? Hãy thử sức với bài kiểm tra của chúng tôi để kiểm tra kiến thức của bạn!</h1>
 
-            <Button as={Link} href='/besitter/quizstart'>Bắt đầu bài kiểm tra</Button>
+            <Button as={Link} href='/besitter/quizstart' className='' variant='bordered'>Bắt đầu bài kiểm tra</Button>
         </div>
     )
 }

@@ -14,6 +14,14 @@ export type UserType = {
   gender: string;
 };
 
+export type FormRegister = {
+  id: string;
+  fullName: string;
+  email: string;
+  phoneNumber: string;
+  address: string;
+};
+
 export interface UserState {
   userProfile: UserType | null;
   loading: boolean;
@@ -56,6 +64,7 @@ export type PetProfile = {
 };
 
 export type CatSitter = {
+  avatar: string;
   fullName: string;
   id: string;
   bio: string;
@@ -66,6 +75,7 @@ export type CatSitter = {
   environment: string;
   maximumQuantity: number;
   user: {
+    id: string;
     email: string;
     password: string;
     fullName: string;
@@ -101,6 +111,7 @@ export type ConfigService = {
   ceilPrice: number;
   floorPrice: number;
   name: string;
+  actionDescription: string;
   isBasicService: boolean | null;
 };
 
@@ -182,4 +193,33 @@ export type Order = {
     registrationDate: string;
     status: number;
   };
+};
+
+export type Quiz = {
+  id: string;
+  title: string;
+  description: string;
+  isActive: boolean;
+  quizQuestions: [
+    {
+      id: string;
+      questionText: string;
+      questionType: string;
+      quizAnswers: [
+        {
+          id: string;
+          answerText: string;
+          isCorrect: boolean;
+        }
+      ];
+    }
+  ];
+};
+
+export type Report = {
+  id: string;
+  userId: string;
+  reportTypeId: string;
+  reason: string;
+  description: string;
 };

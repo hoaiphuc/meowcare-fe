@@ -284,6 +284,8 @@ const Page = () => {
 
     const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
+        console.log(file);
+
         if (file) {
             setSelectedImage(file);
             setPreviewImage(URL.createObjectURL(file));
