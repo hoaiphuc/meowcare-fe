@@ -1,5 +1,7 @@
 'use client'
 
+import Chat from '@/app/components/Chat';
+import DateFormat from '@/app/components/DateFormat';
 import { CareSchedules, Order, Task } from '@/app/constants/types/homeType';
 import axiosClient from '@/app/lib/axiosClient';
 import { Accordion, AccordionItem, Avatar, Button, Tab, Tabs } from '@nextui-org/react';
@@ -60,6 +62,7 @@ const Tracking = () => {
     // Handle date click
     const handleDateClick = (date: Date) => {
         setSelectedDate(date);
+        console.log(date);
 
         if (data && data.tasks) {
             // Filter tasks that have the selected date
@@ -71,7 +74,7 @@ const Tracking = () => {
                     taskDate.getDate() === date.getDate()
                 );
             });
-
+            tasksForDate.sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime());
             setFilteredTasks(tasksForDate);
         }
     };
@@ -95,11 +98,13 @@ const Tracking = () => {
                             <Tabs aria-label="Options" className='w-full' fullWidth>
                                 <Tab key="info" title=" Thông tin đặt lịch">
                                     <div className='bg-[#60666b] text-white p-2 rounded-md'>
+                                        <h2>Ngày bắt đầu: {DateFormat(dataOrder.startDate)}</h2>
+                                        <h2>Ngày kết thúc: {DateFormat(dataOrder.endDate)}</h2>
                                         <h2>Ghi chú: {dataOrder.note}</h2>
                                     </div>
                                 </Tab>
                                 <Tab key="chat" title="Nhắn tin">
-                                    <h1>Chat</h1>
+                                    <Chat userId={dataOrder.sitter.email} userName={dataOrder.sitter.fullName} />
                                 </Tab>
                             </Tabs>
                         </div>
