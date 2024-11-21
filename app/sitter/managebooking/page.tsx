@@ -1,15 +1,17 @@
 'use client'
 
-import { Order, UserLocal } from '@/app/constants/types/homeType';
+import { Orders, UserLocal } from '@/app/constants/types/homeType';
 import axiosClient from '@/app/lib/axiosClient'
-import { Avatar, Navbar, NavbarContent, NavbarItem } from '@nextui-org/react';
+import { Avatar, Navbar, NavbarContent, NavbarItem, Pagination } from '@nextui-org/react';
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react'
 
 
 const Page = () => {
-    const [data, setData] = useState<Order[]>([]);
+    const [data, setData] = useState<Orders>();
     const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
+    const [page, setPage] = useState(1);
+    const [pages, setPages] = useState(1);
 
     const getUserFromStorage = () => {
         if (typeof window !== "undefined") {
@@ -23,7 +25,8 @@ const Page = () => {
 
     const menuItems = [
         { name: 'Tất cả', status: null },
-        { name: 'Chờ xác nhận', status: 'AWAITING_PAYMENT' },
+        { name: 'Chờ thanh toán', status: 'AWAITING_PAYMENT' },
+        { name: 'Chờ xác nhận', status: 'AWAITING_CONFIRM' },
         { name: 'Đã xác nhận', status: 'CONFIRMED' },
         { name: 'Đang diễn ra', status: 'IN_PROGRESS' },
         { name: 'Đã hoàn thành', status: 'COMPLETED' },
@@ -31,14 +34,17 @@ const Page = () => {
         // Add more menu items as needed
     ];
     const statusColors: { [key: string]: string } = {
-        AWAITING_PAYMENT: 'text-[#9E9E9E]', // Chờ duyệt - gray
+        AWAITING_PAYMENT: 'text-[#e67e22]', // Chờ duyệt - gray
+        AWAITING_CONFIRM: 'text-[#9E9E9E]', // Chờ duyệt - gray
         CONFIRMED: 'text-[#2E67D1]',        // Xác nhận - blue
         IN_PROGRESS: 'text-[#FFC107]',      // yellow
         COMPLETED: 'text-[#4CAF50]',        // Hoàn thành - green
         CANCELLED: 'text-[#DC3545]',        // Đã hủy - Red
     };
+
     const statusLabels: { [key: string]: string } = {
-        AWAITING_PAYMENT: 'Chờ xác nhận',
+        AWAITING_PAYMENT: 'Chờ thanh toán',
+        AWAITING_CONFIRM: 'Chờ xác nhận',
         CONFIRMED: 'Đã xác nhận',
         IN_PROGRESS: 'Đang diễn ra',
         COMPLETED: 'Hoàn thành',
@@ -46,14 +52,15 @@ const Page = () => {
     };
 
     useEffect(() => {
-        axiosClient(`booking-orders/sitter?id=${userId}`)
+        axiosClient(`booking-orders/sitter/pagination?id=${userId}&page=${page}&size=10&sort=createdAt&direction=DESC`)
             .then((res) => {
                 setData(res.data)
+                setPages(res.data.totalPages)
             })
             .catch((e) => {
                 console.log(e);
             })
-    }, [userId])
+    }, [userId, page])
 
 
     return (
@@ -85,8 +92,12 @@ const Page = () => {
                     </NavbarContent>
                 </Navbar>
                 <div className='w-[804px] flex flex-col gap-5 bg-transparent'>
-                    {data.length ? (data.filter((activity) => { return selectedStatus === null || activity.status === selectedStatus }).map((activity) => (
-                        <Link href={`/sitter/bookingdetail/${activity.id}`} key={activity.id} className='flex flex-col gap-3 p-3 cursor-pointer rounded-md hover:bg-[#ecf0f1]'>
+                    {data?.content && data.content.length > 0 ? (data?.content.filter((activity) => { return selectedStatus === null || activity.status === selectedStatus }).map((activity) => (
+                        <Link
+                            href={(activity.status === "CONFIRMED" || activity.status === "CONFIRMED") ? `/sitter/tracking/${activity.id}` : `/sitter/bookingdetail/${activity.id}`}
+                            key={activity.id}
+                            className='flex flex-col gap-3 p-3 cursor-pointer rounded-md hover:bg-[#ecf0f1]'
+                        >
                             <div className='flex justify-between '>
                                 <div className='flex gap-3'>
                                     <Avatar src='' className='w-14 h-14 ' />
@@ -109,12 +120,26 @@ const Page = () => {
                         <div className='flex justify-center items-center'>
                             <h1 className='text-2xl font-semibold'>Hiện tại chưa có lịch</h1>
                         </div>
-                    )
+                    )}
 
-                    }
+                    {page ? (
+                        <div className={pages < 2 ? "hidden" : "flex w-full justify-center"}>
+                            <Pagination
+                                isCompact
+                                showControls
+                                showShadow
+                                color="secondary"
+                                page={page}
+                                total={pages}
+                                onChange={(page) => setPage(page)}
+                            />
+                        </div>
+                    ) : (
+                        <div>???</div>
+                    )}
                 </div>
             </div>
-        </div>
+        </div >
     )
 }
 

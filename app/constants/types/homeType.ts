@@ -113,6 +113,7 @@ export type ConfigService = {
   name: string;
   actionDescription: string;
   isBasicService: boolean | null;
+  type: string;
 };
 
 export interface Role {
@@ -120,79 +121,135 @@ export interface Role {
   roleName: string;
 }
 
+export type Orders = {
+  id: string;
+  totalPages: number;
+  totalElements: number;
+  pageable: {
+    paged: true;
+    pageNumber: number;
+    pageSize: number;
+    offset: number;
+    sort: [
+      {
+        direction: string;
+        nullHandling: string;
+        ascending: true;
+        property: string;
+        ignoreCase: true;
+      }
+    ];
+    unpaged: true;
+  };
+  size: number;
+  content: [Order];
+  number: number;
+  sort: [
+    {
+      direction: string;
+      nullHandling: string;
+      ascending: true;
+      property: string;
+      ignoreCase: boolean;
+    }
+  ];
+  numberOfElements: 0;
+  first: true;
+  last: true;
+  empty: true;
+};
+
 export type Order = {
   id: string;
-  time: number;
-  startDate: number;
-  endDate: number;
+  time: string;
+  startDate: Date;
+  endDate: Date;
   numberOfPet: number;
   name: string;
   phoneNumber: string;
   address: string;
+  note: string;
   paymentStatus: number;
   status: string;
-  createdAt: string;
-  updatedAt: string;
-  note: string;
-  bookingDetails: string;
+  createdAt: Date;
+  updatedAt: Date;
+  user: {
+    email: string;
+    fullName: string;
+    avatar: string;
+    phoneNumber: string;
+    dob: Date;
+    gender: string;
+    address: string;
+  };
+  sitter: {
+    email: string;
+    fullName: string;
+    avatar: string;
+    phoneNumber: string;
+    dob: Date;
+    gender: string;
+    address: string;
+  };
   bookingDetailWithPetAndServices: [
     {
       id: string;
       quantity: number;
+      status: number;
+      createdAt: Date;
+      updatedAt: Date;
       pet: {
-        id: string;
         description: string;
         petName: string;
         breed: string;
-        age: string;
+        age: number;
         gender: string;
-        weight: string;
+        weight: number;
         profilePicture: string;
-        status: string;
-        createdAt: string;
-        updatedAt: string;
-        medicalConditions: [];
+        status: number;
       };
       service: {
         id: string;
         serviceName: string;
+        otherName: string;
+        additionDescription: string;
         serviceType: string;
         actionDescription: string;
-        price: string;
-        duration: string;
-        startTime: number;
-        status: number;
-        configServiceId: string;
+        price: number;
       };
     }
   ];
-  sitterId: string;
-  user: {
-    id: string;
-    email: number;
-    password: string;
-    fullName: number;
-    avatar: string;
-    phoneNumber: string;
-    dob: number;
-    gender: string;
-    address: string;
-    registrationDate: string;
-    status: number;
-  };
-  sitter: {
-    id: number;
-    email: number;
-    password: string;
-    fullName: number;
-    avatar: string;
-    phoneNumber: string;
-    dob: number;
-    gender: string;
-    address: string;
-    registrationDate: string;
-    status: number;
-  };
+};
+
+export type CareSchedules = {
+  id: string;
+  tasks: Task[];
+  startTime: Date;
+  endTime: Date;
+  sessionNotes: string;
+  photoUrl: string;
+  videoCallUrl: string;
+  reportIssue: string;
+  status: string;
+};
+
+export type Task = {
+  id: string;
+  description: string;
+  startTime: Date;
+  endTime: Date;
+  status: number;
+  createdAt: Date;
+  updatedAt: Date;
+  petProfiles: [
+    {
+      id: string;
+      description: string;
+      startTime: Date;
+      endTime: Date;
+      status: number;
+    }
+  ];
 };
 
 export type Quiz = {

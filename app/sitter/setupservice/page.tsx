@@ -60,7 +60,7 @@ const Page = () => {
 
     const displayedServices = showAll
         ? services
-        : services.filter((service) => service.isBasicService).slice(0, 2);
+        : services.filter((service) => service.type === "Main Service").slice(0, 2);
 
     return (
         <div className='flex flex-col justify-center items-center text-black my-10'>

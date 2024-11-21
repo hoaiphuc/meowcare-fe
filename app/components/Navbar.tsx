@@ -8,7 +8,7 @@ import { faArrowRightToBracket } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '../lib/hooks';
-import { fetchUserProfile } from '../lib/slices/userSlice';
+import { fetchUserProfile, logout } from '../lib/slices/userSlice';
 import { UserLocal } from '../constants/types/homeType';
 import Loading from './Loading';
 
@@ -69,6 +69,7 @@ const Navbar = () => {
         if (typeof window !== 'undefined') {
             localStorage.clear();
         }
+        dispatch(logout());
         router.push('/login')
     }
 
@@ -126,14 +127,6 @@ const Navbar = () => {
                             <DropdownMenu aria-label="User Actions" variant="flat">
                                 <DropdownItem key="profile" className="h-14 gap-2">
                                     <p className="font-bold">{userProfile?.fullName}</p>
-                                </DropdownItem>
-                                <DropdownItem key="profile">
-                                    <Link
-                                        href="/setupservice"
-                                        className="text-black w-full py-3 text-[17px]"
-                                    >
-                                        Quản lí dịch vụ
-                                    </Link>
                                 </DropdownItem>
                                 <DropdownItem key="profile">
                                     <Link

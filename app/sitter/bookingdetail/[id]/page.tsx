@@ -6,11 +6,12 @@ import { faHandshake, faTriangleExclamation } from '@fortawesome/free-solid-svg-
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Button, Textarea } from '@nextui-org/react';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react'
 import { toast } from 'react-toastify';
 
 const Page = () => {
+    const router = useRouter();
     const param = useParams();
     const [data, setData] = useState<Order>();
     useEffect(() => {
@@ -30,9 +31,10 @@ const Page = () => {
     //denied request
     const handleDenied = (bookingId: string) => {
         try {
-            axiosClient(`booking-orders/status/${bookingId}?status=CANCELLED`)
+            axiosClient.put(`booking-orders/status/${bookingId}?status=CANCELLED`)
                 .then(() => {
                     toast.success('Bạn đã từ chối')
+                    router.push(`/sitter/managebooking`)
                 })
                 .catch(() => {
                     toast.error('Có lỗi xảy ra vui lòng thử lại sau')
@@ -44,9 +46,10 @@ const Page = () => {
     //accept request
     const handleAccept = (bookingId: string) => {
         try {
-            axiosClient(`booking-orders/status/${bookingId}?status=CONFIRMED`)
+            axiosClient.put(`booking-orders/status/${bookingId}?status=CONFIRMED`)
                 .then(() => {
                     toast.success('Bạn đã chấp nhận yêu cầu này, vui lòng chăm sóc theo lịch')
+                    router.push(`/sitter/tracking/${bookingId}`)
                 })
                 .catch(() => {
                     toast.error('Có lỗi xảy ra vui lòng thử lại sau')

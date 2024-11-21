@@ -1,16 +1,18 @@
 'use client'
 
-import { Button } from '@nextui-org/react'
+import { Button, Pagination } from '@nextui-org/react'
 import React, { useEffect, useState } from 'react'
 import styles from './activity.module.css'
-import { Order, UserLocal } from '@/app/constants/types/homeType'
+import { Orders, UserLocal } from '@/app/constants/types/homeType'
 import axiosClient from '@/app/lib/axiosClient'
 import { Icon } from '@iconify/react/dist/iconify.js'
 import Link from 'next/link'
 
 const Page = () => {
-    const [data, setData] = useState<Order[]>([]);
+    const [data, setData] = useState<Orders>();
     const [filterStatus, setFilterStatus] = useState<string>('ALL');
+    const [page, setPage] = useState(1);
+    const [pages, setPages] = useState(5);
 
     const getUserFromStorage = () => {
         if (typeof window !== "undefined") {
@@ -39,14 +41,15 @@ const Page = () => {
     const userId = user?.id;
 
     useEffect(() => {
-        axiosClient(`booking-orders/user?id=${userId}`)
+        axiosClient(`booking-orders/user/pagination?id=${userId}&page=${page}&size=5&sort=createdAt&direction=DESC`)
             .then((res) => {
                 setData(res.data)
+                setPages(res.data.totalPages)
             })
             .catch((e) => {
                 console.log(e);
             })
-    }, [userId])
+    }, [userId, page])
 
     return (
         <div className="w-[891px]  bg-white rounded-2xl shadow-2xl">
@@ -91,7 +94,7 @@ const Page = () => {
                     </Button>
                 </div>
                 <div>
-                    {data ? (data.filter((activity) => filterStatus === 'ALL' || activity.status === filterStatus).map((activity) => (
+                    {data ? (data.content.filter((activity) => filterStatus === 'ALL' || activity.status === filterStatus).map((activity) => (
                         <div key={activity.id} className='border w-[700px] p-3 rounded-lg flex justify-between my-3'>
                             <div>
                                 <div className='flex'>
@@ -109,11 +112,29 @@ const Page = () => {
                                 {statusLabels[activity.status] || 'Trạng thái không xác định'}
                             </h2>
                         </div>
+
                     ))) : (
                         <div className='flex justify-center items-center'>
                             <h1>Hiện tại không có hoạt động nào</h1>
                         </div>
                     )}
+                    {page ? (
+                        <div className={pages <= 1 ? "hidden" : "flex w-full justify-center"}>
+                            <Pagination
+                                isCompact
+                                showControls
+                                showShadow
+                                color="secondary"
+                                page={page}
+                                total={pages}
+                                onChange={(page) => setPage(page)}
+                            />
+                        </div>
+                    ) : (
+                        <div></div>
+                    )}
+
+
                 </div>
             </div>
         </div >

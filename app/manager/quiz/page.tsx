@@ -9,7 +9,6 @@ import Link from 'next/link'
 // import { Accordion, AccordionItem } from '@nextui-org/react'
 import React, { useEffect, useMemo, useState } from 'react'
 
-
 const Page = () => {
     const [quizzes, setQuizzes] = useState<Quiz[]>([])
     const [page, setPage] = useState(1);
