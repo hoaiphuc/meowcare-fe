@@ -17,8 +17,17 @@ const Page = () => {
         ceilPrice: 0,
         floorPrice: 0,
         name: "",
+        actionDescription: ""
     });
     const rowsPerPage = 10;
+
+    //convert type to VN
+    const serviceTypeMapping: { [key: string]: string } = {
+        "Main Service": "Dịch vụ chính",
+        "Addition Service": "Dịch vụ thêm",
+        "Child Service": "Dịch vụ dính kèm",
+    };
+
     //get all service
     const fetchService = () => {
         try {
@@ -105,10 +114,8 @@ const Page = () => {
                     {(item) => (
                         <TableRow key={item.id}>
                             <TableCell>{item.name}</TableCell>
-                            <TableCell>{item.isBasicService ? "Dịch vụ chính" : "Dịch vụ phụ"}</TableCell>
-                            <TableCell>
-                                Chua co chi tiet
-                            </TableCell>
+                            <TableCell>{serviceTypeMapping[item.type] || item.type}</TableCell>
+                            <TableCell>{item.actionDescription}</TableCell>
                             <TableCell>{item.floorPrice}</TableCell>
                             <TableCell>{item.ceilPrice}</TableCell>
                             <TableCell>
@@ -138,6 +145,15 @@ const Page = () => {
                                         variant="bordered"
                                         name='name'
                                         value={updateService.name}
+                                        onChange={handleInputChange}
+                                    />
+                                    <h2>Tên dịch vụ</h2>
+                                    <Input
+                                        className="mb-4"
+                                        type="text"
+                                        variant="bordered"
+                                        name='actionDescription'
+                                        value={updateService.actionDescription}
                                         onChange={handleInputChange}
                                     />
                                     <h2>Giá thấp nhất</h2>
