@@ -72,7 +72,7 @@ const Profile = () => {
                     toast.success('Đổi mật khẩu thành công')
                 })
                 .catch(() => {
-                    toast.error('Có lỗi xảy ra, vui lòng thử lại sau! ')
+                    toast.error('Có lỗi xảy ra, vui lòng thử lại sau!')
                 })
         } catch (error) {
 
