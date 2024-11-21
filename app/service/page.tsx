@@ -127,7 +127,7 @@ const Service = () => {
                     label="Địa điểm"
                     labelPlacement='outside'
                     placeholder="Tỉnh/Thành Phố"
-                    className="select"
+                    className="select min-w-full"
                     variant="bordered"
                     onChange={(event) => handleProvinceChange(event.target.value)}
                 >
@@ -142,7 +142,7 @@ const Service = () => {
                 <Select
                     aria-label="Quận/Huyện"
                     placeholder="Quận/Huyện"
-                    className="select"
+                    className="select min-w-full"
                     variant="bordered"
                     disabled={!selectedProvince} // Disable if no province is selected
                 >

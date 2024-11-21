@@ -20,25 +20,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
 
-  // const pathname = usePathname();
-  // const noNav = [
-  //   "/login",
-  //   "/register",
-  //   "/dashboard",
-  //   "/admin",
-  //   "/forgetPassword",
-  //   "/sendOTP"
-  // ];
-
-  // const shouldHideNavbar = noNav.some((path) => pathname.startsWith(path));
-
   return (
     <html lang="en">
-      <body
-      // className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body>
         <ToastContainer />
-
         <Providers>
           <NavbarVisibility />
           {children}

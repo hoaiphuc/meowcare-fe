@@ -3,6 +3,7 @@ import axiosClient from "../axiosClient";
 import axios from "axios";
 import { UserState, UserType } from "@/app/constants/types/homeType";
 import { RootState } from "../store";
+import { toast } from "react-toastify";
 
 // Thunk để lấy thông tin người dùng
 export const fetchUserProfile = createAsyncThunk<
@@ -41,6 +42,11 @@ export const updateUserProfile = createAsyncThunk<
 
   try {
     const response = await axiosClient.put(`/users/${userId}`, updatedData);
+    console.log(response);
+
+    if (response.status === 200) {
+      toast.success("Cập nhật hồ sơ thành công");
+    }
     return response.data as UserType;
   } catch (error) {
     let errorMessage = "Đã xảy ra lỗi không xác định";
@@ -63,7 +69,9 @@ const userSlice = createSlice({
   name: "user",
   initialState,
   reducers: {
-    // Có thể thêm các reducer sync nếu cần
+    logout() {
+      return initialState;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -97,4 +105,5 @@ const userSlice = createSlice({
   },
 });
 
+export const { logout } = userSlice.actions;
 export default userSlice.reducer;

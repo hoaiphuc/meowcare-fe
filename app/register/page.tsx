@@ -8,6 +8,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import axiosClient from '../lib/axiosClient'
 import { useRouter } from 'next/navigation'
+import { toast } from 'react-toastify'
 
 
 const Register = () => {
@@ -22,7 +23,7 @@ const Register = () => {
     const dataRegister = {
         email: email,
         password: password,
-        username: username,
+        fullName: username,
     };
 
     const handleSubmit = async () => {
@@ -30,9 +31,11 @@ const Register = () => {
             await axiosClient
                 .post('users', dataRegister)
                 .then(() => {
+                    toast.success('Đăng ký tài khoản thành công')
                     router.push('/login');
                 })
                 .catch((error) => {
+                    toast.error('Đăng ký tài khoản thất bại, vui lòng thử lại sau!')
                     console.log(error);
                 })
         } catch (error) {

@@ -1,18 +1,19 @@
 'use client'
 
-import { Button, Checkbox, DateRangePicker, Input, Modal, ModalBody, ModalContent, ModalFooter, Radio, RadioGroup, Select, SelectItem, Textarea, useDisclosure } from '@nextui-org/react'
+import { Button, Checkbox, DateRangePicker, DateValue, Input, Modal, ModalBody, ModalContent, ModalFooter, Radio, RadioGroup, Select, SelectItem, Textarea, useDisclosure } from '@nextui-org/react'
 import React, { useEffect, useMemo, useState } from 'react'
 import styles from './booking.module.css'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faClock } from '@fortawesome/free-regular-svg-icons'
 // import Link from 'next/link'
-import { parseZonedDateTime } from "@internationalized/date";
 import { useParams } from 'next/navigation'
 import axiosClient from '@/app/lib/axiosClient'
 import { PetProfile, Service } from '@/app/constants/types/homeType'
 import Image from 'next/image'
 import { toast } from 'react-toastify'
 import { faMinus, faPlus } from '@fortawesome/free-solid-svg-icons'
+import { today, getLocalTimeZone } from '@internationalized/date';
+
 const Page = () => {
     const params = useParams();
     const [selectedService, setSelectedService] = useState<string>('');
@@ -25,12 +26,19 @@ const Page = () => {
     const [bookingId, setBookingId] = useState();
 
     const [services, setServices] = useState<Service[]>([])
+    const [childServices, setChildServices] = useState<Service[]>([])
     const [additionServices, setAdditionServices] = useState<Service[]>([])
     const [isShowAdditionService, setIsShowAdditionService] = useState<boolean>(false)
     const [name, setName] = useState('');
     const [phoneNumber, setPhoneNumber] = useState('');
     const [address, setAddress] = useState('')
     const [note, setNote] = useState('')
+    const todayDate = today(getLocalTimeZone());
+    const [dateRange, setDateRange] = useState<{ startDate: DateValue | null; endDate: DateValue | null }>({
+        startDate: null,
+        endDate: null,
+    });
+
 
     const catFoods = [
         { id: '1', foodName: 'Cá' },
@@ -39,6 +47,15 @@ const Page = () => {
 
 
     const [userId, setUserId] = useState<string | null>(null);
+
+    useEffect(() => {
+        axiosClient(`services/sitter/${params.id}/type?typeId=2b3c4d5e-6789-4a12-3456-789abcde0123`)
+            .then((res) => {
+                setChildServices(res.data)
+            })
+            .catch(() => { })
+    }, [params.id])
+
 
     useEffect(() => {
         if (typeof window !== 'undefined') {
@@ -81,11 +98,11 @@ const Page = () => {
             axiosClient(`services/sitter/${params.id}`)
                 .then((res) => {
                     const filteredServices = res.data.filter(
-                        (service: Service) => service.isBasicService === true
+                        (service: Service) => service.serviceType === "Main Service"
                     );
                     setServices(filteredServices);
                     const filteredAdditionServices = res.data.filter(
-                        (service: Service) => service.isBasicService === false
+                        (service: Service) => service.serviceType === "Addition Service"
                     )
                     setAdditionServices(filteredAdditionServices)
                 })
@@ -131,13 +148,34 @@ const Page = () => {
             });
         });
 
+        //add child service
+        childServices.forEach((service) => {
+            bookingDetails.push({
+                quantity: 1,
+                petProfileId: selectedPet, // Adjust if petProfileId is not needed for additional services
+                serviceId: service.id,
+            });
+        });
+
+        //add date
+        if (!dateRange.startDate || !dateRange.endDate) {
+            toast.error("Vui lòng chọn ngày bắt đầu và ngày kết thúc.");
+            return;
+        }
+
+        // Convert DateValue to Date
+        const startDate = convertDateValueToDate(dateRange.startDate).toISOString();
+        const endDate = convertDateValueToDate(dateRange.endDate).toISOString();
+
         const data = {
             bookingDetails: bookingDetails,
             sitterId: params.id,
             name: name,
             phoneNumber: phoneNumber,
             address: address,
-            note: note
+            note: note,
+            startDate,
+            endDate
         }
 
         try {
@@ -169,6 +207,30 @@ const Page = () => {
         }
     }
 
+    // Function to convert DateValue to Date
+    const convertDateValueToDate = (dateValue: DateValue): Date => {
+        return new Date(dateValue.year, dateValue.month - 1, dateValue.day);
+    };
+
+    const bookingDetails = useMemo(() => {
+        let numberOfNights = 1;
+        let formattedStartDate = 'Chưa chọn';
+        let formattedEndDate = 'Chưa chọn';
+
+        if (dateRange.startDate && dateRange.endDate) {
+            const start = convertDateValueToDate(dateRange.startDate);
+            const end = convertDateValueToDate(dateRange.endDate);
+            const diffTime = end.getTime() - start.getTime();
+            numberOfNights = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+            if (numberOfNights <= 0) numberOfNights = 1;
+
+            formattedStartDate = start.toLocaleDateString();
+            formattedEndDate = end.toLocaleDateString();
+        }
+
+        return { numberOfNights, formattedStartDate, formattedEndDate };
+    }, [dateRange]);
+
     //calculate price
     const totalPrice = useMemo(() => {
         let totalPerNight = 0;
@@ -187,12 +249,12 @@ const Page = () => {
             }
         });
 
-        // Calculate the number of nights
-        // const nights = numberOfNights > 0 ? numberOfNights : 1; // Ensure at least 1 night
+        return totalPerNight * bookingDetails.numberOfNights;
+    }, [services, selectedAdditionalServices, bookingDetails.numberOfNights, selectedService, additionServices]);
 
-        return totalPerNight * 1;
-    }, [selectedService, selectedAdditionalServices, services, additionServices]);
+    useEffect(() => {
 
+    }, [dateRange])
 
     return (
         <div className='flex flex-col items-center justify-start my-12'>
@@ -243,13 +305,10 @@ const Page = () => {
 
                         <h2 className={styles.h2}>Chọn ngày</h2>
                         <DateRangePicker
-                            label="Event duration"
-                            hideTimeZone
+                            label="Ngày đặt lịch"
+                            minValue={todayDate}
                             visibleMonths={2}
-                            defaultValue={{
-                                start: parseZonedDateTime("2024-04-01T00:45[America/Los_Angeles]"),
-                                end: parseZonedDateTime("2024-04-08T11:15[America/Los_Angeles]"),
-                            }}
+                            onChange={(range) => setDateRange({ startDate: range.start, endDate: range.end })}
                         />
 
                         <h2 className={styles.h2}>Thêm thú cưng của bạn</h2>
@@ -320,15 +379,15 @@ const Page = () => {
                         <div className='flex flex-cols-3 justify-between'>
                             <div>
                                 <h3>Ngày nhận</h3>
-                                <h3>01/10/2024</h3>
+                                <h3>{bookingDetails.formattedStartDate}</h3>
                             </div>
                             <div className='flex flex-col items-center'>
-                                <h3 className='text-[#902C6C]'>1 đêm</h3>
+                                <h3 className='text-[#902C6C]'>{bookingDetails.numberOfNights}</h3>
                                 <FontAwesomeIcon icon={faClock} className='text-[#A65587]' />
                             </div>
                             <div>
                                 <h3>Ngày trả</h3>
-                                <h3>02/10/2024</h3>
+                                <h3>{bookingDetails.formattedEndDate}</h3>
                             </div>
                         </div>
                         <h3>Số lượng mèo: 1</h3>

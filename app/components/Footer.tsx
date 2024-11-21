@@ -30,6 +30,7 @@ const Footer = () => {
                         <p>Về chúng tôi</p>
                         <p>Q&A và cộng đồng</p>
                         <p>Cửa hàng MeowCare</p>
+                        <p>Báo cáo lỗi hệ thống</p>
                     </div>
                 </div>
                 <div>
