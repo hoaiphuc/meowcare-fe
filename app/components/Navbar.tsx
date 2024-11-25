@@ -1,10 +1,10 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { NavbarBrand, NavbarContent, NavbarItem, NavbarMenuToggle, NavbarMenu, NavbarMenuItem, Link, Avatar, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Button } from "@nextui-org/react";
+import { NavbarBrand, NavbarContent, NavbarItem, NavbarMenuToggle, NavbarMenu, NavbarMenuItem, Link, Avatar, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from "@nextui-org/react";
 import { Navbar as MyNavbar } from "@nextui-org/react";
 import Image from 'next/image';
-import { faArrowRightToBracket } from '@fortawesome/free-solid-svg-icons';
+import { faArrowRightToBracket, faMessage } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '../lib/hooks';
@@ -112,17 +112,26 @@ const Navbar = () => {
                     </NavbarItem>
                 ))}
             </NavbarContent>
-            <NavbarContent justify="end">
+            <NavbarContent justify="end" className='flex gap-5'>
                 {userProfile ?
-                    <NavbarItem className="hidden lg:flex">
-                        <Button as={Link} href='/chat'>Chat</Button>
+                    <NavbarItem className="lg:flex flex gap-5">
+                        <Link href='/chat' >
+                            < FontAwesomeIcon icon={faMessage} className='text-maincolor' size='xl' />
+                        </Link>
                         <Dropdown placement="bottom-start">
                             <DropdownTrigger>
                                 <Avatar
                                     isBordered
                                     as="button"
                                     className="transition-transform"
-                                    src={userProfile?.avatar || '/User-avatar.png'}
+                                    // src={userProfile?.avatar ? userProfile?.avatar : '/User-avatar.png'}
+                                    src={
+                                        userProfile?.avatar &&
+                                            (userProfile.avatar.startsWith('http://') ||
+                                                userProfile.avatar.startsWith('https://'))
+                                            ? userProfile.avatar
+                                            : '/User-avatar.png'
+                                    }
                                 />
                             </DropdownTrigger>
                             <DropdownMenu aria-label="User Actions" variant="flat">

@@ -75,7 +75,7 @@ const Page = () => {
                                         </Button>
                                     </DropdownTrigger>
                                     <DropdownMenu aria-label="Example with disabled actions">
-                                        <DropdownItem as={Link} key="edit" href={`/manager/quizUpdate/${item.id}`}>Cập nhật</DropdownItem>
+                                        <DropdownItem as={Link} key="edit" href={`/manager/quiz/quizupdate/${item.id}`}>Cập nhật</DropdownItem>
                                         <DropdownItem key="delete" className="text-danger" color="danger">
                                             Xóa
                                         </DropdownItem>

@@ -16,10 +16,12 @@ export type UserType = {
 
 export type FormRegister = {
   id: string;
+  userId: string;
   fullName: string;
   email: string;
   phoneNumber: string;
   address: string;
+  status: string;
 };
 
 export interface UserState {
@@ -257,20 +259,24 @@ export type Quiz = {
   title: string;
   description: string;
   isActive: boolean;
-  quizQuestions: [
+  quizQuestions: [QuizQuestions];
+};
+
+export type QuizQuestions = {
+  id: string;
+  questionText: string;
+  questionType: string;
+  quizAnswers: [
     {
       id: string;
-      questionText: string;
-      questionType: string;
-      quizAnswers: [
-        {
-          id: string;
-          answerText: string;
-          isCorrect: boolean;
-        }
-      ];
+      answerText: string;
+      isCorrect: boolean;
     }
   ];
+};
+
+export type QuizResult = {
+  score: number;
 };
 
 export type Report = {

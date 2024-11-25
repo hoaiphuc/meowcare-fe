@@ -1,9 +1,14 @@
+import { faCheckCircle } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Button } from '@nextui-org/react'
 import Image from 'next/image'
 import Link from 'next/link'
 import React from 'react'
+interface CatKnowledgeProps {
+    isCompleteQuiz: boolean;
+}
 
-const CatKnowledge = () => {
+const CatKnowledge: React.FC<CatKnowledgeProps> = ({ isCompleteQuiz }) => {
 
     return (
         <div className=' w-[1253px] my-10 flex flex-col items-center'>
@@ -31,7 +36,17 @@ const CatKnowledge = () => {
 
             <h1 className='text-[20px] font-semibold py-10 text-center'>Bạn tự tin hiểu rõ về mèo cưng? Hãy thử sức với bài kiểm tra của chúng tôi để kiểm tra kiến thức của bạn!</h1>
 
-            <Button as={Link} href='/besitter/quizstart' className='' variant='bordered'>Bắt đầu bài kiểm tra</Button>
+            <div className='relative'>
+                {isCompleteQuiz && (
+                    <FontAwesomeIcon
+                        icon={faCheckCircle}
+                        className='absolute text-green-700 z-10 right-1 top-1'
+                    />
+                )}
+                <Button as={Link} href='/besitter/quizstart' className={isCompleteQuiz ? 'border-green-700' : ''} variant='bordered' isDisabled={isCompleteQuiz}>
+                    Bắt đầu bài kiểm tra
+                </Button>
+            </div>
         </div>
     )
 }

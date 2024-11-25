@@ -20,6 +20,7 @@
     "@nextui-org/react": "^2.4.6",
     "@reduxjs/toolkit": "^2.3.0",
     "@types/leaflet": "^1.9.12",
+    "@zegocloud/zego-uikit-prebuilt": "^2.13.1",
     "axios": "^1.7.7",
     "date-fns": "^4.1.0",
     "firebase": "^11.0.1",
@@ -30,12 +31,14 @@
     "react": "^18",
     "react-dom": "^18",
     "react-redux": "^9.1.2",
+    "react-select": "^5.8.3",
     "react-toastify": "^10.0.5",
     "recharts": "^2.13.3",
     "sass": "^1.78.0",
     "sweetalert2": "^11.14.5",
     "uuid": "^11.0.2",
-    "yet-another-react-lightbox": "^3.21.6"
+    "yet-another-react-lightbox": "^3.21.6",
+    "zego-express-engine-webrtc": "^3.7.4"
   },
   "devDependencies": {
     "@iconify/react": "^5.0.2",

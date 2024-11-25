@@ -2,8 +2,11 @@
 
 import { FormRegister } from '@/app/constants/types/homeType';
 import axiosClient from '@/app/lib/axiosClient';
-import { Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Pagination, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, useDisclosure } from '@nextui-org/react';
-import React, { useEffect, useMemo, useState } from 'react'
+import { faBars } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Pagination, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, useDisclosure } from '@nextui-org/react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { toast } from 'react-toastify';
 
 const Page = () => {
     const [page, setPage] = useState(1);
@@ -12,7 +15,7 @@ const Page = () => {
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
     const [selectedForm, setSelectedForm] = useState<FormRegister>();
 
-    useEffect(() => {
+    const fetchForm = useCallback(() => {
         try {
             axiosClient('sitter-form-register')
                 .then((res) => {
@@ -26,6 +29,10 @@ const Page = () => {
         }
     }, [])
 
+    useEffect(() => {
+        fetchForm()
+    }, [fetchForm])
+
     const pages = Math.ceil(data.length / rowsPerPage);
     const items = useMemo(() => {
         const start = (page - 1) * rowsPerPage;
@@ -38,6 +45,44 @@ const Page = () => {
     const handleDetail = async (item: FormRegister) => {
         setSelectedForm(item);
         onOpen();
+    }
+
+    //accept
+    const handleAccept = async (userId: string, id: string) => {
+        const data = { status: "APPROVED" }
+        try {
+            await axiosClient.put(`sitter-form-register/${id}`, data)
+                .then(() => { })
+                .catch(() => { })
+
+            await axiosClient.post(`users/${userId}/roles?roleName=SITTER`)
+                .then(() => {
+                    fetchForm()
+                    onOpenChange()
+                    toast.success("Người dùng này đã trở thành người chăm sóc")
+                })
+                .catch(() => {
+
+                })
+        } catch (error) {
+
+        }
+    }
+    //reject
+    const handleReject = () => {
+        try {
+            axiosClient("")
+                .then(() => {
+                    fetchForm()
+                    onOpenChange()
+                    toast.error("Đơn đăng ký này đã bị hủy")
+                })
+                .catch(() => {
+
+                })
+        } catch (error) {
+
+        }
     }
 
     return (
@@ -65,6 +110,7 @@ const Page = () => {
                 <TableHeader>
                     <TableColumn key="name">Người đăng ký</TableColumn>
                     <TableColumn key="role">Email</TableColumn>
+                    <TableColumn key="role">Trạng thái</TableColumn>
                     <TableColumn key="status">Hành động</TableColumn>
                 </TableHeader>
                 <TableBody items={items}>
@@ -72,11 +118,27 @@ const Page = () => {
                         <TableRow key={item.id}>
                             <TableCell>{item.fullName}</TableCell>
                             <TableCell>{item.email}</TableCell>
+                            <TableCell>{item.status}</TableCell>
                             <TableCell>
-                                <Button onClick={() => handleDetail(item)}>
-                                    Xem chi tiết
-                                </Button>
+                                <Dropdown >
+                                    <DropdownTrigger>
+                                        <Button
+                                            variant="bordered"
+                                        >
+                                            <FontAwesomeIcon icon={faBars} />
+                                        </Button>
+                                    </DropdownTrigger>
+                                    <DropdownMenu aria-label="Example with disabled actions">
+                                        <DropdownItem onClick={() => handleDetail(item)}>
+                                            Xem chi tiết
+                                        </DropdownItem>
+                                        <DropdownItem key="delete" className="text-danger" color="danger">
+                                            Xóa
+                                        </DropdownItem>
+                                    </DropdownMenu>
+                                </Dropdown>
                             </TableCell>
+
                         </TableRow>
                     )}
                 </TableBody>
@@ -84,7 +146,7 @@ const Page = () => {
 
             <Modal isOpen={isOpen} onOpenChange={onOpenChange} size='2xl'>
                 <ModalContent>
-                    {(onClose) => (
+                    {() => (
                         <>
                             <ModalHeader className="flex flex-col gap-1">Đơn đăng ký của {selectedForm?.fullName}</ModalHeader>
                             <ModalBody>
@@ -98,10 +160,10 @@ const Page = () => {
                                 </div>
                             </ModalBody>
                             <ModalFooter>
-                                <Button color="danger" variant="light" onPress={onClose}>
+                                <Button color="danger" variant="light" onPress={handleReject}>
                                     Không duyệt
                                 </Button>
-                                <Button color="primary" onPress={() => onClose}>
+                                <Button color="primary" onPress={() => handleAccept(selectedForm ? selectedForm?.userId : "", selectedForm ? selectedForm.id : "")}>
                                     Duyệt
                                 </Button>
                             </ModalFooter>

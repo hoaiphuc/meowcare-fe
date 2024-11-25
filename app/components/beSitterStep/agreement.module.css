@@ -1,0 +1,26 @@
+.h1 {
+  @apply font-bold text-4xl;
+}
+
+.h2 {
+  @apply text-xl mt-3;
+}
+
+.customList {
+  list-style-type: none; /* Remove default bullets */
+  padding-left: 1em; /* Add left padding for better spacing */
+}
+
+.customList li {
+  position: relative;
+  padding-left: 1.5em; /* Add padding to accommodate the custom bullet */
+}
+
+.customList li::before {
+  content: "•"; /* Use a dot character for the bullet */
+  position: absolute;
+  left: 0; /* Position the bullet to the left of the text */
+  color: #000; /* You can change this color as needed */
+  font-size: 1.5em; /* Adjust the size of the bullet */
+  line-height: 1em; /* Adjust line height */
+}

@@ -39,7 +39,7 @@ const PaymentResult = () => {
         <div className='flex justify-center items-center my-10 '>
             {isPaymentSuccess !== undefined && (
                 <div className='flex flex-col items-center gap-3'>
-                    <Image src={isPaymentSuccess ? `/cathappy.jpg` : `/catsad.png`} alt='' width={300} height={300} />
+                    <Image src={isPaymentSuccess ? `/cathappy.png` : `/catsad.png`} alt='' width={300} height={300} />
                     <h1 className={`text-5xl font-bold ${isPaymentSuccess ? `text-[#3CB878]` : `text-red-600`}`} >
                         Thanh toán {paymentType[isPaymentSuccess ? 0 : 1].title}
                     </h1>

@@ -104,6 +104,7 @@ const Service = () => {
 
         }
     }, [])
+
     return (
         <div className='flex flex-cols-3 p-[5px] justify-center'>
             {/* 1 */}

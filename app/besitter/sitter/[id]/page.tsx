@@ -1,164 +1,93 @@
 'use client'
 
-import { Button, Input, Select, SelectItem } from '@nextui-org/react';
+import { Button } from '@nextui-org/react';
 import React, { useEffect, useState } from 'react'
 import './sitter.scss'
-import data from '@/app/lib/vietnam.json';
-import CatKnowledge from '@/app/components/CatKnowledge';
-import { useParams } from 'next/navigation';
-
-
-interface Province {
-    idProvince: string;
-    name: string;
-}
-
-interface District {
-    idProvince: string;
-    idDistrict: string;
-    name: string;
-}
+import CatKnowledge from '@/app/components/beSitterStep/CatKnowledge';
+import { useParams, useRouter } from 'next/navigation';
+import axiosClient from '@/app/lib/axiosClient';
+import { QuizResult, UserLocal } from '@/app/constants/types/homeType';
+import Information from '@/app/components/beSitterStep/Information';
+import Agreement from '@/app/components/beSitterStep/Agreement';
 
 const Sitter = () => {
     const params = useParams<{ id: string }>();
+    const router = useRouter()
+    const [isCompleteQuiz, setIsCompleteQuiz] = useState(true)
+    const today = new Date()
+    const currentMonth = today.getMonth() + 1;
+    const currentYear = today.getFullYear();
+    const [isCheckboxChecked, setIsCheckboxChecked] = useState(false);
 
-    const [formData, setFormData] = useState({
-        name: '',
-        email: '',
-        phone: '',
-        selectedProvince: '',
-        // Add other fields as needed
-    });
-    const [isInitialized, setIsInitialized] = useState(false);
-
+    const getUserFromStorage = () => {
+        if (typeof window !== "undefined") {
+            const storedUser = localStorage.getItem("user");
+            return storedUser ? JSON.parse(storedUser) : null;
+        }
+    };
+    const user: UserLocal | null = getUserFromStorage();
+    const userId = user?.id;
 
     const [step, setStep] = useState(Number(params.id) ? Number(params.id) : 1);
 
-    // State for selected province
-    // const [selectedProvince, setSelectedProvince] = useState<string>('');
-    // State for filtered districts
-    const [filteredDistricts, setFilteredDistricts] = useState<District[]>([]);
-
-    const provinces: Province[] = data.province;
-    const districts: District[] = data.district;
-
-    // Handle province change
-    // const handleProvinceChange = (provinceId: string) => {
-    //     setSelectedProvince(provinceId);
-    // };
-
-    const handleProvinceChange = (provinceId: string) => {
-        setFormData((prevData) => ({ ...prevData, selectedProvince: provinceId }));
-    };
-
-    // Handle input change
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
-        setFormData((prevData) => ({ ...prevData, [name]: value }));
-    };
-    // Filter districts when selected province changes
-    // useEffect(() => {
-    //     const newDistricts: District[] = districts.filter(district => district.idProvince === selectedProvince);
-    //     setFilteredDistricts(newDistricts);
-    // }, [districts, selectedProvince]);
+    //get history quiz
     useEffect(() => {
-        const newDistricts: District[] = districts.filter(
-            (district) => district.idProvince === formData.selectedProvince
-        );
-        setFilteredDistricts(newDistricts);
-    }, [districts, formData.selectedProvince]);
+        if (!userId) return;
 
-    useEffect(() => {
-        if (typeof window !== 'undefined') {
-            const storedData = localStorage.getItem('formData');
-            if (storedData) {
-                const parsedData = JSON.parse(storedData);
-                setFormData(parsedData);
+        try {
+            axiosClient(`/user-quiz-results/user/${userId}/month?month=${currentMonth}&year=${currentYear}`)
+                .then((res) => {
+                    if (res.data.find((q: QuizResult) => (q.score >= 70))) {
+                        setIsCompleteQuiz(true)
+                    } else {
+                        setIsCompleteQuiz(false)
+                    }
+                })
+                .catch((e) => {
+                    console.log(e);
+                })
+        } catch (error) {
+        }
+    }, [currentMonth, currentYear, userId])
+
+    //send form
+    const handleSubmit = () => {
+        if (typeof window !== "undefined") {
+            const storedFormData = localStorage.getItem("formData");
+            const formData = storedFormData ? JSON.parse(storedFormData) : {};
+
+            const data = {
+                ...formData,
+                userId: userId,
+            };
+
+            try {
+                axiosClient.post("sitter-form-register", data)
+                    .then(() => {
+                        router.push('/besitter/success')
+                    })
+                    .catch((error) => {
+                        console.log(error);
+                    });
+            } catch (error) {
             }
-            setIsInitialized(true); // Set to true after data is loaded
         }
-    }, []);
+    };
 
-
-    useEffect(() => {
-        if (typeof window !== 'undefined' && isInitialized) {
-            localStorage.setItem('formData', JSON.stringify(formData));
-        }
-    }, [formData, isInitialized]);
-
-
-
-    // const handleSubmit = () => {
-    //     const a = formData;
-    // }
     const renderStep = () => {
         switch (step) {
             case 1:
                 return (
-                    <div className='flex flex-col px-[500px] text-center justify-center items-center'>
-                        <h1 className='font-semibold text-xl py-10'>Vui lòng điền đầy đủ thông tin để chúng tôi đảm bảo thông tin để xác nhận bạn trở thành người chăm sóc mèo</h1>
-                        <div className='flex flex-col justify-center items-start gap-6'>
-                            {/* <h2>Họ và tên</h2> */}
-                            <Input placeholder="Nhập họ và tên" label="Họ và tên" labelPlacement='outside' variant="bordered" className='input' name="name" value={formData.name} onChange={handleInputChange} />
-                            <Input placeholder="Nhập họ và tên" label="Email" labelPlacement='outside' variant="bordered" className='input' />
-                            <Input placeholder="Nhập số điện thoại" label="Số điện thoại" labelPlacement='outside' variant="bordered" className='input' />
-
-                            <div className='flex flex-col gap-3'>
-
-                                <div className='flex justify-end items-end gap-[10px]'>
-                                    <Select
-                                        label="Địa chỉ"
-                                        labelPlacement='outside'
-                                        placeholder="Tỉnh/Thành Phố"
-                                        className="select"
-                                        variant="bordered"
-                                        onChange={(event) => handleProvinceChange(event.target.value)}
-                                    >
-                                        {provinces.map((province) => (
-                                            <SelectItem key={province.idProvince} value={province.idProvince}>
-                                                {province.name}
-                                            </SelectItem>
-                                        ))}
-                                    </Select>
-
-                                    {/* District Select (filtered by province) */}
-                                    <Select
-                                        placeholder="Quận/Huyện"
-                                        className="select"
-                                        variant="bordered"
-                                        disabled={!formData.selectedProvince} // Disable if no province is selected
-                                    >
-                                        {filteredDistricts.length > 0 ? (
-                                            filteredDistricts.map((district) => (
-                                                <SelectItem key={district.idDistrict} value={district.idDistrict}>
-                                                    {district.name}
-                                                </SelectItem>
-                                            ))
-                                        ) : (
-                                            <SelectItem isDisabled key="no-districts">Vui lòng chọn Tỉnh/Thành phố</SelectItem>
-                                        )}
-                                    </Select>
-                                </div>
-                                <Input placeholder="Nhập địa chỉ của ban" variant="bordered" className='input' />
-                            </div>
-                            <Input placeholder="Nhập số điện thoại" label="Số điện thoại" labelPlacement='outside' variant="bordered" className='input' />
-                        </div>
-                    </div>
+                    <Information />
                 )
             case 2:
                 return (
                     <div>
-                        <CatKnowledge />
-                    </div>
-                )
-            case 3:
-                return (
-                    <div>
-                        Stepper 3
+                        <CatKnowledge isCompleteQuiz={isCompleteQuiz} />
                     </div>
                 )
             default:
-                return <div>Step 4</div>;
+                return <Agreement onAgreeChange={setIsCheckboxChecked} />;
         }
     }
 
@@ -171,13 +100,15 @@ const Sitter = () => {
                 <div className={step === 2 ? "circle-done" : "circle-pending"}>2</div>
                 <div className='circle-hr'></div>
                 <div className={step === 3 ? "circle-done" : "circle-pending"}>3</div>
-                <div className='circle-hr'></div>
-                <div className={step === 4 ? "circle-done" : "circle-pending"}>4</div>
             </div>
             {renderStep()}
             <div className='flex gap-20'>
                 <Button onClick={() => setStep(step - 1)} className={step === 1 ? `hidden` : `w-[228px] h-[47px] text-[16px] font-bold bg-transparent border-text border rounded-full mt-5`}>Trở lại</Button>
-                <Button isDisabled={step === 4} onClick={() => setStep(step + 1)} className='w-[228px] h-[47px] text-[16px] font-bold text-white bg-btnbg rounded-full mt-5'>Tiếp theo</Button>
+                {step === 3 ? (
+                    <Button isDisabled={!isCheckboxChecked} onClick={handleSubmit} className='w-[228px] h-[47px] text-[16px] font-bold text-white bg-btnbg rounded-full mt-5'>Hoàn thành</Button>
+                ) : (
+                    <Button isDisabled={(step === 2 && !isCompleteQuiz) || (step === 3 && !isCheckboxChecked)} onClick={() => setStep(step + 1)} className='w-[228px] h-[47px] text-[16px] font-bold text-white bg-btnbg rounded-full mt-5'>Tiếp theo</Button>
+                )}
             </div>
         </div >
     )
