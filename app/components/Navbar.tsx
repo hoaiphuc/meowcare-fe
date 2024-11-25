@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { NavbarBrand, NavbarContent, NavbarItem, NavbarMenuToggle, NavbarMenu, NavbarMenuItem, Link, Avatar, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from "@nextui-org/react";
+import { NavbarBrand, NavbarContent, NavbarItem, NavbarMenuToggle, NavbarMenu, NavbarMenuItem, Link, Avatar, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Skeleton } from "@nextui-org/react";
 import { Navbar as MyNavbar } from "@nextui-org/react";
 import Image from 'next/image';
 import { faArrowRightToBracket, faMessage } from '@fortawesome/free-solid-svg-icons';
@@ -10,15 +10,39 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '../lib/hooks';
 import { fetchUserProfile, logout } from '../lib/slices/userSlice';
 import { UserLocal } from '../constants/types/homeType';
-import Loading from './Loading';
+// import Loading from './Loading';
 
 const Navbar = () => {
     const router = useRouter();
     const dispatch = useAppDispatch();
-    const { userProfile, loading } = useAppSelector((state) => state.user);
+    const { userProfile } = useAppSelector((state) => state.user);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const pathname = usePathname();
     const [isSitter, setIsSitter] = useState<boolean | null>(null);
+
+    // useEffect(() => {
+    //     if (typeof window !== 'undefined') {
+    //         const userJson = localStorage.getItem('user');
+    //         const user: UserLocal | null = userJson ? JSON.parse(userJson) : null;
+
+    //         const userRoles = user?.roles ?? [];
+
+    //         if (userRoles.some(role => role.roleName === 'SITTER')) {
+    //             setIsSitter(true);
+    //         } else {
+    //             setIsSitter(false);
+    //         }
+    //     }
+    // }, []);
+
+
+    // Update isSitter and menuItems when user data changes
+    // Initialize menuItems with default options
+    const [menuItems, setMenuItems] = useState([
+        { name: 'Trang chủ', path: '/' },
+        { name: 'Dịch vụ', path: '/service' },
+        { name: 'Trở thành người chăm sóc', path: '/besitter' },
+    ]);
 
     useEffect(() => {
         if (typeof window !== 'undefined') {
@@ -29,23 +53,25 @@ const Navbar = () => {
 
             if (userRoles.some(role => role.roleName === 'SITTER')) {
                 setIsSitter(true);
+                // Update menu items for sitter
+                setMenuItems([
+                    { name: 'Trang chủ', path: '/' },
+                    { name: 'Dịch vụ', path: '/service' },
+                    { name: 'Quản lí dịch vụ', path: '/sitter' },
+                ]);
+
             } else {
                 setIsSitter(false);
+                // Update menu items for non-sitter
+                setMenuItems([
+                    { name: 'Trang chủ', path: '/' },
+                    { name: 'Dịch vụ', path: '/service' },
+                    { name: 'Trở thành người chăm sóc', path: '/besitter' },
+                ]);
+
             }
         }
     }, []);
-
-    //Items on Navbar
-    const menuItems = [
-        { name: 'Trang chủ', path: '/' },
-        { name: 'Dịch vụ', path: '/service' },
-    ];
-
-    if (isSitter === true) {
-        menuItems.push({ name: 'Quản lí dịch vụ', path: '/sitter' });
-    } else if (isSitter === false) {
-        menuItems.push({ name: 'Trở thành người chăm sóc', path: '/besitter' });
-    }
 
     useEffect(() => {
         if (typeof window !== 'undefined') {
@@ -73,12 +99,9 @@ const Navbar = () => {
         router.push('/login')
     }
 
-
-
-    if (loading) {
-        return <Loading />;
+    if (isSitter === null) {
+        return <Skeleton className="flex w-full h-[96px]" />
     }
-
     return (
         <MyNavbar onMenuOpenChange={setIsMenuOpen} shouldHideOnScroll isBordered maxWidth="full" className='min-h-24 bg-[#fffaf5] '>
             <NavbarContent>
@@ -175,6 +198,7 @@ const Navbar = () => {
                 ))}
             </NavbarMenu>
         </MyNavbar>
+
     )
 }
 

@@ -70,7 +70,7 @@ const Page = () => {
                             <FontAwesomeIcon icon={faTriangleExclamation} size='2xl' className='text-yellow-400' />
                             <h1 className='text-black p-5 text-2xl font-semibold'>Yêu cầu này chưa được đặt</h1>
                         </div>
-                        <div className='bg-[#3F4346] text-white p-5 rounded-md shadow-xl font-medium flex flex-col gap-3'>
+                        <div className='bg-[#FFE3D5] text-black p-5 rounded-md shadow-xl font-medium flex flex-col gap-3'>
                             <h1>{data.bookingDetailWithPetAndServices[0].service.serviceName}</h1>
                             <h1>15 tháng 10 - 16 tháng 10</h1>
                             <h1>Giờ bắt đầu: 5:00 sáng</h1>
@@ -111,7 +111,7 @@ const Page = () => {
                         </div>
                         <div className='bg-white w-full h-full shadow-2xl rounded-md p-5'>
                             <h1 className='font-semibold text-2xl my-3'>Tin nhắn</h1>
-                            <div className='bg-[#BBBBBF] p-3 rounded-xl'>
+                            <div className='bg-from-[#d8ab95] bg-gradient-to-r from-[#fab1a0] to-blue-[#FFE3D5] p-3 rounded-xl'>
                                 <Textarea className='bg-white rounded-xl' variant='bordered' placeholder={`Gửi một tin nhắn mới cho ${data.user.fullName}`} />
                                 <div className='flex justify-end mt-3 mb-5'>
                                     <Button className='bg-btnbg rounded-full text-white text-xl'>Gửi</Button>
@@ -122,7 +122,7 @@ const Page = () => {
                                     Đặt lịch và thanh toán trên Meowcare bắt buộc tuân theo <Link href='/termsofservice' className='underline font-semibold'>điều khoản của Meowcare</Link>.
                                 </h1>
                             </div>
-                            <div className='bg-[#d0d0d3] p-3 rounded-xl text-black flex flex-col gap-2'>
+                            <div className='bg-[#FFE3D5] p-3 rounded-xl text-black flex flex-col gap-2'>
                                 <h1 className='text-xl'>Bạn nhận được yêu cầu này nhưng:</h1>
                                 <ul className='ml-3'>
                                     <li>- Bạn ở xa và không muốn nhận</li>
