@@ -126,7 +126,7 @@ const Page = () => {
                 <div className="my-10">
                     <h1 className={styles.h1}>Cài đặt hồ sơ</h1>
                     <div className="flex flex-col gap-3">
-                        <h3 className={styles.h3}>Thông tin cơ bản</h3>
+                        <Link href={"/sitter/setupservice/info"} className={styles.h3}>Thông tin cơ bản</Link>
                         <h3 className={styles.h3}>Chi tiết</h3>
                         <h3 className={styles.h3}>Ảnh</h3>
                     </div>

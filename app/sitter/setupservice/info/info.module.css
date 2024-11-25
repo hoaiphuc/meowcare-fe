@@ -1,0 +1,7 @@
+.h3 {
+  @apply text-[16px];
+}
+
+.h2 {
+  @apply text-xl font-semibold;
+}

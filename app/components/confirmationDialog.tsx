@@ -22,8 +22,11 @@ export const showConfirmationDialog = async (
         denyButtonText: options.denyButtonText || 'No',
         confirmButtonColor: options.confirmButtonColor || '#3085d6',
         denyButtonColor: options.denyButtonColor || '#d33',
+        // focusConfirm: false,
+        allowOutsideClick: false, // Prevent closing when clicking outside
+        allowEscapeKey: false,    // Prevent closing with the escape key
+        backdrop: true,           // Use a backdrop to isolate the modal
+        returnFocus: false,       // Prevent returning focus to the main modal
     });
-    console.log(result.isConfirmed);
-
     return result.isConfirmed;
 };
