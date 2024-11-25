@@ -4,6 +4,7 @@ import {
     faWallet,
     faFileSignature,
     faClockRotateLeft,
+    faList,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
@@ -23,7 +24,7 @@ export const profileSidebar: ProfileSidebarItem[] = [
         path: '/profile/wallet',
         icon: (
             <FontAwesomeIcon
-                icon={faAddressCard}
+                icon={faWallet}
                 className="h-7 w-7 text-[#902C6C]"
             />
         ),
@@ -32,7 +33,7 @@ export const profileSidebar: ProfileSidebarItem[] = [
         title: 'Hoạt động',
         path: '/profile/activity',
         icon: (
-            <FontAwesomeIcon icon={faWallet} className="h-7 w-7 text-[#902C6C]" />
+            <FontAwesomeIcon icon={faList} className="h-7 w-7 text-[#902C6C]" />
         ),
     },
 
