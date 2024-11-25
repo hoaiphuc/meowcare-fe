@@ -4,7 +4,9 @@ import Chat from '@/app/components/Chat';
 import DateFormat from '@/app/components/DateFormat';
 import { CareSchedules, Order, Task } from '@/app/constants/types/homeType';
 import axiosClient from '@/app/lib/axiosClient';
-import { Accordion, AccordionItem, Avatar, Button, Tab, Tabs } from '@nextui-org/react';
+import { faCamera, faVideo } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Accordion, AccordionItem, Avatar, Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Tab, Tabs, useDisclosure } from '@nextui-org/react';
 import { useParams } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 
@@ -15,6 +17,7 @@ const Tracking = () => {
     const [dateList, setDateList] = useState<Date[]>([]);
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
     const [filteredTasks, setFilteredTasks] = useState<Task[]>([]);
+    const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
     // Function to generate dates between two dates inclusive
     const generateDateRange = (startDate: Date, endDate: Date): Date[] => {
@@ -97,7 +100,7 @@ const Tracking = () => {
                         <div className='w-full'>
                             <Tabs aria-label="Options" className='w-full' fullWidth>
                                 <Tab key="info" title=" Thông tin đặt lịch">
-                                    <div className='bg-[#60666b] text-white p-2 rounded-md'>
+                                    <div className='bg-[#FFE3D5] text-black p-2 rounded-md'>
                                         <h2>Ngày bắt đầu: {DateFormat(dataOrder.startDate)}</h2>
                                         <h2>Ngày kết thúc: {DateFormat(dataOrder.endDate)}</h2>
                                         <h2>Ghi chú: {dataOrder.note}</h2>
@@ -126,6 +129,7 @@ const Tracking = () => {
                                 key={date.toISOString()}
                                 onClick={() => handleDateClick(date)}
                                 variant={selectedDate === date ? 'solid' : 'bordered'}
+                                className={selectedDate === date ? 'bg-maincolor text-white' : ''}
                             >
                                 {date.toLocaleDateString()}
                             </Button>
@@ -160,7 +164,7 @@ const Tracking = () => {
                                         </p>}
                                     >
                                         <h3 className='font-medium'>{task.description}</h3>
-                                        {task.petProfiles && task.petProfiles.length > 0 && (
+                                        {/* {task.petProfiles && task.petProfiles.length > 0 && (
                                             <div>
                                                 <h4 className='font-medium mt-2'>Pet Profiles:</h4>
                                                 <ul className='list-disc pl-5'>
@@ -169,7 +173,8 @@ const Tracking = () => {
                                                     ))}
                                                 </ul>
                                             </div>
-                                        )}
+                                        )} */}
+                                        <Button className='bg-btnbg text-white' onClick={onOpen}>Cập nhật hoạt động</Button>
                                     </AccordionItem>
                                 ))}
                             </Accordion>
@@ -179,8 +184,64 @@ const Tracking = () => {
                     </div>
                 )}
             </div>
+            <Modal isOpen={isOpen} onOpenChange={onOpenChange} isDismissable={false} isKeyboardDismissDisabled={true} size='3xl'>
+                <ModalContent>
+                    {(onClose) => (
+                        <>
+                            <ModalHeader className="flex flex-col gap-1">Cập nhật hoạt động</ModalHeader>
+                            <ModalBody>
+                                <div className=" font-sans">
+                                    <div className="p-4">
+                                        {/* Time and Status */}
+                                        <div className="mb-4 text-sm">
+                                            <div>
+                                                <strong>Khung giờ:</strong> 7:00 - 9:00 AM
+                                            </div>
+                                            <div>
+                                                <strong>Ngày:</strong> 27/09/2024
+                                            </div>
+                                            <div className="text-orange-500 font-bold mt-2">Đang diễn ra</div>
+                                        </div>
 
-        </div>
+                                        {/* Notes Section */}
+                                        <div className="mb-4">
+                                            <label className="block mb-2 font-bold">Ghi chú từ người chăm sóc:</label>
+                                            <textarea
+                                                placeholder="Hãy ghi chú thông tin về mèo cung cho chủ mèo yên tâm"
+                                                className="w-full p-2 border rounded-md border-gray-300 resize-none h-20"
+                                            ></textarea>
+                                        </div>
+
+                                        {/* Image and Video Section */}
+                                        <div className="mb-4">
+                                            <label className="block mb-2 font-bold">Hình ảnh và video:</label>
+                                            <div className="flex gap-2">
+                                                <button className="flex justify-center items-center p-3 bg-pink-100 border border-pink-300 rounded-md text-center gap-3">
+                                                    <FontAwesomeIcon icon={faCamera} className='text-maincolor' />
+                                                    <p>Thêm hình ảnh</p>
+                                                </button>
+                                                <button className="flex justify-center items-center p-3 bg-pink-100 border border-pink-300 rounded-md text-center gap-3">
+                                                    <FontAwesomeIcon icon={faVideo} className='text-maincolor' />
+                                                    <p>Thêm video</p>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </ModalBody>
+                            <ModalFooter>
+                                <Button color="danger" variant="light" onPress={onClose}>
+                                    Trở lại
+                                </Button>
+                                <Button color="primary" className="p-3 bg-blue-500 text-white font-bold rounded-md hover:bg-blue-600" onPress={onClose}>
+                                    Cập nhật
+                                </Button>
+                            </ModalFooter>
+                        </>
+                    )}
+                </ModalContent>
+            </Modal>
+        </div >
     )
 }
 
