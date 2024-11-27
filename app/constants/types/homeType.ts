@@ -245,17 +245,26 @@ export type Task = {
   createdAt: Date;
   updatedAt: Date;
   haveEvidence: boolean;
-  petProfiles: [
-    {
-      id: string;
-      description: string;
-      startTime: Date;
-      endTime: Date;
-      status: number;
-    }
-  ];
+  petProfile: PetProfile;
 };
 
+// export type pet = {
+//   id: string;
+//   description: string;
+//   petName: string;
+//   species: string;
+//   breed: string;
+//   age: number;
+//   gender: string;
+//   weight: number;
+//   specialNeeds: string;
+//   vaccinationStatus: true;
+//   vaccinationInfo: string;
+//   microchipNumber: string;
+//   medicalConditions: string;
+//   profilePicture: string;
+//   status: number;
+// };
 export type TaskEvidence = {
   id: string;
   photoUrl: string;
@@ -317,4 +326,5 @@ export type Notification = {
   message: string;
   timestamp: string;
   isRead: boolean;
+  createdAt: Date;
 };

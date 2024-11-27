@@ -2,7 +2,7 @@
 
 import Chat from '@/app/components/Chat';
 import DateFormat from '@/app/components/DateFormat';
-import { CareSchedules, Order, Task } from '@/app/constants/types/homeType';
+import { CareSchedules, Order, PetProfile, Task } from '@/app/constants/types/homeType';
 import axiosClient from '@/app/lib/axiosClient';
 import { storage } from '@/app/utils/firebase';
 import { faCamera, faCheck, faVideo } from '@fortawesome/free-solid-svg-icons';
@@ -11,9 +11,10 @@ import { Accordion, AccordionItem, Avatar, Button, Modal, ModalBody, ModalConten
 import { formatDate } from 'date-fns';
 import { getDownloadURL, ref, uploadBytes, uploadBytesResumable } from 'firebase/storage';
 import { useParams } from 'next/navigation'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'react-toastify';
 import { v4 as uuidv4 } from 'uuid';
+import styles from "./tracking.module.css"
 
 interface TaskEvident {
     id?: string,
@@ -32,11 +33,12 @@ const Tracking = () => {
     const [filteredTasks, setFilteredTasks] = useState<Task[]>([]);
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
     const { isOpen: isOpenUpdate, onOpen: onOpenUpdate, onOpenChange: onOpenChangeUpdate } = useDisclosure();
+    const { isOpen: isOpenCat, onOpen: onOpenCat, onOpenChange: onOpenChangeCat } = useDisclosure();
     const [selectedTask, setSelectedTask] = useState<Task>();
     const hiddenFileInput = useRef<HTMLInputElement>(null);
     const hiddenFileVideoInput = useRef<HTMLInputElement>(null);
     const [selectTaskEvidence, setSelectedTaskEvidence] = useState<TaskEvident[]>([])
-
+    const [selectedCat, setSelectedCat] = useState<PetProfile | null>()
     //update 
     const [isUpdateMode, setIsUpdateMode] = useState(false)
     const [removeList, setRemoveList] = useState<TaskEvident[]>([]);
@@ -68,6 +70,24 @@ const Tracking = () => {
 
         return dates;
     };
+    const fetchTask = useCallback(() => {
+        axiosClient(`care-schedules/booking/${param.id}`)
+            .then((res) => {
+                const scheduleData = res.data;
+                setData(scheduleData);
+
+                // Parse startTime and endTime
+                const startDate = new Date(scheduleData.startTime);
+                const endDate = new Date(scheduleData.endTime);
+
+                // Generate list of dates
+                const dates = generateDateRange(startDate, endDate);
+                setDateList(dates);
+            })
+            .catch((e) => {
+                console.log(e);
+            })
+    }, [param.id])
 
     useEffect(() => {
         try {
@@ -76,27 +96,12 @@ const Tracking = () => {
                     setDataOrder(res.data)
                 })
                 .catch()
+            fetchTask()
 
-            axiosClient(`care-schedules/booking/${param.id}`)
-                .then((res) => {
-                    const scheduleData = res.data;
-                    setData(scheduleData);
-
-                    // Parse startTime and endTime
-                    const startDate = new Date(scheduleData.startTime);
-                    const endDate = new Date(scheduleData.endTime);
-
-                    // Generate list of dates
-                    const dates = generateDateRange(startDate, endDate);
-                    setDateList(dates);
-                })
-                .catch((e) => {
-                    console.log(e);
-                })
         } catch (error) {
             console.log(error);
         }
-    }, [param.id])
+    }, [fetchTask, param.id])
 
     // Handle date click
     const handleDateClick = (date: Date) => {
@@ -116,28 +121,25 @@ const Tracking = () => {
         }
     };
 
-    const TaskTimeRange = ({ startTime, endTime, status }: { startTime: Date; endTime: Date, status: number }) => {
+    const TaskTimeRange = ({
+        startTimeStr,
+        endTimeStr,
+        status,
+    }: {
+        startTimeStr: string;
+        endTimeStr: string;
+        status: number;
+    }) => {
         return (
-            <div className='flex justify-between'>
+            <div className="flex justify-between">
                 <p>
-                    {new Date(startTime).toLocaleTimeString([], {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                        hour12: false,
-                    })}{' '}
-                    -{' '}
-                    {new Date(endTime).toLocaleTimeString([], {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                        hour12: false,
-                    })}
+                    {startTimeStr} - {endTimeStr}
                 </p>
-                <p className={statusColors[status]}>
-                    {statusLabels[status]}
-                </p>
+                <p className={statusColors[status]}>{statusLabels[status]}</p>
             </div>
         );
     };
+
 
     //get evidence
     const handleOpenEvidenceTask = (task: Task) => {
@@ -148,7 +150,6 @@ const Tracking = () => {
                 })
                 .catch(() => { })
         } catch (error) {
-
         }
         setSelectedTask(task);
         onOpen();
@@ -257,6 +258,7 @@ const Tracking = () => {
                                     }
                                 }
                             );
+
                         });
                     } else {
                         // Skip if evidenceType or file is not valid
@@ -271,7 +273,35 @@ const Tracking = () => {
             // Proceed to update the task evidence regardless of whether files were uploaded
             axiosClient
                 .post(`task-evidences/list?taskId=${selectedTask?.id}`, uploadedEvidences)
-                .then(() => {
+                .then((res) => {
+                    // Update the haveEvidence property for the selected task
+                    const updatedTasks = data?.tasks?.map(task => {
+                        if (task.id === selectedTask?.id) {
+                            return { ...task, haveEvidence: res.data.length > 0 ? true : false }; // Or false, based on your needs
+                        }
+                        return task;
+                    }) || [];
+
+                    // Update data and filteredTasks state
+                    setData(prevData => {
+                        if (prevData) {
+                            return {
+                                ...prevData,
+                                tasks: updatedTasks || [] // Ensure tasks is not undefined
+                            };
+                        }
+                        return prevData;
+                    });
+                    setFilteredTasks(updatedTasks.filter(task => {
+                        const taskDate = new Date(task.startTime);
+                        return (
+                            taskDate.getFullYear() === selectedDate?.getFullYear() &&
+                            taskDate.getMonth() === selectedDate?.getMonth() &&
+                            taskDate.getDate() === selectedDate?.getDate()
+                        );
+                    }));
+
+                    onOpenChange();
                     toast.success("Cập nhật hoạt động thành công");
                 })
                 .catch(() => {
@@ -286,7 +316,14 @@ const Tracking = () => {
     // update evidence
     const handleRemoveUpdate = (evident: TaskEvident) => {
         setSelectedTaskEvidence((prev) => prev.filter((item) => item !== evident));
-        setRemoveList((prev) => [...prev, evident])
+        // setRemoveList((prev) => [...prev, evident])
+        if (evident.id) {
+            // Existing item fetched from the server, add to removeList
+            setRemoveList((prev) => [...prev, evident]);
+        } else {
+            // Newly added item, remove from addList
+            setAddList((prev) => prev.filter((item) => item !== evident));
+        }
     }
 
     const handleImageUpdateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -323,60 +360,154 @@ const Tracking = () => {
         }
     };
 
-
-
     const handleUpdate = async () => {
         console.log(removeList);
         console.log(addList);
 
-        try {
-            //remove api
-            removeList && removeList.forEach((item) => {
-                axiosClient.delete(`task-evidences/${item.id}`)
-                    .then(() => {
-                        setRemoveList([])
-                    })
-                    .catch(() => {
-                        toast.error("Lỗi khi gỡ ảnh")
-                    })
-            });
 
-            //add api
+        try {
+            // Handle removal asynchronously using Promise.all
+            if (removeList && removeList.length > 0) {
+                await Promise.all(
+                    removeList.map(async (item) => {
+                        try {
+                            if (item.id) {
+                                await axiosClient.delete(`task-evidences/${item.id}`);
+                            } else {
+                                return;
+                            }
+                        } catch (error) {
+                            toast.error("Lỗi khi gỡ ảnh");
+                        }
+                    })
+                );
+                setRemoveList([]);
+            }
+
+            // Handle addition asynchronously using a loop and async-await
             if (addList && addList.length > 0) {
                 for (const item of addList) {
                     if (item.file) {
-                        const storageRef = ref(storage, `petProfiles/${uuidv4()}_${item.evidenceType}`);
+                        try {
+                            const storageRef = ref(storage, `petProfiles/${uuidv4()}_${item.evidenceType}`);
 
-                        // Upload the file
-                        await uploadBytes(storageRef, item.file);
+                            // Upload the file
+                            await uploadBytes(storageRef, item.file);
 
-                        // Get the download URL
-                        const profilePictureUrl = await getDownloadURL(storageRef);
+                            // Get the download URL
+                            const profilePictureUrl = await getDownloadURL(storageRef);
 
-                        // Prepare item data with the profile picture URL
-                        const addItem = {
-                            ...item,
-                            photoUrl: profilePictureUrl,
-                        };
+                            // Prepare item data with the profile picture URL
+                            const addItem = {
+                                ...item,
+                                photoUrl: profilePictureUrl,
+                            };
 
-                        axiosClient.post(`task-evidences?taskId=${selectedTask?.id}`, addItem)
-                            .then(() => {
-                                setAddList([])
-                            })
-                            .catch(() => {
-                                toast.error("Lỗi khi thêm ảnh")
-
-                            })
+                            await axiosClient.post(`task-evidences?taskId=${selectedTask?.id}`, addItem);
+                        } catch (error) {
+                            toast.error("Lỗi khi thêm ảnh");
+                        }
                     }
                 }
-                setAddList([])
+                setAddList([]);
             }
-            toast.success("Cập nhật thành công")
-            setIsUpdateMode(false)
+
+            // Update the local state instead of fetching
+            const hasEvidence = (addList.length > 0 || selectTaskEvidence.length > removeList.length);
+            setData((prevData) => {
+                if (prevData) {
+                    const updatedTasks = prevData.tasks.map(task => {
+                        if (task.id === selectedTask?.id) {
+                            return {
+                                ...task,
+                                haveEvidence: hasEvidence,
+                            };
+                        }
+                        return task;
+                    });
+                    return {
+                        ...prevData,
+                        tasks: updatedTasks,
+                    };
+                }
+                return prevData;
+            });
+
+            // Update filteredTasks based on the current selected date
+            if (selectedDate) {
+                setFilteredTasks((prevFilteredTasks) => {
+                    const updatedFilteredTasks = prevFilteredTasks.map(task => {
+                        if (task.id === selectedTask?.id) {
+                            return {
+                                ...task,
+                                haveEvidence: hasEvidence,
+                            };
+                        }
+                        return task;
+                    });
+                    return updatedFilteredTasks;
+                });
+            }
+
+            // Provide user feedback and close the modal
+            toast.success("Cập nhật thành công");
+            setIsUpdateMode(false);
+            onOpenChangeUpdate();
         } catch (error) {
-            toast.error("Có lỗi xảy ra, vui lòng thử lại sau")
+            console.error(error);
+            toast.error("Có lỗi xảy ra, vui lòng thử lại sau");
         }
-    }
+    };
+    // State for grouped tasks
+    const [groupedTasks, setGroupedTasks] = useState<{ timeRangeKey: string; tasks: Task[] }[]>([]);
+    const formatTime = (date: Date) => {
+        const adjustedDate = new Date(date);
+        adjustedDate.setSeconds(0, 0); // Zero out seconds and milliseconds
+        return adjustedDate.toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false,
+        });
+    };
+
+    // Group tasks when filteredTasks change
+    useEffect(() => {
+        if (filteredTasks.length > 0) {
+            const groupsMap = filteredTasks.reduce((acc, task) => {
+                const startTimeKey = formatTime(new Date(task.startTime));
+                const endTimeKey = formatTime(new Date(task.endTime));
+                const timeRangeKey = `${startTimeKey} - ${endTimeKey}`;
+
+                if (!acc[timeRangeKey]) {
+                    acc[timeRangeKey] = [];
+                }
+                acc[timeRangeKey].push(task);
+                return acc;
+            }, {} as { [key: string]: Task[] });
+
+            // Convert the groupsMap to an array and sort it
+            const groupsArray = Object.keys(groupsMap)
+                .map((timeRangeKey) => ({
+                    timeRangeKey,
+                    tasks: groupsMap[timeRangeKey],
+                }))
+                .sort((a, b) => {
+                    const [aStartTime] = a.timeRangeKey.split(' - ');
+                    const [bStartTime] = b.timeRangeKey.split(' - ');
+
+                    const aDate = new Date(`1970-01-01T${aStartTime}:00`);
+                    const bDate = new Date(`1970-01-01T${bStartTime}:00`);
+
+                    return aDate.getTime() - bDate.getTime();
+                });
+
+            setGroupedTasks(groupsArray);
+        } else {
+            setGroupedTasks([]);
+        }
+    }, [filteredTasks]);
+
+
 
     return (
         <div className='flex justify-center items-start my-10 gap-3'>
@@ -438,43 +569,58 @@ const Tracking = () => {
                 )}
 
 
-                {selectedDate && (
-                    <div className='mt-4'>
-                        {filteredTasks.length > 0 ? (
-                            <Accordion key={selectedDate?.toISOString()} selectionMode="multiple">
-                                {filteredTasks.map((task) => (
-                                    <AccordionItem
-                                        key={task.id}
-                                        aria-label={task.id}
-                                        className='mt-2'
-                                        title={<TaskTimeRange startTime={task.startTime} endTime={task.endTime} status={task.status} />}
-                                    >
-                                        <div className='flex gap-3 items-center'>
-                                            {task.haveEvidence &&
+                {groupedTasks.length > 0 ? (
+                    <Accordion key={selectedDate?.toISOString()} selectionMode="multiple">
+                        {groupedTasks.map((group) => {
+                            const { timeRangeKey, tasks } = group;
+                            const [startTimeStr, endTimeStr] = timeRangeKey.split(' - ');
+
+                            return (
+                                <AccordionItem
+                                    key={timeRangeKey}
+                                    aria-label={timeRangeKey}
+                                    className="mt-2"
+                                    title={
+                                        <TaskTimeRange
+                                            startTimeStr={startTimeStr}
+                                            endTimeStr={endTimeStr}
+                                            status={tasks[0].status}
+                                        />
+                                    }
+                                >
+                                    {tasks.map((task) => (
+                                        <div key={task.id} className="flex gap-3 items-center">
+                                            {task.haveEvidence && (
                                                 <FontAwesomeIcon icon={faCheck} className="text-green-500" />
-                                            }
-                                            <h3 className={task.haveEvidence ? "text-green-500" : ""}>{task.description}</h3>
+                                            )}
+                                            <h3 className={task.haveEvidence ? 'text-green-500' : ''}>
+                                                {task.description}
+                                            </h3>
+                                            <Button onClick={() => { setSelectedCat(task.petProfile), onOpenCat() }}>Xem mèo</Button>
+
+                                            {task.haveEvidence ? (
+                                                <Button
+                                                    className="bg-btnbg text-white px-7"
+                                                    onClick={() => handleOpenUpdate(task)}
+                                                >
+                                                    Xem hoạt động
+                                                </Button>
+                                            ) : (
+                                                <Button
+                                                    className="bg-btnbg text-white px-7"
+                                                    onClick={() => handleOpenEvidenceTask(task)}
+                                                >
+                                                    Cập nhật hoạt động
+                                                </Button>
+                                            )}
                                         </div>
-                                        {task.haveEvidence ?
-                                            <Button
-                                                className='bg-btnbg text-white'
-                                                onClick={() => handleOpenUpdate(task)}>
-                                                Xem hoạt động
-                                            </Button>
-                                            :
-                                            <Button
-                                                className='bg-btnbg text-white'
-                                                onClick={() => handleOpenEvidenceTask(task)}>
-                                                Cập nhật hoạt động
-                                            </Button>
-                                        }
-                                    </AccordionItem>
-                                ))}
-                            </Accordion>
-                        ) : (
-                            <p>Hôm nay không có lịch chăm sóc phụ</p>
-                        )}
-                    </div>
+                                    ))}
+                                </AccordionItem>
+                            );
+                        })}
+                    </Accordion>
+                ) : (
+                    <p>Hôm nay không có lịch chăm sóc phụ</p>
                 )}
             </div>
             <Modal isOpen={isOpen} onOpenChange={onOpenChange} isDismissable={false} isKeyboardDismissDisabled={true} size='3xl'>
@@ -594,10 +740,19 @@ const Tracking = () => {
                                 </div>
                             </ModalBody>
                             <ModalFooter>
-                                <Button color="danger" variant="light" onPress={onClose}>
+                                <Button
+                                    color="danger"
+                                    variant="light"
+                                    onClick={() => {
+                                        onClose();
+                                        setIsUpdateMode(false);
+                                        setAddList([]);
+                                        setRemoveList([]);
+                                    }}
+                                >
                                     Trở lại
                                 </Button>
-                                <Button color="primary" className="p-3 bg-blue-500 text-white font-bold rounded-md hover:bg-blue-600" onPress={() => { handleAdd(), onClose() }}>
+                                <Button color="primary" className="p-3 bg-blue-500 text-white font-bold rounded-md hover:bg-blue-600" onPress={() => { handleAdd() }}>
                                     Cập nhật
                                 </Button>
                             </ModalFooter>
@@ -731,7 +886,7 @@ const Tracking = () => {
                                     Trở lại
                                 </Button>
                                 {isUpdateMode ?
-                                    <Button color="primary" className="p-3 bg-blue-500 text-white font-bold rounded-md hover:bg-blue-600" onClick={() => { handleUpdate(), onClose() }}>
+                                    <Button color="primary" className="p-3 bg-blue-500 text-white font-bold rounded-md hover:bg-blue-600" onClick={() => { handleUpdate() }}>
                                         Xác nhận
                                     </Button>
                                     :
@@ -739,6 +894,46 @@ const Tracking = () => {
                                         Chỉnh sửa
                                     </Button>
                                 }
+                            </ModalFooter>
+                        </>
+                    )}
+                </ModalContent>
+            </Modal>
+
+            {/* View Cat */}
+            <Modal isOpen={isOpenCat} onOpenChange={onOpenChangeCat} isDismissable={false} isKeyboardDismissDisabled={true} size='3xl' hideCloseButton>
+                <ModalContent>
+                    {(onClose) => (
+                        <>
+                            <ModalHeader className="flex flex-col gap-1">Cập nhật hoạt động</ModalHeader>
+                            <ModalBody>
+                                {selectedCat &&
+                                    <div className='flex gap-10'>
+                                        <div className=' w-[200px] h-[200px]'>
+                                            <Avatar
+                                                className='w-full h-full'
+                                                radius="sm"
+                                                src={selectedCat?.profilePicture}
+                                            />
+
+                                        </div>
+                                        <div className='flex flex-col gap-5'>
+                                            <div className='grid grid-cols-2 gap-3'>
+                                                <h1 className={styles.h1}>Tên:</h1> <p className={styles.p}>{selectedCat.petName}</p>
+                                                <h1 className={styles.h1}>Tuổi:</h1> <p className={styles.p}>{selectedCat.age}</p>
+                                                <h1 className={styles.h1}>Giống loài:</h1> <p className={styles.p}>{selectedCat.breed}</p>
+                                                <h1 className={styles.h1}>Cân nặng:</h1> <p className={styles.p}>{selectedCat.breed}</p>
+                                                <h1 className={styles.h1}>Những điều cần lưu ý:</h1> <p className={styles.p}>{selectedCat.description}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                }
+                            </ModalBody>
+                            <ModalFooter>
+                                <Button color="danger" variant="light" onClick={() => { onClose(), setIsUpdateMode(false), setAddList([]), setRemoveList([]) }}>
+                                    Trở lại
+                                </Button>
                             </ModalFooter>
                         </>
                     )}

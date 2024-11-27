@@ -1,6 +1,6 @@
 'use client'
 
-import { Button, Checkbox, DateRangePicker, DateValue, Input, Modal, ModalBody, ModalContent, ModalFooter, Radio, RadioGroup, Select, SelectItem, Textarea, useDisclosure } from '@nextui-org/react'
+import { Avatar, Button, Checkbox, Chip, DateRangePicker, DateValue, Input, Modal, ModalBody, ModalContent, ModalFooter, Radio, RadioGroup, Select, SelectItem, Textarea, useDisclosure } from '@nextui-org/react'
 import React, { useEffect, useMemo, useState } from 'react'
 import styles from './booking.module.css'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -313,18 +313,37 @@ const Page = () => {
 
                         <h2 className={styles.h2}>Thêm thú cưng của bạn</h2>
                         <Select
+                            items={pets}
                             aria-label='pet'
                             labelPlacement='outside'
                             className="select min-w-full"
+                            selectionMode="multiple"
                             variant="bordered"
+                            isMultiline={true}
                             defaultSelectedKeys={selectedPet}
                             onChange={(event) => handlePetChange(event.target.value)}
+                            renderValue={(items) => {
+                                return (
+                                    <div className="flex gap-2">
+                                        {items.map((item) => (
+                                            <Chip key={item.key} className='w-full'>{item.data?.petName}</Chip>
+                                        ))}
+                                    </div>
+                                );
+                            }}
                         >
-                            {pets.map((pet) => (
-                                <SelectItem key={pet.id} value={pet.id}>
-                                    {pet.petName}
+                            {(pet) => (
+                                <SelectItem key={pet.id} value={pet.id} textValue={pet.petName}>
+                                    <div className='flex gap-2 items-center'>
+                                        <Avatar alt={pet.petName} className="flex-shrink-0" size="sm" src={pet.profilePicture} />
+                                        <div className="flex flex-col">
+                                            <span>{pet.petName}</span>
+                                            <span>{pet.breed}</span>
+                                        </div>
+                                    </div>
                                 </SelectItem>
-                            ))}
+                            )}
+
                         </Select>
 
                         <h2 className={styles.h2}>Chọn thức ăn cho mèo</h2>
@@ -497,7 +516,7 @@ const Page = () => {
                     )}
                 </ModalContent>
             </Modal>
-        </div>
+        </div >
     )
 }
 

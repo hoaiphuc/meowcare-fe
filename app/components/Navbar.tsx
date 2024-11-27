@@ -1,6 +1,6 @@
 'use client'
 
-import { faArrowRightToBracket, faBell } from '@fortawesome/free-solid-svg-icons';
+import { faArrowRightToBracket, faBell, faCircle } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Avatar, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, Link, Navbar as MyNavbar, NavbarBrand, NavbarContent, NavbarItem, NavbarMenu, NavbarMenuItem, NavbarMenuToggle, Skeleton } from "@nextui-org/react";
 import Image from 'next/image';
@@ -10,6 +10,7 @@ import { UserLocal } from '../constants/types/homeType';
 import { useAppDispatch, useAppSelector } from '../lib/hooks';
 import { fetchUserProfile, logout } from '../lib/slices/userSlice';
 import useNotifications from './Notification';
+import { differenceInMinutes } from 'date-fns';
 // import Loading from './Loading';
 
 const Navbar = () => {
@@ -29,22 +30,27 @@ const Navbar = () => {
         { name: 'Trở thành người chăm sóc', path: '/besitter' },
     ]);
 
-    // const [notifications, setNotifications] = useState<Notification[]>([]);
 
+    //get notifications
+    const currentDate = new Date();
     const notifications = useNotifications(user?.id);
     const notificationItems = notifications.length > 0
         ? notifications.map((notification) => ({
             key: notification.id,
             message: notification.message,
             isRead: notification.isRead,
+            createAt: notification.createdAt,
         }))
         : [
             {
                 key: 'no-notification',
                 message: 'Hiện tại chưa có thông báo nào',
                 isRead: true,
+                createAt: new Date(),
             },
         ];
+
+
 
     useEffect(() => {
         if (typeof window !== 'undefined') {
@@ -149,11 +155,19 @@ const Navbar = () => {
                                     aria-label="User Actions"
                                     variant="flat"
                                     items={notificationItems}
+                                    className='overflow-auto h-96'
                                 >
                                     {(notification) => (
-                                        <DropdownItem key={notification.key}>
-                                            {notification.message}
-                                            {notification.isRead ? ' (Read)' : ' (Unread)'}
+                                        <DropdownItem key={notification.key} className=' w-96 h-20'>
+                                            <div className='flex text-wrap justify-between gap-5 overflow-auto'>
+                                                <div className=''>
+                                                    <p>{notification.message}</p>
+                                                    <p>{differenceInMinutes(currentDate, new Date(notification.createAt))}</p>
+                                                </div>
+                                                <div>
+                                                    {notification.isRead ? "" : < FontAwesomeIcon icon={faCircle} className='text-blue-600' />}
+                                                </div>
+                                            </div>
                                         </DropdownItem>
                                     )}
                                 </DropdownMenu>
