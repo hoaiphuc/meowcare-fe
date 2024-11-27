@@ -25,7 +25,7 @@ const Page = () => {
 
     const menuItems = [
         { name: 'Tất cả', status: null },
-        { name: 'Chờ thanh toán', status: 'AWAITING_PAYMENT' },
+        // { name: 'Chờ thanh toán', status: 'AWAITING_PAYMENT' },
         { name: 'Chờ xác nhận', status: 'AWAITING_CONFIRM' },
         { name: 'Đã xác nhận', status: 'CONFIRMED' },
         { name: 'Đang diễn ra', status: 'IN_PROGRESS' },
@@ -34,7 +34,7 @@ const Page = () => {
         // Add more menu items as needed
     ];
     const statusColors: { [key: string]: string } = {
-        AWAITING_PAYMENT: 'text-[#e67e22]', // Chờ duyệt - gray
+        // AWAITING_PAYMENT: 'text-[#e67e22]', // Chờ duyệt - gray
         AWAITING_CONFIRM: 'text-[#9E9E9E]', // Chờ duyệt - gray
         CONFIRMED: 'text-[#2E67D1]',        // Xác nhận - blue
         IN_PROGRESS: 'text-[#FFC107]',      // yellow
@@ -43,7 +43,7 @@ const Page = () => {
     };
 
     const statusLabels: { [key: string]: string } = {
-        AWAITING_PAYMENT: 'Chờ thanh toán',
+        // AWAITING_PAYMENT: 'Chờ thanh toán',
         AWAITING_CONFIRM: 'Chờ xác nhận',
         CONFIRMED: 'Đã xác nhận',
         IN_PROGRESS: 'Đang diễn ra',
@@ -92,35 +92,41 @@ const Page = () => {
                     </NavbarContent>
                 </Navbar>
                 <div className='w-[804px] flex flex-col gap-5 bg-transparent'>
-                    {data?.content && data.content.length > 0 ? (data?.content.filter((activity) => { return selectedStatus === null || activity.status === selectedStatus }).map((activity) => (
-                        <Link
-                            href={(activity.status === "CONFIRMED" || activity.status === "CONFIRMED") ? `/sitter/tracking/${activity.id}` : `/sitter/bookingdetail/${activity.id}`}
-                            key={activity.id}
-                            className='flex flex-col gap-3 p-3 cursor-pointer rounded-md hover:bg-[#ecf0f1]'
-                        >
-                            <div className='flex justify-between '>
-                                <div className='flex gap-3'>
-                                    <Avatar src='' className='w-14 h-14 ' />
-                                    <div className=''>
-                                        <h1 className='font-bold'>{activity.user.fullName}</h1>
-                                        <h1 className='text-secondary'>{activity.address}</h1>
+                    {data?.content && data.content.length > 0 ? (
+                        data.content
+                            .filter((activity) => activity.status !== "AWAITING_PAYMENT") // Exclude items with status "AWAITING_CONFIRM"
+                            .filter((activity) => selectedStatus === null || activity.status === selectedStatus) // Filter based on selected status
+                            .map((activity) => (
+                                <Link
+                                    href={(activity.status !== "AWAITING_CONFIRM" && activity.status !== "CANCELLED") ? `/sitter/tracking/${activity.id}` : `/sitter/bookingdetail/${activity.id}`}
+                                    key={activity.id}
+                                    className='flex flex-col gap-3 p-3 cursor-pointer rounded-md hover:bg-[#ecf0f1]'
+                                >
+                                    <div className='flex justify-between '>
+                                        <div className='flex gap-3'>
+                                            <Avatar src='' className='w-14 h-14 ' />
+                                            <div className=''>
+                                                <h1 className='font-bold'>{activity.user.fullName}</h1>
+                                                <h1 className='text-secondary'>{activity.address}</h1>
+                                            </div>
+                                        </div>
+                                        <div className='text-secondary'>Hôm nay</div>
                                     </div>
-                                </div>
-                                <div className='text-secondary'>Hôm nay</div>
-                            </div>
-                            <h1 className='mb-5'>{activity.user.fullName}: {activity.note}</h1>
-                            <div>Chăm sóc mèo tại nhà: <span >15 tháng 10</span> - <span className=''>21 tháng 10</span></div>
+                                    <h1 className='mb-5'>{activity.user.fullName}: {activity.note}</h1>
+                                    <div>Chăm sóc mèo tại nhà: <span >15 tháng 10</span> - <span className=''>21 tháng 10</span></div>
 
-                            <h2 className={`${statusColors[activity.status] || 'text-black'}`}>
-                                {statusLabels[activity.status] || ""}
-                            </h2>
-                            <hr />
-                        </Link>
-                    ))) : (
+                                    <h2 className={`${statusColors[activity.status] || 'text-black'}`}>
+                                        {statusLabels[activity.status] || ""}
+                                    </h2>
+                                    <hr />
+                                </Link>
+                            ))
+                    ) : (
                         <div className='flex justify-center items-center'>
                             <h1 className='text-2xl font-semibold'>Hiện tại chưa có lịch</h1>
                         </div>
                     )}
+
 
                     {page ? (
                         <div className={pages < 2 ? "hidden" : "flex w-full justify-center"}>

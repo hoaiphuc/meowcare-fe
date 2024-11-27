@@ -5,7 +5,6 @@ import { NavbarBrand, NavbarContent, NavbarItem, NavbarMenuToggle, NavbarMenu, N
 import { Navbar as MyNavbar } from "@nextui-org/react";
 import Image from 'next/image';
 import { faArrowRightToBracket } from '@fortawesome/free-solid-svg-icons';
-import { faMessage } from '@fortawesome/free-regular-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '../lib/hooks';
@@ -139,9 +138,6 @@ const Navbar = () => {
             <NavbarContent justify="end" className='flex gap-5'>
                 {userProfile ?
                     <NavbarItem className="lg:flex flex gap-5">
-                        <Link href='/chat' >
-                            < FontAwesomeIcon icon={faMessage} className='text-maincolor' size='xl' />
-                        </Link>
                         <Dropdown placement="bottom-start">
                             <DropdownTrigger>
                                 <Avatar

@@ -21,7 +21,7 @@ const Page = () => {
         }
     };
     const statusColors: { [key: string]: string } = {
-        AWAITING_PAYMENT: 'text-[#e67e22]', // Chờ duyệt - gray
+        AWAITING_PAYMENT: 'text-[#e67e22]', // Chờ 
         AWAITING_CONFIRM: 'text-[#9E9E9E]', // Chờ duyệt - gray
         CONFIRMED: 'text-[#2E67D1]',        // Xác nhận - blue
         IN_PROGRESS: 'text-[#FFC107]',      // yellow

@@ -185,6 +185,7 @@ export type Order = {
     address: string;
   };
   sitter: {
+    id: string;
     email: string;
     fullName: string;
     avatar: string;
@@ -243,6 +244,7 @@ export type Task = {
   status: number;
   createdAt: Date;
   updatedAt: Date;
+  haveEvidence: boolean;
   petProfiles: [
     {
       id: string;
@@ -252,6 +254,13 @@ export type Task = {
       status: number;
     }
   ];
+};
+
+export type TaskEvidence = {
+  id: string;
+  photoUrl: string;
+  videoUrl: string;
+  comment: string;
 };
 
 export type Quiz = {
@@ -285,4 +294,19 @@ export type Report = {
   reportTypeId: string;
   reason: string;
   description: string;
+};
+
+export type Transaction = {
+  id: string;
+  amount: number;
+  currency: string;
+  paymentMethod: string;
+  transactionType: string;
+  status: string;
+  createdAt: Date;
+  updatedAt: Date;
+  fromUserId: string;
+  toUserId: string;
+  fromUserEmail: string;
+  toUserEmail: string;
 };

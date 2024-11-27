@@ -18,6 +18,7 @@ import './chat.css'
 interface ChatProps {
     userId: string;
     userName: string;
+    orderId: string;
 }
 
 // Define the type for a single message
@@ -29,7 +30,7 @@ interface Message {
     timestamp: Timestamp; // Using Firestore timestamp type
 }
 
-const Chat: React.FC<ChatProps> = ({ userId, userName }) => {
+const Chat: React.FC<ChatProps> = ({ userId, userName, orderId }) => {
     const [messages, setMessages] = useState<Message[]>([]);
     const [newMessage, setNewMessage] = useState<string>('');
     const messagesListRef = useRef<HTMLDivElement>(null);
@@ -43,7 +44,7 @@ const Chat: React.FC<ChatProps> = ({ userId, userName }) => {
 
     useEffect(() => {
         // Set up Firestore listener for real-time messages
-        const messagesRef = collection(db, 'conversations', 'chatRoom1', 'messages');
+        const messagesRef = collection(db, 'conversations', orderId, 'messages');
         const q = query(messagesRef, orderBy('timestamp', 'desc'));
 
         const unsubscribeMessages = onSnapshot(q, (querySnapshot: QuerySnapshot<DocumentData>) => {
@@ -63,7 +64,7 @@ const Chat: React.FC<ChatProps> = ({ userId, userName }) => {
     const handleSendMessage = async () => {
         if (newMessage.trim() === '') return;
 
-        const messagesRef = collection(db, 'conversations', 'chatRoom1', 'messages');
+        const messagesRef = collection(db, 'conversations', orderId, 'messages');
         try {
             await addDoc(messagesRef, {
                 text: newMessage,
