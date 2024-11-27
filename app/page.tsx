@@ -6,6 +6,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCheck, faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
 import { faPhone } from "@fortawesome/free-solid-svg-icons/faPhone";
 import { faApple } from "@fortawesome/free-brands-svg-icons"
+import Link from "next/link";
 
 export default function Home() {
   return (
@@ -15,11 +16,11 @@ export default function Home() {
           <h1 className="text-5xl font-semibold">Tìm kiếm người đồng hành đáng tín cậy cho bé cưng của bạn</h1>
           <h3 className="text-xl text-secondary font-semibold mt-10">Chúng tôi sẽ giúp bạn giải quyết nỗi lo gửi giữ thú cưng khi bạn bận rộn và không thể tự chăm sóc chúng.</h3>
           <div className="flex gap-10 justify-center items-center mt-16">
-            <Button className="bg-[#FF5B2E] text-white rounded-full w-56 h-16 text-2xl font-semibold">
+            <Button as={Link} href="/service" className="bg-[#FF5B2E] text-white rounded-full w-56 h-16 text-2xl font-semibold">
               <FontAwesomeIcon icon={faMagnifyingGlass} className="h-5 w-5" />
               Tìm kiếm
             </Button>
-            <Button className="bg-[#fffaf5] text-2xl font-semibold">
+            <Button as={Link} href="/contact" className="bg-[#fffaf5] text-2xl font-semibold">
               <FontAwesomeIcon icon={faPhone} className="h-5 w-5 " />
               Liên hệ
             </Button>

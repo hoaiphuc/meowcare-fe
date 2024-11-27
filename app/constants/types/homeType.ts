@@ -31,7 +31,7 @@ export interface UserState {
 }
 
 export interface UserLocal {
-  id: number;
+  id: string;
   token: string;
   roles: [
     {
@@ -309,4 +309,12 @@ export type Transaction = {
   toUserId: string;
   fromUserEmail: string;
   toUserEmail: string;
+};
+
+export type Notification = {
+  id: string;
+  userId: string;
+  message: string;
+  timestamp: string;
+  isRead: boolean;
 };

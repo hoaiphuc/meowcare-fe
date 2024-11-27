@@ -5,17 +5,18 @@ import DateFormat from '@/app/components/DateFormat';
 import { CareSchedules, Order, Task } from '@/app/constants/types/homeType';
 import axiosClient from '@/app/lib/axiosClient';
 import { storage } from '@/app/utils/firebase';
-import { faCamera, faVideo } from '@fortawesome/free-solid-svg-icons';
+import { faCamera, faCheck, faVideo } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Accordion, AccordionItem, Avatar, Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Tab, Tabs, useDisclosure } from '@nextui-org/react';
 import { formatDate } from 'date-fns';
-import { getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
+import { getDownloadURL, ref, uploadBytes, uploadBytesResumable } from 'firebase/storage';
 import { useParams } from 'next/navigation'
 import React, { useEffect, useRef, useState } from 'react'
 import { toast } from 'react-toastify';
 import { v4 as uuidv4 } from 'uuid';
 
 interface TaskEvident {
+    id?: string,
     file?: File;
     photoUrl?: string,
     videoUrl?: string,
@@ -32,12 +33,14 @@ const Tracking = () => {
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
     const { isOpen: isOpenUpdate, onOpen: onOpenUpdate, onOpenChange: onOpenChangeUpdate } = useDisclosure();
     const [selectedTask, setSelectedTask] = useState<Task>();
-    // const [selectedImage, setSelectedImage] = useState<File[]>([]);
-    // const [selectedVideos, setSelectedVideos] = useState<File[]>([]);
     const hiddenFileInput = useRef<HTMLInputElement>(null);
     const hiddenFileVideoInput = useRef<HTMLInputElement>(null);
-
     const [selectTaskEvidence, setSelectedTaskEvidence] = useState<TaskEvident[]>([])
+
+    //update 
+    const [isUpdateMode, setIsUpdateMode] = useState(false)
+    const [removeList, setRemoveList] = useState<TaskEvident[]>([]);
+    const [addList, setAddList] = useState<TaskEvident[]>([]);
 
     const statusColors: { [key: number]: string } = {
         0: 'text-[#9E9E9E]',
@@ -152,7 +155,7 @@ const Tracking = () => {
         console.log(task)
     }
 
-    //get evidence
+    //get evidence to update
     const handleOpenUpdate = (task: Task) => {
         try {
             axiosClient(`task-evidences/task/${task.id}`)
@@ -211,8 +214,6 @@ const Tracking = () => {
         setSelectedTaskEvidence((prevEvidence) => prevEvidence.filter((_, i) => i !== index));
     };
 
-
-    // update evidence
     const handleAdd = async () => {
         try {
             let uploadedEvidences: TaskEvident[] = [];
@@ -282,8 +283,99 @@ const Tracking = () => {
         }
     };
 
+    // update evidence
+    const handleRemoveUpdate = (evident: TaskEvident) => {
+        setSelectedTaskEvidence((prev) => prev.filter((item) => item !== evident));
+        setRemoveList((prev) => [...prev, evident])
+    }
+
+    const handleImageUpdateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        if (event.target.files) {
+            const filesArray = Array.from(event.target.files);
+            const newEvidences = filesArray.map((file) => ({
+                file: file,
+                photoUrl: URL.createObjectURL(file),
+                evidenceType: 'PHOTO',
+            }));
+
+            // Update the selectedTaskEvidence to display the new images
+            setSelectedTaskEvidence((prevImages) => [...prevImages, ...newEvidences]);
+
+            // Add the new images to the addList for tracking
+            setAddList((prevList) => [...prevList, ...newEvidences]);
+        }
+    };
+
+    const handleVideoUpdateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        if (event.target.files) {
+            const filesArray = Array.from(event.target.files);
+            const newEvidences = filesArray.map((file) => ({
+                file: file,
+                videoUrl: URL.createObjectURL(file),
+                evidenceType: 'VIDEO',
+            }));
+
+            // Update the selectedTaskEvidence to display the new videos
+            setSelectedTaskEvidence((prevVideos) => [...prevVideos, ...newEvidences]);
+
+            // Add the new videos to the addList for tracking
+            setAddList((prevList) => [...prevList, ...newEvidences]);
+        }
+    };
+
+
 
     const handleUpdate = async () => {
+        console.log(removeList);
+        console.log(addList);
+
+        try {
+            //remove api
+            removeList && removeList.forEach((item) => {
+                axiosClient.delete(`task-evidences/${item.id}`)
+                    .then(() => {
+                        setRemoveList([])
+                    })
+                    .catch(() => {
+                        toast.error("Lỗi khi gỡ ảnh")
+                    })
+            });
+
+            //add api
+            if (addList && addList.length > 0) {
+                for (const item of addList) {
+                    if (item.file) {
+                        const storageRef = ref(storage, `petProfiles/${uuidv4()}_${item.evidenceType}`);
+
+                        // Upload the file
+                        await uploadBytes(storageRef, item.file);
+
+                        // Get the download URL
+                        const profilePictureUrl = await getDownloadURL(storageRef);
+
+                        // Prepare item data with the profile picture URL
+                        const addItem = {
+                            ...item,
+                            photoUrl: profilePictureUrl,
+                        };
+
+                        axiosClient.post(`task-evidences?taskId=${selectedTask?.id}`, addItem)
+                            .then(() => {
+                                setAddList([])
+                            })
+                            .catch(() => {
+                                toast.error("Lỗi khi thêm ảnh")
+
+                            })
+                    }
+                }
+                setAddList([])
+            }
+            toast.success("Cập nhật thành công")
+            setIsUpdateMode(false)
+        } catch (error) {
+            toast.error("Có lỗi xảy ra, vui lòng thử lại sau")
+        }
     }
 
     return (
@@ -357,17 +449,25 @@ const Tracking = () => {
                                         className='mt-2'
                                         title={<TaskTimeRange startTime={task.startTime} endTime={task.endTime} status={task.status} />}
                                     >
-                                        <h3 className='font-medium'>{task.description}</h3>
-                                        <Button
-                                            className='bg-btnbg text-white'
-                                            onClick={() => handleOpenEvidenceTask(task)}>
-                                            Xem hoạt động
-                                        </Button>
-                                        <Button
-                                            className='bg-btnbg text-white'
-                                            onClick={() => handleOpenUpdate(task)}>
-                                            Xem hoạt động
-                                        </Button>
+                                        <div className='flex gap-3 items-center'>
+                                            {task.haveEvidence &&
+                                                <FontAwesomeIcon icon={faCheck} className="text-green-500" />
+                                            }
+                                            <h3 className={task.haveEvidence ? "text-green-500" : ""}>{task.description}</h3>
+                                        </div>
+                                        {task.haveEvidence ?
+                                            <Button
+                                                className='bg-btnbg text-white'
+                                                onClick={() => handleOpenUpdate(task)}>
+                                                Xem hoạt động
+                                            </Button>
+                                            :
+                                            <Button
+                                                className='bg-btnbg text-white'
+                                                onClick={() => handleOpenEvidenceTask(task)}>
+                                                Cập nhật hoạt động
+                                            </Button>
+                                        }
                                     </AccordionItem>
                                 ))}
                             </Accordion>
@@ -507,7 +607,7 @@ const Tracking = () => {
             </Modal>
 
             {/* View and Update modal  */}
-            <Modal isOpen={isOpenUpdate} onOpenChange={onOpenChangeUpdate} isDismissable={false} isKeyboardDismissDisabled={true} size='3xl'>
+            <Modal isOpen={isOpenUpdate} onOpenChange={onOpenChangeUpdate} isDismissable={false} isKeyboardDismissDisabled={true} size='3xl' hideCloseButton>
                 <ModalContent>
                     {(onClose) => (
                         <>
@@ -573,44 +673,47 @@ const Tracking = () => {
                                                                     <Avatar className="w-full h-full" radius="sm" src={evidence.photoUrl} />
                                                                 )}
                                                                 <button
-                                                                    onClick={() => handleRemoveEvidence(index)}
-                                                                    className="absolute top-0 right-0 p-1 rounded-full w-8 h-8 bg-black bg-opacity-50 text-white"
+                                                                    onClick={() => handleRemoveUpdate(evidence)}
+                                                                    className={isUpdateMode ? "absolute top-0 right-0 p-1 rounded-full w-8 h-8 bg-black bg-opacity-50 text-white" : "hidden"}
                                                                 >
                                                                     ✕
                                                                 </button>
                                                             </div>
                                                         ))}
+                                                        {isUpdateMode &&
+                                                            <button
+                                                                className={selectTaskEvidence.filter((e) => e.evidenceType === 'PHOTO').length < 3 ? "flex flex-col justify-center items-center p-3 bg-pink-100 border border-pink-300 rounded-md text-center w-36 h-36" : "hidden"}
+                                                                onClick={handleImageClick}
 
-                                                        <button
-                                                            className={selectTaskEvidence.filter((e) => e.evidenceType === 'PHOTO').length < 3 ? "flex flex-col justify-center items-center p-3 bg-pink-100 border border-pink-300 rounded-md text-center w-36 h-36" : "hidden"}
-                                                            onClick={handleImageClick}
-
-                                                        >
-                                                            <FontAwesomeIcon icon={faCamera} className='text-maincolor' size='2xl' />
-                                                            <p>Thêm hình ảnh</p>
-                                                            <p>{`${selectTaskEvidence.filter((e) => e.evidenceType === 'PHOTO').length}/3`}</p>
-                                                        </button>
+                                                            >
+                                                                <FontAwesomeIcon icon={faCamera} className='text-maincolor' size='2xl' />
+                                                                <p>Thêm hình ảnh</p>
+                                                                <p>{`${selectTaskEvidence.filter((e) => e.evidenceType === 'PHOTO').length}/3`}</p>
+                                                            </button>
+                                                        }
                                                         <input
                                                             type="file"
                                                             accept='image/*'
                                                             ref={hiddenFileInput}
-                                                            onChange={handleImageChange}
+                                                            onChange={handleImageUpdateChange}
                                                             style={{ display: 'none' }}
                                                             multiple
                                                         />
-                                                        <button
-                                                            className={selectTaskEvidence.filter((e) => e.evidenceType === 'VIDEO').length < 1 ? "flex flex-col justify-center items-center p-3 bg-pink-100 border border-pink-300 rounded-md text-center w-36 h-36" : "hidden"}
-                                                            onClick={handleVideoClick}
-                                                        >
-                                                            <FontAwesomeIcon icon={faVideo} className='text-maincolor' size='2xl' />
-                                                            <p>Thêm video</p>
-                                                            <p>{`${selectTaskEvidence.filter((e) => e.evidenceType === 'VIDEO').length}/1`}</p>
-                                                        </button>
+                                                        {isUpdateMode &&
+                                                            <button
+                                                                className={selectTaskEvidence.filter((e) => e.evidenceType === 'VIDEO').length < 1 ? "flex flex-col justify-center items-center p-3 bg-pink-100 border border-pink-300 rounded-md text-center w-36 h-36" : "hidden"}
+                                                                onClick={handleVideoClick}
+                                                            >
+                                                                <FontAwesomeIcon icon={faVideo} className='text-maincolor' size='2xl' />
+                                                                <p>Thêm video</p>
+                                                                <p>{`${selectTaskEvidence.filter((e) => e.evidenceType === 'VIDEO').length}/1`}</p>
+                                                            </button>
+                                                        }
                                                         <input
                                                             type="file"
                                                             accept="video/mp4,video/x-m4v,video/*"
                                                             ref={hiddenFileVideoInput}
-                                                            onChange={handleVideoChange}
+                                                            onChange={handleVideoUpdateChange}
                                                             style={{ display: 'none' }}
                                                             multiple
                                                         />
@@ -624,12 +727,18 @@ const Tracking = () => {
                                 </div>
                             </ModalBody>
                             <ModalFooter>
-                                <Button color="danger" variant="light" onPress={onClose}>
+                                <Button color="danger" variant="light" onClick={() => { onClose(), setIsUpdateMode(false), setAddList([]), setRemoveList([]) }}>
                                     Trở lại
                                 </Button>
-                                <Button color="primary" className="p-3 bg-blue-500 text-white font-bold rounded-md hover:bg-blue-600" onPress={() => { handleUpdate(), onClose() }}>
-                                    Cập nhật
-                                </Button>
+                                {isUpdateMode ?
+                                    <Button color="primary" className="p-3 bg-blue-500 text-white font-bold rounded-md hover:bg-blue-600" onClick={() => { handleUpdate(), onClose() }}>
+                                        Xác nhận
+                                    </Button>
+                                    :
+                                    <Button color="primary" className="p-3 bg-blue-500 text-white font-bold rounded-md hover:bg-blue-600" onClick={() => setIsUpdateMode(true)}>
+                                        Chỉnh sửa
+                                    </Button>
+                                }
                             </ModalFooter>
                         </>
                     )}
