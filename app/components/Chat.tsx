@@ -59,7 +59,7 @@ const Chat: React.FC<ChatProps> = ({ userId, userName, orderId }) => {
         return () => {
             unsubscribeMessages();
         };
-    }, []);
+    }, [orderId]);
 
     const handleSendMessage = async () => {
         if (newMessage.trim() === '') return;
