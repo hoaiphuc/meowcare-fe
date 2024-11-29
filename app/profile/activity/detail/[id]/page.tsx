@@ -4,10 +4,11 @@ import { CareSchedules, Order, PetProfile, Task } from '@/app/constants/types/ho
 import axiosClient from '@/app/lib/axiosClient'
 import { faCheck } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { Accordion, AccordionItem, Avatar, Button } from '@nextui-org/react'
+import { Accordion, AccordionItem, Avatar, Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, useDisclosure } from '@nextui-org/react'
 import { formatDate } from 'date-fns'
 import { useParams } from 'next/navigation'
 import React, { useCallback, useEffect, useState } from 'react'
+import styles from "./detail.module.css"
 
 const Page = () => {
     const param = useParams();
@@ -17,6 +18,7 @@ const Page = () => {
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
     const [filteredTasks, setFilteredTasks] = useState<Task[]>([]);
     const [selectedCat, setSelectedCat] = useState<PetProfile | null>()
+    const { isOpen: isOpenCat, onOpen: onOpenCat, onOpenChange: onOpenChangeCat } = useDisclosure();
 
     const statusColors: { [key: number]: string } = {
         0: 'text-[#9E9E9E]',
@@ -219,7 +221,7 @@ const Page = () => {
                                                         <h3 className={task.haveEvidence ? 'text-green-500' : ''}>
                                                             {task.description}
                                                         </h3>
-                                                        <Button onClick={() => { setSelectedCat(task.petProfile) }}>Xem mèo</Button>
+                                                        <Button onClick={() => { setSelectedCat(task.petProfile), onOpenCat() }}>Xem mèo</Button>
 
 
                                                         <Button
@@ -241,6 +243,46 @@ const Page = () => {
                     </div>
                 </div>
             }
+
+            {/* View Cat */}
+            <Modal isOpen={isOpenCat} onOpenChange={onOpenChangeCat} isDismissable={false} isKeyboardDismissDisabled={true} size='3xl' hideCloseButton>
+                <ModalContent>
+                    {(onClose) => (
+                        <>
+                            <ModalHeader className="flex flex-col gap-1">Cập nhật hoạt động</ModalHeader>
+                            <ModalBody>
+                                {selectedCat &&
+                                    <div className='flex gap-10'>
+                                        <div className=' w-[200px] h-[200px]'>
+                                            <Avatar
+                                                className='w-full h-full'
+                                                radius="sm"
+                                                src={selectedCat?.profilePicture}
+                                            />
+
+                                        </div>
+                                        <div className='flex flex-col gap-5'>
+                                            <div className='grid grid-cols-2 gap-3'>
+                                                <h1 className={styles.h1}>Tên:</h1> <p className={styles.p}>{selectedCat.petName}</p>
+                                                <h1 className={styles.h1}>Tuổi:</h1> <p className={styles.p}>{selectedCat.age}</p>
+                                                <h1 className={styles.h1}>Giống loài:</h1> <p className={styles.p}>{selectedCat.breed}</p>
+                                                <h1 className={styles.h1}>Cân nặng:</h1> <p className={styles.p}>{selectedCat.breed}</p>
+                                                <h1 className={styles.h1}>Những điều cần lưu ý:</h1> <p className={styles.p}>{selectedCat.description}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                }
+                            </ModalBody>
+                            <ModalFooter>
+                                <Button color="danger" variant="light" onClick={() => { onClose() }}>
+                                    Trở lại
+                                </Button>
+                            </ModalFooter>
+                        </>
+                    )}
+                </ModalContent>
+            </Modal>
         </div>
     )
 }
