@@ -8,10 +8,11 @@ import { faClock } from '@fortawesome/free-regular-svg-icons'
 // import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import axiosClient from '@/app/lib/axiosClient'
-import { PetProfile, Service } from '@/app/constants/types/homeType'
+import { CatSitter, PetProfile, Service } from '@/app/constants/types/homeType'
 import Image from 'next/image'
 import { toast } from 'react-toastify'
 import { today, getLocalTimeZone } from '@internationalized/date';
+import { format } from 'date-fns'
 
 interface BookingDetail {
     quantity: number;
@@ -39,8 +40,9 @@ const Page = () => {
         startDate: null,
         endDate: null,
     });
+    const [sitter, setSitter] = useState<CatSitter>()
     const [paymentMethod, setPaymentMethod] = useState("")
-
+    const [selectedServiceName, setSelectedServiceName] = useState("")
     const catFoods = [
         { id: '1', foodName: 'Cá' },
         { id: '2', foodName: 'Thịt' },
@@ -53,6 +55,11 @@ const Page = () => {
         axiosClient(`services/sitter/${params.id}/type?serviceType=CHILD_SERVICE&status=ACTIVE`)
             .then((res) => {
                 setChildServices(res.data)
+            })
+            .catch(() => { })
+        axiosClient(`sitter-profiles/sitter/${params.id}`)
+            .then((res) => {
+                setSitter(res.data)
             })
             .catch(() => { })
     }, [params.id])
@@ -76,6 +83,10 @@ const Page = () => {
     // Handle service change
     const handleServiceChange = (serviceId: string) => {
         setSelectedService(serviceId);
+        const selected = services.find((service) => service.id === serviceId);
+        if (selected) {
+            setSelectedServiceName(selected.name);
+        }
     };
 
     const handlePetChange = (petIds: string) => {
@@ -163,7 +174,6 @@ const Page = () => {
                 .then((res) => {
                     setBookingId(res.data.id)
                     onOpen();
-                    toast.success("Đặt lịch thành công vui lòng chờ xác nhận")
                 })
                 .catch((e) => {
                     console.log(e);
@@ -281,7 +291,17 @@ const Page = () => {
                                 return (
                                     <div className="flex gap-2">
                                         {items.map((item) => (
-                                            <Chip key={item.key} className='w-full'>{item.data?.petName}</Chip>
+                                            <Chip key={item.key}
+                                                className='min-h-full'
+                                                avatar={
+                                                    <Avatar
+                                                        name={item.data?.id}
+                                                        src={item.data?.profilePicture}
+                                                    />
+                                                }>
+                                                <p>{item.data?.petName}</p>
+
+                                            </Chip>
                                         ))}
                                     </div>
                                 );
@@ -332,9 +352,9 @@ const Page = () => {
 
                     </div>
                 </div>
-                <div className='w-[327px]'>
+                <div className='w-[427px]'>
                     <div className='border flex flex-col p-3 rounded-lg gap-3 mb-10'>
-                        <h2>Bảng giá dịch vụ</h2>
+                        <h2 className={styles.h2}>Bảng giá dịch vụ</h2>
                         {services.map((service) => (
                             <div className='flex justify-between' key={service.id}>
                                 <h3>{service.name}</h3>
@@ -348,8 +368,8 @@ const Page = () => {
 
                     {/* Final price */}
                     <div className='border flex flex-col p-3 rounded-lg gap-3'>
-                        <h2>Thông tin đặt lịch </h2>
-                        <h3>Dịch vụ: Gửi thú cưng</h3>
+                        <h2 className={styles.h2}>Thông tin đặt lịch </h2>
+                        <h3>Dịch vụ: {selectedServiceName}</h3>
                         <div className='flex flex-cols-3 justify-between'>
                             <div>
                                 <h3>Ngày nhận</h3>
@@ -394,21 +414,21 @@ const Page = () => {
                                             <h2 className={styles.h2}>Thông tin quý khách</h2>
                                             <div className={`${styles.h3} grid grid-cols-2 w-80`}>
                                                 <h3 className={styles.h3}>Họ và tên: </h3>
-                                                <h3 >phuc</h3>
+                                                <h3 >{name}</h3>
                                                 <h3 className={styles.h3}>Điện thoại: </h3>
-                                                <h3 >03232323</h3>
-                                                <h3 className={styles.h3}>Email:</h3>
-                                                <h3 > hoaiphuc@gmail.com</h3>
+                                                <h3 >{phoneNumber}</h3>
+                                                <h3 className={styles.h3}>Điều cần lưu ý</h3>
+                                                <h3 >{note}</h3>
                                             </div>
                                         </div>
                                         <div className='flex items-start justify-start flex-col w-full'>
                                             <h2 className={styles.h2}>Thông tin đặt lịch của bạn</h2>
                                             <div className='grid grid-cols-2 w-80'>
                                                 <h3 className={styles.h3}>Mã đặt hàng</h3> <h3>123</h3>
-                                                <h3 className={styles.h3}>Dịch vụ</h3> <h3>Gửi thú cưng</h3>
-                                                <h3 className={styles.h3}>Ngày gửi</h3> <h3>04/09/2024   8:00</h3>
-                                                <h3 className={styles.h3}>Ngày Nhận</h3> <h3>05/09/2024   15:00</h3>
-                                                <h3 className={styles.h3}>Người chăm sóc</h3> <h3>Đức Tấn</h3>
+                                                <h3 className={styles.h3}>Dịch vụ</h3> <h3>{selectedServiceName}</h3>
+                                                <h3 className={styles.h3}>Ngày gửi</h3> <h3>{format(new Date(bookingDetails.formattedStartDate), 'dd/MM/yyyy')}</h3>
+                                                <h3 className={styles.h3}>Ngày Nhận</h3> <h3>{format(new Date(bookingDetails.formattedEndDate), 'dd/MM/yyyy')}</h3>
+                                                <h3 className={styles.h3}>Người chăm sóc</h3> <h3>{sitter?.fullName}</h3>
                                                 <h3 className={styles.h3}>Số lượng thú cưng</h3> <h3>1</h3>
                                             </div>
                                         </div>
@@ -422,7 +442,7 @@ const Page = () => {
                                                 <div className={styles.money}>VND</div>
 
                                                 <div className={`${styles.money} col-span-3`}>Tổng cộng</div>
-                                                <div className={styles.money}>150.000</div>
+                                                <div className={styles.money}>{totalPrice.toLocaleString("de")}</div>
                                                 <div className={styles.money}>VND</div>
                                             </div>
                                         </div>
@@ -446,7 +466,7 @@ const Page = () => {
                                                     </Radio>
                                                 </div>
                                                 <div className='border border-black p-3'>
-                                                    <Radio value="qr" className='px-5' onClick={() => setPaymentMethod("PAY_WITH_ATM")}>
+                                                    <Radio value="atm" className='px-5' onClick={() => setPaymentMethod("PAY_WITH_ATM")}>
                                                         <div className='flex items-center'>
                                                             <Image src='/nganhang.png' alt='' width={50} height={90} className='mx-3 w-[70px] h-[40px]' />
                                                             <div>

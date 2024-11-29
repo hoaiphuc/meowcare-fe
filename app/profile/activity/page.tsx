@@ -102,7 +102,7 @@ const Page = () => {
                             .map((activity) => {
                                 // Check if bookingDetailWithPetAndServices exists and has data
                                 if (
-                                    !activity.bookingDetailWithPetAndServices
+                                    activity.bookingDetailWithPetAndServices.length < 1
                                 ) {
                                     return null; // Skip rendering this activity
                                 }
