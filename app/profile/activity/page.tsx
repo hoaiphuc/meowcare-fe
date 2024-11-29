@@ -94,26 +94,49 @@ const Page = () => {
                     </Button>
                 </div>
                 <div>
-                    {data ? (data.content.filter((activity) => filterStatus === 'ALL' || activity.status === filterStatus).map((activity) => (
-                        <div key={activity.id} className='border w-[700px] p-3 rounded-lg flex justify-between my-3'>
-                            <div>
-                                <div className='flex'>
-                                    <Icon icon="cbi:camera-pet" className='text-[#902C6C] w-12 h-11 mr-2' />
-                                    <div>
-                                        <h2><span className={styles.title}>Dịch vụ: </span>{activity.bookingDetailWithPetAndServices[0].service.serviceName}</h2>
-                                        <h2><span className={styles.title}>Người chăm sóc: </span>{activity.sitter.fullName}</h2>
-                                        <h2><span className={styles.title}>Mèo của bạn: </span>{activity.bookingDetailWithPetAndServices[0].pet.petName}</h2>
-                                        <h2><span className={styles.title}>Thời gian: </span></h2>
-                                    </div>
-                                </div>
-                                <Button as={Link} href={`/profile/activity/detail/${activity.id}`} className='bg-btnbg text-white rounded-lg mt-3'>Theo dõi lịch</Button>
-                            </div>
-                            <h2 className={`${statusColors[activity.status] || 'text-black'}`}>
-                                {statusLabels[activity.status] || 'Trạng thái không xác định'}
-                            </h2>
-                        </div>
+                    {data ? (
+                        data.content
+                            .filter((activity) =>
+                                filterStatus === 'ALL' || activity.status === filterStatus
+                            )
+                            .map((activity) => {
+                                // Check if bookingDetailWithPetAndServices exists and has data
+                                if (
+                                    !activity.bookingDetailWithPetAndServices
+                                ) {
+                                    return null; // Skip rendering this activity
+                                }
 
-                    ))) : (
+                                return (
+                                    <div key={activity.id} className='border w-[700px] p-3 rounded-lg flex justify-between my-3'>
+                                        <div>
+                                            <div className='flex'>
+                                                <Icon icon="cbi:camera-pet" className='text-[#902C6C] w-12 h-11 mr-2' />
+                                                <div>
+                                                    <h2>
+                                                        <span className={styles.title}>Dịch vụ: </span>
+                                                        {activity.bookingDetailWithPetAndServices[0].service.serviceName}
+                                                    </h2>
+                                                    <h2>
+                                                        <span className={styles.title}>Người chăm sóc: </span>
+                                                        {activity.sitter.fullName}
+                                                    </h2>
+                                                    <h2>
+                                                        <span className={styles.title}>Mèo của bạn: </span>
+                                                        {activity.bookingDetailWithPetAndServices[0].pet.petName}
+                                                    </h2>
+                                                    <h2><span className={styles.title}>Thời gian: </span></h2>
+                                                </div>
+                                            </div>
+                                            <Button as={Link} href={`/profile/activity/detail/${activity.id}`} className='bg-btnbg text-white rounded-lg mt-3'>Theo dõi lịch</Button>
+                                        </div>
+                                        <h2 className={`${statusColors[activity.status] || 'text-black'}`}>
+                                            {statusLabels[activity.status] || 'Trạng thái không xác định'}
+                                        </h2>
+                                    </div>
+                                );
+                            })
+                    ) : (
                         <div className='flex justify-center items-center'>
                             <h1>Hiện tại không có hoạt động nào</h1>
                         </div>
@@ -133,9 +156,8 @@ const Page = () => {
                     ) : (
                         <div></div>
                     )}
-
-
                 </div>
+
             </div>
         </div >
     )

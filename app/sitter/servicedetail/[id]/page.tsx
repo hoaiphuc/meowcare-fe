@@ -1,6 +1,6 @@
 'use client'
 
-import { ConfigService, Service } from '@/app/constants/types/homeType';
+import { ConfigService, Service, UserLocal } from '@/app/constants/types/homeType';
 import axiosClient from '@/app/lib/axiosClient';
 import { Button, Input, TimeInput, TimeInputValue } from '@nextui-org/react';
 import { useParams, useRouter } from 'next/navigation'
@@ -39,6 +39,30 @@ const ServiceDetail = () => {
     //check valid
     const [isPriceValid, setIsPriceValid] = useState(false);
 
+    const getUserFromStorage = () => {
+        if (typeof window !== "undefined") {
+            const storedUser = localStorage.getItem("user");
+            return storedUser ? JSON.parse(storedUser) : null;
+        }
+    };
+
+    const user: UserLocal | null = getUserFromStorage();
+    const userId = user?.id;
+
+    useEffect(() => {
+        try {
+            axiosClient(`/services/sitter/${userId}/type?serviceType=CHILD_SERVICE&status=ACTIVE`)
+                .then((res) => {
+                    setChildServices(res.data)
+                })
+                .catch((e) => {
+                    console.log(e);
+                })
+        } catch (error) {
+
+        }
+    }, [userId])
+
     useEffect(() => {
         setIsLoading(true)
         try {
@@ -46,7 +70,7 @@ const ServiceDetail = () => {
                 .then((res) => {
                     axiosClient('config-services')
                         .then((resConfig) => {
-                            const filter = resConfig.data.filter((config: ConfigService) => config.id === res.data.configServiceId)
+                            const filter = resConfig.data.find((config: ConfigService) => config.name === res.data.name)
                             setConfigService(filter)
                         })
                     setService(res.data)
@@ -112,7 +136,20 @@ const ServiceDetail = () => {
     }
 
     const handleUpdate = () => {
-        console.log(childServices);
+        try {
+            console.log(childServices);
+            childServices.map((childService) => {
+                axiosClient.post("services", childService)
+                    .then(() => {
+                        toast.success("Cập nhật dịch vụ thành công")
+                    })
+                    .catch(() => {
+                        toast.error("Có lỗi xảy ra")
+                    })
+            })
+        } catch (error) {
+
+        }
 
     }
 

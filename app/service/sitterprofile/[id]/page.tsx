@@ -71,7 +71,7 @@ const Page = () => {
                         </div>
                     </div>
                     <div className='flex gap-3 w-full mt-7'>
-                        <Button as={Link} href={isUser ? `/service/booking/${sitterProfile?.id}` : `/login`} className='w-full rounded-full text-white bg-[#2E67D1] shadow-sm'>Đặt lịch</Button>
+                        <Button as={Link} href={isUser ? `/service/booking/${sitterProfile?.sitterId}` : `/login`} className='w-full rounded-full text-white bg-[#2E67D1] shadow-sm'>Đặt lịch</Button>
                         <Button className='rounded-full bg-[#2E67D1] text-white w-8 h-10 border-0'>
                             <FontAwesomeIcon icon={faMessage} />
                         </Button>

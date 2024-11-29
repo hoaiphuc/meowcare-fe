@@ -39,7 +39,7 @@ const Page = () => {
         startDate: null,
         endDate: null,
     });
-
+    const [paymentMethod, setPaymentMethod] = useState("")
 
     const catFoods = [
         { id: '1', foodName: 'Cá' },
@@ -175,7 +175,7 @@ const Page = () => {
 
     const handlePay = () => {
         try {
-            axiosClient.post(`booking-orders/payment-url?id=${bookingId}&requestType=PAY_WITH_ATM&redirectUrl=${process.env.NEXT_PUBLIC_BASE_URL}/payment-result`)
+            axiosClient.post(`booking-orders/payment-url?id=${bookingId}&requestType=${paymentMethod}&redirectUrl=${process.env.NEXT_PUBLIC_BASE_URL}/payment-result`)
                 .then((res) => {
                     window.open(res.data.payUrl, '_self');
                 })
@@ -435,17 +435,28 @@ const Page = () => {
                                                 className='w-full flex flex-col '
                                             >
                                                 <div className='border border-black p-3'>
-                                                    <Radio value="qr" className='px-5'>
+                                                    <Radio value="qr" className='px-5' onClick={() => setPaymentMethod("CAPTURE_WALLET")}>
                                                         <div className='flex items-center'>
                                                             <Image src='/momo.png' alt='' width={90} height={50} className='mx-3 w-[70px] h-[40px]' />
                                                             <div>
                                                                 <h1 className={styles.paymentHeading1}>Thanh toán qua Momo</h1>
+                                                                <h2 className={styles.paymentHeading2}>Thanh toán qua mã QR</h2>
+                                                            </div>
+                                                        </div>
+                                                    </Radio>
+                                                </div>
+                                                <div className='border border-black p-3'>
+                                                    <Radio value="qr" className='px-5' onClick={() => setPaymentMethod("PAY_WITH_ATM")}>
+                                                        <div className='flex items-center'>
+                                                            <Image src='/nganhang.png' alt='' width={50} height={90} className='mx-3 w-[70px] h-[40px]' />
+                                                            <div>
+                                                                <h1 className={styles.paymentHeading1}>Thanh toán qua ngân hàng</h1>
                                                                 <h2 className={styles.paymentHeading2}>Thanh toán bằng số tài khoản</h2>
                                                             </div>
                                                         </div>
                                                     </Radio>
                                                 </div>
-                                                <div className='border border-black mt-[-8px] p-3'>
+                                                <div className='border border-black p-3'>
                                                     <Radio value="cash" className='px-5' aria-label='j'>
                                                         <div className='flex items-center'>
                                                             <Image src='/cash.png' alt='' width={51} height={44} className='mx-3 w-[71px] h-[54px]' />
