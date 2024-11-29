@@ -5,7 +5,7 @@ import { CatSitter, ConfigService, Service } from "@/app/constants/types/homeTyp
 import axiosClient from "@/app/lib/axiosClient"
 import { useAppDispatch, useAppSelector } from "@/app/lib/hooks"
 import { fetchUserProfile } from "@/app/lib/slices/userSlice"
-import { faCheck, faChevronRight, faCircle, faEye, faUnlock, faXmark } from "@fortawesome/free-solid-svg-icons"
+import { faCheck, faChevronRight, faCircle, faEye, faRectangleList, faStarHalfStroke, faUnlock, faUsers, faXmark } from "@fortawesome/free-solid-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { Avatar, Button, Modal, ModalBody, ModalContent, ModalFooter, useDisclosure } from "@nextui-org/react"
 import Image from "next/image"
@@ -90,10 +90,6 @@ const Page = () => {
         return <Loading />;
     }
 
-    const displayedServices = showAll
-        ? services
-        : services.filter((service) => service.serviceType === "MAIN_SERVICE").slice(0, 2);
-
     //Change status 
     const handleChangeStatus = () => {
         if (!sitterStatus) {
@@ -139,7 +135,7 @@ const Page = () => {
                 <div className="mt-10">
                     <h1 className={styles.h1}>Cài đặt dịch vụ</h1>
                     <div className="flex flex-col gap-5">
-                        {displayedServices.map((service) => {
+                        {services.filter((service) => service.serviceType === "MAIN_SERVICE").map((service) => {
                             const createdService = createdServices.find(
                                 (createdService) => createdService.name === service.name
                             );
@@ -162,6 +158,32 @@ const Page = () => {
                                 </Link>
                             )
                         })}
+                        {/* addition service  */}
+
+                        <h1 className={showAll ? `${styles.h1}` : "hidden"}>Dịch vụ thêm</h1>
+                        {showAll && services.filter((service) => service.serviceType === "ADDITION_SERVICE").map((service) => {
+                            const createdService = createdServices.find(
+                                (createdService) => createdService.name === service.name
+                            );
+                            const isActivated = Boolean(createdService);
+
+                            const idToUse = createdService ? createdService.id : service.id;
+                            return (
+                                <Link href={`/sitter/servicedetail/${idToUse}`} key={service.id}>
+                                    <div className="flex justify-between border-b py-4 cursor-pointer">
+                                        <div className="flex gap-3">
+                                            <Image src='/noimage.jpg' alt="" width={50} height={50} className="rounded-md" />
+                                            <div>
+                                                <h2 className={styles.h2}>{service.name}</h2>
+                                                {isActivated ? <h2 className="text-green-500">Đã kích hoạt</h2> : <h2 className="text-[#A46950]">Chưa kích hoạt</h2>}
+                                            </div>
+                                        </div>
+                                        <FontAwesomeIcon icon={faChevronRight} />
+                                    </div>
+                                </Link>
+                            )
+                        })}
+
                         {services.length > 2 && (
                             <Button
                                 onClick={() => setShowAll(!showAll)}
@@ -204,7 +226,8 @@ const Page = () => {
                                     </div>
                                     <div className="px-10">
                                         <div>
-                                            <h1>Dịch vụ của bạn đang {sitterProfile?.status}</h1>
+                                            <h1 className="text-2xl font-semibold">Dịch vụ của bạn đang {sitterProfile?.status}</h1>
+                                            <h2 className="mb-4">Mở hoạt động để mọi người có thể tìm thấy dịch vụ của bạn</h2>
                                             <div className="flex justify-center items-center gap-32">
                                                 <div className="flex flex-col justify-center items-center gap-2">
                                                     <Button className={styles.modalButton} onClick={() => { }}>
@@ -217,6 +240,21 @@ const Page = () => {
                                                         <FontAwesomeIcon icon={faUnlock} size="2x" className="cursor-pointer" />
                                                     </Button>
                                                     <p className="text-[16px] font-semibold">Mở hoạt động</p>
+                                                </div>
+                                            </div>
+                                            <hr className="my-10" />
+                                            <div className="flex flex-col gap-3">
+                                                <div className="flex gap-3 items-center">
+                                                    <FontAwesomeIcon icon={faUsers} size="2x" />
+                                                    <p className={styles.modalList}>Mọi người có thể tìm và xem dịch của bạn</p>
+                                                </div>
+                                                <div className="flex gap-3 items-center">
+                                                    <FontAwesomeIcon icon={faRectangleList} size="2x" />
+                                                    <p className={styles.modalList}>Mọi người có thể tìm và đặt dịch vụ của bạn</p>
+                                                </div>
+                                                <div className="flex gap-3 items-center">
+                                                    <FontAwesomeIcon icon={faStarHalfStroke} size="2x" />
+                                                    <p className={styles.modalList}>Mọi người xem và đánh giá dịch vụ</p>
                                                 </div>
                                             </div>
                                         </div>
