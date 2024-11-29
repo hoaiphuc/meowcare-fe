@@ -71,22 +71,20 @@ export type CatSitter = {
   id: string;
   bio: string;
   experience: string;
+  sitterId: string;
   skill: string;
   rating: number;
   location: string;
   environment: string;
   maximumQuantity: number;
-  user: {
-    id: string;
-    email: string;
-    password: string;
-    fullName: string;
-    avatar: string;
-    phoneNumber: string;
-    dob: Date;
-    gender: string;
-    address: string;
-  };
+  status: string;
+  profilePictures: [
+    {
+      id: string;
+      imageName: string;
+      imageUrl: string;
+    }
+  ];
 };
 
 export type SideNavItem = {
@@ -99,11 +97,12 @@ export type SideNavItem = {
 
 export type Service = {
   id: string;
-  serviceName: string;
+  name: string;
   serviceType: string;
+  type: string;
   actionDescription: string;
   price: number;
-  duration: number;
+  endTime: number;
   startTime: number;
   isBasicService: boolean;
 };
@@ -115,7 +114,7 @@ export type ConfigService = {
   name: string;
   actionDescription: string;
   isBasicService: boolean | null;
-  type: string;
+  serviceType: string;
 };
 
 export interface Role {

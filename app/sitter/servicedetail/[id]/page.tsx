@@ -2,14 +2,16 @@
 
 import { ConfigService, Service } from '@/app/constants/types/homeType';
 import axiosClient from '@/app/lib/axiosClient';
-import { Button, Input } from '@nextui-org/react';
+import { Button, Input, TimeInput, TimeInputValue } from '@nextui-org/react';
 import { useParams, useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 import styles from "./servicedetail.module.css"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCircleInfo } from '@fortawesome/free-solid-svg-icons';
+import { faCircleInfo, faPlus } from '@fortawesome/free-solid-svg-icons';
 import Loading from '@/app/components/Loading';
 import { toast } from 'react-toastify';
+import { v4 as uuidv4 } from 'uuid';
+import { Time } from "@internationalized/date";
 
 const ServiceDetail = () => {
     const router = useRouter();
@@ -22,6 +24,17 @@ const ServiceDetail = () => {
         configServiceId: params.id,
         price: '',
     })
+    const [childServices, setChildServices] = useState<Service[]>([{
+        id: uuidv4(),
+        name: "",
+        serviceType: "CHILD_SERVICE",
+        actionDescription: "",
+        endTime: 0,
+        startTime: 0,
+        type: "",
+        price: 0, // Default price value
+        isBasicService: false, // Default boolean value
+    }]);
 
     //check valid
     const [isPriceValid, setIsPriceValid] = useState(false);
@@ -79,10 +92,6 @@ const ServiceDetail = () => {
         }));
     }
 
-    const handleUpdate = () => {
-
-    }
-
     const handleAdd = () => {
         if (isPriceValid) {
             return;
@@ -102,14 +111,61 @@ const ServiceDetail = () => {
         }
     }
 
+    const handleUpdate = () => {
+        console.log(childServices);
+
+    }
+
     if (isLoading) {
         return <Loading />;
     }
 
+    const handleInputServiceChange = (
+        id: string,
+        field: string,
+        value: TimeInputValue
+    ) => {
+        // const formattedTime = `${value.hour.toString().padStart(2, '0')}:${value.minute.toString().padStart(2, '0')}`;
+        const formattedTime = `${value.hour.toString().padStart(2, '0')}`;
+        setChildServices((prev) =>
+            prev.map((service) =>
+                service.id === id ? { ...service, [field]: formattedTime } : service
+            )
+        );
+    };
+    const handleInputTextChange = (
+        id: string,
+        field: string,
+        value: string
+    ) => {
+        setChildServices((prev) =>
+            prev.map((service) =>
+                service.id === id ? { ...service, [field]: value } : service
+            )
+        );
+    };
+
+    const addTime = () => {
+        const newService: Service = {
+            id: uuidv4(),
+            name: "",
+            serviceType: "CHILD_SERVICE",
+            actionDescription: "",
+            endTime: 0,
+            startTime: 0,
+            type: "",
+            price: 0,
+            isBasicService: false,
+        };
+
+        setChildServices((prevState) => [...prevState, newService]);
+    };
+
+
     return (
         <div className='flex flex-col justify-center items-center my-10 text-black'>
             <div className='w-[600px] flex flex-col gap-5'>
-                <h1 className={styles.title}>{service ? service?.serviceName : configService?.name}</h1>
+                <h1 className={styles.title}>{service ? service?.name : configService?.name}</h1>
                 <h2>{service?.actionDescription}</h2>
                 <div className='flex bg-[#F3F5F7] p-5 rounded-2xl gap-2'>
                     <FontAwesomeIcon icon={faCircleInfo} />
@@ -138,6 +194,44 @@ const ServiceDetail = () => {
                 {!service?.isBasicService &&
                     <div>
                         <h1 className={styles.title}>Thời gian hoạt động</h1>
+                        <div className="flex flex-col gap-6 p-6 bg-gradient-to-r from-blue-50 via-white to-blue-50 rounded-md shadow-md">
+                            {childServices.map((childService: Service) => (
+                                <div
+                                    className="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-md shadow-sm gap-5"
+                                    key={childService.id}
+                                >
+                                    <div className='flex justify-center items-center gap-3'>
+                                        <TimeInput
+                                            className='w-28'
+                                            label="Giờ bắt đầu"
+                                            hourCycle={24}
+                                            granularity="minute"
+                                            value={new Time(childService.startTime)}
+                                            onChange={(e) => handleInputServiceChange(childService.id, 'startTime', e)}
+                                        />
+                                        -
+                                        <TimeInput
+                                            className='w-28'
+                                            label="Giờ bắt đầu"
+                                            hourCycle={24}
+                                            granularity="minute"
+                                            value={new Time(childService.endTime)}
+                                            onChange={(e) => handleInputServiceChange(childService.id, 'endTime', e)}
+                                        />
+                                    </div>
+                                    <Input
+                                        label="Tên dịch vụ"
+                                        value={childService.name}
+                                        onChange={(e) =>
+                                            handleInputTextChange(childService.id, 'name', e.target.value)
+                                        }
+                                    />
+                                </div>
+                            ))}
+                            <Button className="flex items-center justify-center p-4 bg-white border border-gray-200 rounded-md shadow-sm gap-2" onClick={() => addTime()}>
+                                <FontAwesomeIcon icon={faPlus} /> Tạo thêm không giờ
+                            </Button>
+                        </div>
 
                     </div>
                 }

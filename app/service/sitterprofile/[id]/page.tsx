@@ -37,7 +37,7 @@ const Page = () => {
 
     useEffect(() => {
         try {
-            axiosClient(`sitter-profiles/${params.id}`)
+            axiosClient(`sitter-profiles/sitter/${params.id}`)
                 .then((res) => {
                     setSitterProfile(res.data);
                     console.log(res.data);
@@ -61,8 +61,8 @@ const Page = () => {
                         </button>
                     </div>
                     <div className='gap-2 flex flex-col'>
-                        <h1 className="text-[30px] font-semibold">{sitterProfile?.user?.fullName}</h1>
-                        <h1 className='text-[16px] font-semibold'>Linh Xuân, Thành phố Thủ Đức, Thành phố Hồ Chí Minh</h1>
+                        <h1 className="text-[30px] font-semibold">{sitterProfile?.fullName}</h1>
+                        <h1 className='text-[16px] font-semibold'>{sitterProfile?.location}</h1>
                         <div className='flex gap-1 text-[10px] text-[#3b2f26] items-start'>
                             <FontAwesomeIcon icon={faStar} className='text-[#F8B816] h-5 w-5' />
                             <p className='text-[16px]'>5.0</p>
@@ -71,7 +71,7 @@ const Page = () => {
                         </div>
                     </div>
                     <div className='flex gap-3 w-full mt-7'>
-                        <Button as={Link} href={isUser ? `/service/booking/${sitterProfile?.user.id}` : `/login`} className='w-full rounded-full text-white bg-[#2E67D1] shadow-sm'>Đặt lịch</Button>
+                        <Button as={Link} href={isUser ? `/service/booking/${sitterProfile?.id}` : `/login`} className='w-full rounded-full text-white bg-[#2E67D1] shadow-sm'>Đặt lịch</Button>
                         <Button className='rounded-full bg-[#2E67D1] text-white w-8 h-10 border-0'>
                             <FontAwesomeIcon icon={faMessage} />
                         </Button>
@@ -125,8 +125,7 @@ const Page = () => {
                 <div className='mt-20'>
                     <h1 className={styles.h1}>Cat sitter</h1>
                     <h1 className={styles.h1}>Kinh nghiệm chăm sóc mèo:</h1>
-                    <p className={styles.p}>Tôi là Tấn, một người rất yêu thích mèo và đã gắn bó với chúng từ khi còn nhỏ. Tôi bắt đầu chăm sóc bé mèo đầu tiên của mình từ khi 10 tuổi, và từ đó, tình yêu dành cho loài vật đáng yêu này ngày càng lớn dần. Với kinh nghiệm và sự tận tâm, tôi luôn mong muốn mang lại sự thoải mái và an toàn nhất cho mỗi bé mèo mà tôi chăm sóc....
-                        Đọc thêm</p>
+                    <p className={styles.p}>{sitterProfile?.bio}</p>
                 </div>
                 <hr className={styles.hr} />
 

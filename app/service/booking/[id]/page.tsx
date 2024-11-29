@@ -11,24 +11,25 @@ import axiosClient from '@/app/lib/axiosClient'
 import { PetProfile, Service } from '@/app/constants/types/homeType'
 import Image from 'next/image'
 import { toast } from 'react-toastify'
-import { faMinus, faPlus } from '@fortawesome/free-solid-svg-icons'
 import { today, getLocalTimeZone } from '@internationalized/date';
+
+interface BookingDetail {
+    quantity: number;
+    petProfileId: string;
+    serviceId: string;
+}
 
 const Page = () => {
     const params = useParams();
     const [selectedService, setSelectedService] = useState<string>('');
-    const [selectedAdditionalServices, setSelectedAdditionalServices] = useState<string[]>([]);
-    const [selectedPet, setSelectedPet] = useState<string>('');
+    const [selectedPet, setSelectedPet] = useState<string[]>([]);
     const [isSelected, setIsSelected] = useState(false);
     const [isRequireFood, setIsRequireFood] = useState(false);
     const [pets, setPets] = useState<PetProfile[]>([]);
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
     const [bookingId, setBookingId] = useState();
-
-    const [services, setServices] = useState<Service[]>([])
     const [childServices, setChildServices] = useState<Service[]>([])
-    const [additionServices, setAdditionServices] = useState<Service[]>([])
-    const [isShowAdditionService, setIsShowAdditionService] = useState<boolean>(false)
+    const [services, setServices] = useState<Service[]>([])
     const [name, setName] = useState('');
     const [phoneNumber, setPhoneNumber] = useState('');
     const [address, setAddress] = useState('')
@@ -49,13 +50,12 @@ const Page = () => {
     const [userId, setUserId] = useState<string | null>(null);
 
     useEffect(() => {
-        axiosClient(`services/sitter/${params.id}/type?typeId=2b3c4d5e-6789-4a12-3456-789abcde0123`)
+        axiosClient(`services/sitter/${params.id}/type?serviceType=CHILD_SERVICE&status=ACTIVE`)
             .then((res) => {
                 setChildServices(res.data)
             })
             .catch(() => { })
     }, [params.id])
-
 
     useEffect(() => {
         if (typeof window !== 'undefined') {
@@ -78,18 +78,8 @@ const Page = () => {
         setSelectedService(serviceId);
     };
 
-    const handleAdditionalServiceChange = (serviceId: string, isChecked: boolean) => {
-        setSelectedAdditionalServices((prevSelected) => {
-            if (isChecked) {
-                return [...prevSelected, serviceId];
-            } else {
-                return prevSelected.filter((id) => id !== serviceId);
-            }
-        });
-    };
-
-    const handlePetChange = (petId: string) => {
-        setSelectedPet(petId)
+    const handlePetChange = (petIds: string) => {
+        setSelectedPet(petIds.split(','));
     }
 
     //get basic service
@@ -98,13 +88,9 @@ const Page = () => {
             axiosClient(`services/sitter/${params.id}`)
                 .then((res) => {
                     const filteredServices = res.data.filter(
-                        (service: Service) => service.serviceType === "Main Service"
+                        (service: Service) => service.serviceType === "MAIN_SERVICE"
                     );
                     setServices(filteredServices);
-                    const filteredAdditionServices = res.data.filter(
-                        (service: Service) => service.serviceType === "Addition Service"
-                    )
-                    setAdditionServices(filteredAdditionServices)
                 })
                 .catch((e) => {
                     console.log(e);
@@ -130,32 +116,26 @@ const Page = () => {
     }, [userId])
 
     const handleBooking = () => {
-        const bookingDetails = [];
+        const bookingDetails: BookingDetail[] = [];
 
-        // Add the basic service
-        bookingDetails.push({
-            quantity: 1,
-            petProfileId: selectedPet,
-            serviceId: selectedService,
-        });
 
-        // Add the selected additional services
-        selectedAdditionalServices.forEach((serviceId) => {
+        selectedPet.map((petId) => {
             bookingDetails.push({
                 quantity: 1,
-                petProfileId: selectedPet, // Adjust if petProfileId is not needed for additional services
-                serviceId: serviceId,
+                petProfileId: petId,
+                serviceId: selectedService,
+            });
+
+            childServices.forEach((service) => {
+                bookingDetails.push({
+                    quantity: 1,
+                    petProfileId: petId,
+                    serviceId: service.id,
+                });
             });
         });
 
-        //add child service
-        childServices.forEach((service) => {
-            bookingDetails.push({
-                quantity: 1,
-                petProfileId: selectedPet, // Adjust if petProfileId is not needed for additional services
-                serviceId: service.id,
-            });
-        });
+
 
         //add date
         if (!dateRange.startDate || !dateRange.endDate) {
@@ -241,16 +221,10 @@ const Page = () => {
             totalPerNight += basicService.price;
         }
 
-        // Add prices of selected additional services
-        selectedAdditionalServices.forEach(serviceId => {
-            const additionalService = additionServices.find(service => service.id === serviceId);
-            if (additionalService) {
-                totalPerNight += additionalService.price;
-            }
-        });
 
-        return totalPerNight * bookingDetails.numberOfNights;
-    }, [services, selectedAdditionalServices, bookingDetails.numberOfNights, selectedService, additionServices]);
+
+        return totalPerNight * bookingDetails.numberOfNights * selectedPet.length;
+    }, [services, bookingDetails.numberOfNights, selectedPet.length, selectedService]);
 
     useEffect(() => {
 
@@ -275,7 +249,7 @@ const Page = () => {
                         >
                             {services.map((service) => (
                                 <SelectItem key={service.id} value={service.id}>
-                                    {service.serviceName}
+                                    {service.name}
                                 </SelectItem>
                             ))}
                         </Select>
@@ -283,25 +257,6 @@ const Page = () => {
                             Dịch vụ đưa đón mèo (1-10km)
                         </Checkbox>
                         <Input placeholder='Nhập địa chỉ đưa đoán mèo' isDisabled={!isSelected} variant="bordered" className='input' />
-
-                        <h2 className={styles.h2}>Chọn dịch vụ thêm</h2>
-                        {additionServices.map((service: Service) => (
-                            <div key={service.id} className={isShowAdditionService ? `flex flex-col` : `hidden`}>
-                                <Checkbox
-                                    size="sm"
-                                    isSelected={selectedAdditionalServices.includes(service.id)}
-                                    onValueChange={(isChecked) => handleAdditionalServiceChange(service.id, isChecked)}
-                                >
-                                    {service.serviceName}
-                                </Checkbox>
-                            </div>
-                        ))}
-
-                        <Button onClick={() => setIsShowAdditionService(!isShowAdditionService)}>
-                            <FontAwesomeIcon icon={isShowAdditionService ? faMinus : faPlus} />
-                            Dịch vụ thêm
-                        </Button>
-
 
                         <h2 className={styles.h2}>Chọn ngày</h2>
                         <DateRangePicker
@@ -382,7 +337,7 @@ const Page = () => {
                         <h2>Bảng giá dịch vụ</h2>
                         {services.map((service) => (
                             <div className='flex justify-between' key={service.id}>
-                                <h3>{service.serviceName}</h3>
+                                <h3>{service.name}</h3>
                                 <div className='flex flex-col left-0'>
                                     <h3 className='text-[#2B764F]'>{service.price.toLocaleString()}</h3>
                                     <h4>giá mỗi đêm</h4>

@@ -249,7 +249,7 @@ const Service = () => {
                                         listItemRefs.current[catSitter.id] = el;
                                     }}
                                     className='selectDiv min-w-full border-b pb-3 bg-[#FFF6ED]'>
-                                    <Link href={`/service/sitterprofile/${catSitter.id}`}>
+                                    <Link href={`/service/sitterprofile/${catSitter.sitterId}`}>
                                         <div className='flex gap-3 cursor-pointer'>
                                             <Avatar
                                                 src={catSitter?.avatar || '/User-avatar.png'}

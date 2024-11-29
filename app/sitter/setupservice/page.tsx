@@ -1,47 +1,79 @@
 'use client'
 
+import Loading from "@/app/components/Loading"
+import { CatSitter, ConfigService, Service } from "@/app/constants/types/homeType"
+import axiosClient from "@/app/lib/axiosClient"
+import { useAppDispatch, useAppSelector } from "@/app/lib/hooks"
+import { fetchUserProfile } from "@/app/lib/slices/userSlice"
+import { faCheck, faChevronRight, faCircle, faEye, faUnlock, faXmark } from "@fortawesome/free-solid-svg-icons"
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+import { Avatar, Button, Modal, ModalBody, ModalContent, ModalFooter, useDisclosure } from "@nextui-org/react"
+import Image from "next/image"
+import Link from "next/link"
 import { useEffect, useState } from "react"
 import styles from "./setupservice.module.css"
-import axiosClient from "@/app/lib/axiosClient"
-import { ConfigService, Service } from "@/app/constants/types/homeType"
-import Image from "next/image"
-import { useAppDispatch, useAppSelector } from "@/app/lib/hooks"
-import Loading from "@/app/components/Loading"
-import { fetchUserProfile } from "@/app/lib/slices/userSlice"
-import Link from "next/link"
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { faChevronRight } from "@fortawesome/free-solid-svg-icons"
-import { Avatar, Button } from "@nextui-org/react"
+import { toast } from "react-toastify"
 
 const Page = () => {
     const [services, setServices] = useState<ConfigService[]>([])
     const [createdServices, setCreatedServices] = useState<Service[]>([])
     const dispatch = useAppDispatch();
     const [showAll, setShowAll] = useState(false);
-    const { userProfile, loading } = useAppSelector((state) => state.user);
+    const { userProfile } = useAppSelector((state) => state.user);
+    const { isOpen, onOpen, onOpenChange } = useDisclosure();
+    const [sitterProfile, setSitterProfile] = useState<CatSitter>();
+    const [sitterStatus, setSitterStatus] = useState();
+    const [isLoading, setIsLoading] = useState(true);
+
+    const statusColors: { [key: string]: string } = {
+        ACTIVE: 'text-[#4CAF50]',        // Hoàn thành - green
+        INACTIVE: 'text-[#DC3545]',     // Đã hủy - Red
+    };
+
+    const statusLabels: { [key: string]: string } = {
+        ACTIVE: 'Đang hoạt động',
+        INACTIVE: 'Đang ngoại tuyến',
+    };
 
     useEffect(() => {
-        try {
-            axiosClient(`services/sitter/${userProfile?.id}`)
-                .then((res) => {
-                    setCreatedServices(res.data)
-                })
-                .catch((e) => {
-                    console.log(e);
-                })
+        const fetchData = async () => {
+            try {
+                const [sitterProfileRes, servicesRes, configServicesRes] = await Promise.allSettled([
+                    axiosClient(`sitter-profiles/sitter/${userProfile?.id}`),
+                    axiosClient(`services/sitter/${userProfile?.id}`),
+                    axiosClient('config-services'),
+                ]);
 
-            axiosClient('config-services')
-                .then((res) => {
-                    setServices(res.data)
-                })
-                .catch((e) => {
-                    console.log(e);
-                })
+                // Handle sitter profile response
+                if (sitterProfileRes.status === "fulfilled") {
+                    setSitterProfile(sitterProfileRes.value.data);
+                    setSitterStatus(sitterProfileRes.value.data.status);
+                } else {
+                    console.error("Failed to fetch sitter profile:", sitterProfileRes.reason);
+                }
 
-        } catch (error) {
+                // Handle services response
+                if (servicesRes.status === "fulfilled") {
+                    setCreatedServices(servicesRes.value.data);
+                } else {
+                    console.error("Failed to fetch services:", servicesRes.reason);
+                }
 
-        }
-    }, [userProfile?.id])
+                // Handle config services response
+                if (configServicesRes.status === "fulfilled") {
+                    setServices(configServicesRes.value.data);
+                } else {
+                    console.error("Failed to fetch config services:", configServicesRes.reason);
+                }
+            } catch (error) {
+                console.error("An unexpected error occurred:", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchData();
+    }, [userProfile?.id]);
 
     useEffect(() => {
         if (typeof window !== 'undefined') {
@@ -54,13 +86,28 @@ const Page = () => {
         }
     }, [dispatch, userProfile]);
 
-    if (loading) {
+    if (isLoading) {
         return <Loading />;
     }
 
     const displayedServices = showAll
         ? services
-        : services.filter((service) => service.type === "Main Service").slice(0, 2);
+        : services.filter((service) => service.serviceType === "MAIN_SERVICE").slice(0, 2);
+
+    //Change status 
+    const handleChangeStatus = () => {
+        if (!sitterStatus) {
+            toast.error("Bạn cần thêm thông tin cơ bản trước")
+            return
+        }
+        try {
+            axiosClient("sitter-profiles/status/")
+                .then(() => { })
+                .catch(() => { })
+        } catch (error) {
+
+        }
+    }
 
     return (
         <div className='flex flex-col justify-center items-center text-black my-10'>
@@ -81,7 +128,12 @@ const Page = () => {
                         <h1 className="text-3xl font-semibold">
                             Chào mừng, {userProfile?.fullName}
                         </h1>
-                        <Link href='/profile' className="text-blue-500">Xem hồ sơ</Link>
+                        <Button onClick={onOpen} variant="bordered">
+                            <h1 className={sitterProfile?.status ? statusColors[sitterProfile.status] : "text-[#DC3545]"}>
+                                <FontAwesomeIcon icon={faCircle} className="mr-1" />
+                                {sitterProfile ? statusLabels[sitterProfile.status] : "Đang ngoại tuyến"}
+                            </h1>
+                        </Button>
                     </div>
                 </div>
                 <div className="mt-10">
@@ -89,7 +141,7 @@ const Page = () => {
                     <div className="flex flex-col gap-5">
                         {displayedServices.map((service) => {
                             const createdService = createdServices.find(
-                                (createdService) => createdService.serviceName === service.name
+                                (createdService) => createdService.name === service.name
                             );
                             const isActivated = Boolean(createdService);
 
@@ -126,12 +178,57 @@ const Page = () => {
                 <div className="my-10">
                     <h1 className={styles.h1}>Cài đặt hồ sơ</h1>
                     <div className="flex flex-col gap-3">
-                        <Link href={"/sitter/setupservice/info"} className={styles.h3}>Thông tin cơ bản</Link>
+                        <div className="flex gap-3 items-center">
+                            {sitterProfile ?
+                                <FontAwesomeIcon icon={faCheck} className="text-green-500" size="2x" />
+                                :
+                                <FontAwesomeIcon icon={faXmark} className="text-red-500" size="2x" />
+                            }
+                            <Link href={"/sitter/setupservice/info"} className={styles.h3}>Thông tin cơ bản</Link>
+                        </div>
                         <h3 className={styles.h3}>Chi tiết</h3>
                         <h3 className={styles.h3}>Ảnh</h3>
                     </div>
                 </div>
             </div>
+
+            <Modal isOpen={isOpen} onOpenChange={onOpenChange} size="2xl">
+                <ModalContent>
+                    {() => (
+                        <>
+                            <ModalBody className="p-0">
+                                <div>
+
+                                    <div className={styles.headerModal}>
+                                        <Avatar src={userProfile?.avatar} className="w-20 h-20" />
+                                    </div>
+                                    <div className="px-10">
+                                        <div>
+                                            <h1>Dịch vụ của bạn đang {sitterProfile?.status}</h1>
+                                            <div className="flex justify-center items-center gap-32">
+                                                <div className="flex flex-col justify-center items-center gap-2">
+                                                    <Button className={styles.modalButton} onClick={() => { }}>
+                                                        <FontAwesomeIcon icon={faEye} size="2x" className="cursor-pointer p-0" />
+                                                    </Button>
+                                                    <p className="text-[16px] font-semibold">Xem hồ sơ</p>
+                                                </div>
+                                                <div className="flex flex-col justify-center items-center gap-2">
+                                                    <Button className={styles.modalButton} onClick={handleChangeStatus}>
+                                                        <FontAwesomeIcon icon={faUnlock} size="2x" className="cursor-pointer" />
+                                                    </Button>
+                                                    <p className="text-[16px] font-semibold">Mở hoạt động</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </ModalBody>
+                            <ModalFooter>
+                            </ModalFooter>
+                        </>
+                    )}
+                </ModalContent>
+            </Modal>
         </div >
     )
 }

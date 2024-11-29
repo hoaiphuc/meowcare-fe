@@ -60,8 +60,12 @@ h2 {
   @apply fill-red-500 text-red-500;
 }
 
+.selectDiv {
+  padding-left: 8px; /* Reserve space for the border to avoid shifting */
+}
+
 .selectDiv:hover {
-  @apply border-l-4 border-l-[#1B7CD5] pl-2;
+  box-shadow: -4px 0 0 0 #1b7cd5; /* Simulates a left border without affecting layout */
 }
 
 .options-container {

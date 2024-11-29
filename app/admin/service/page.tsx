@@ -114,7 +114,7 @@ const Page = () => {
                     {(item) => (
                         <TableRow key={item.id}>
                             <TableCell>{item.name}</TableCell>
-                            <TableCell>{serviceTypeMapping[item.type] || item.type}</TableCell>
+                            <TableCell>{serviceTypeMapping[item.serviceType] || item.serviceType}</TableCell>
                             <TableCell>{item.actionDescription}</TableCell>
                             <TableCell>{item.floorPrice}</TableCell>
                             <TableCell>{item.ceilPrice}</TableCell>
