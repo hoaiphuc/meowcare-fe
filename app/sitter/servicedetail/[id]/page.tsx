@@ -20,9 +20,12 @@ const ServiceDetail = () => {
     const [service, setService] = useState<Service>()
     const [configService, setConfigService] = useState<ConfigService>()
     const [serviceData, setServiceData] = useState({
+        id: "",
         status: 0,
-        configServiceId: params.id,
+        name: "",
         price: '',
+        serviceType: "",
+        actionDescription: ""
     })
     const [childServices, setChildServices] = useState<Service[]>([{
         id: uuidv4(),
@@ -76,7 +79,11 @@ const ServiceDetail = () => {
                     setService(res.data)
                     setServiceData((prevState) => ({
                         ...prevState,
+                        id: res.data.id,
                         price: res.data.price,
+                        actionDescription: res.data.actionDescription,
+                        name: res.data.name,
+                        serviceType: res.data.serviceType
                     }));
                     setIsLoading(false);
                 })
@@ -85,6 +92,12 @@ const ServiceDetail = () => {
                         axiosClient(`config-services/${params.id}`)
                             .then((res) => {
                                 setConfigService(res.data)
+                                setServiceData((prevState) => ({
+                                    ...prevState,
+                                    actionDescription: res.data.actionDescription,
+                                    name: res.data.name,
+                                    serviceType: res.data.serviceType
+                                }));
                                 setIsLoading(false);
                             })
                             .catch((e) => {
@@ -116,37 +129,47 @@ const ServiceDetail = () => {
         }));
     }
 
-    const handleAdd = () => {
+    const handleAdd = async () => {
         if (isPriceValid) {
             return;
         }
 
-        try {
-            axiosClient.post('services', serviceData)
-                .then(() => {
-                    toast.success("Bạn đã tạo dịch vụ thành công")
-                    router.push('/sitter/setupservice')
-                })
-                .catch(() => {
-                    toast.error("Tạo dịch vụ thất bại vui lòng kiểm tra lại")
-                })
-        } catch (error) {
-            console.log(error);
+        if (childServices.length < 5) {
+            toast.error("Bạn phải tạo ít nhất 5 khung thời gian cho dịch vụ này")
+            return;
         }
-    }
+
+        setIsLoading(true); // Show a loading indicator while requests are in progress
+
+        try {
+            // Post the main service data
+            await axiosClient.post('services', serviceData);
+
+            // Post all child services concurrently
+            const childServiceRequests = childServices.map((childService) =>
+                axiosClient.post("services", childService)
+            );
+
+            // Wait for all child service requests to complete
+            await Promise.all(childServiceRequests);
+
+            // If everything is successful
+            toast.success("Bạn đã tạo dịch vụ và cập nhật dịch vụ thành công");
+            router.push('/sitter/setupservice');
+        } catch (error) {
+            console.error(error);
+            toast.error("Đã xảy ra lỗi khi tạo dịch vụ, vui lòng kiểm tra lại");
+        } finally {
+            setIsLoading(false); // Hide the loading indicator
+        }
+    };
+
 
     const handleUpdate = () => {
         try {
-            console.log(childServices);
-            childServices.map((childService) => {
-                axiosClient.post("services", childService)
-                    .then(() => {
-                        toast.success("Cập nhật dịch vụ thành công")
-                    })
-                    .catch(() => {
-                        toast.error("Có lỗi xảy ra")
-                    })
-            })
+            axiosClient.put(`services/${serviceData.id}`, serviceData)
+                .then(() => { })
+                .catch(() => { })
         } catch (error) {
 
         }
