@@ -2,7 +2,7 @@
 
 import { CareSchedules, Order, PetProfile, Task } from '@/app/constants/types/homeType'
 import axiosClient from '@/app/lib/axiosClient'
-import { faCheck } from '@fortawesome/free-solid-svg-icons'
+import { faCheck, faPaw } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Accordion, AccordionItem, Avatar, Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, useDisclosure } from '@nextui-org/react'
 import { formatDate } from 'date-fns'
@@ -162,8 +162,9 @@ const Page = () => {
             setGroupedTasks([]);
         }
     }, [filteredTasks]);
+
     return (
-        <div className='w-[891px]  bg-white rounded-2xl shadow-2xl'>
+        <div className='w-[891px] bg-white rounded-2xl shadow-2xl'>
             {dataOrder &&
                 <div key={dataOrder.id}>
                     <div className='m-2 shadow-2xl rounded-xl flex p-3 gap-3'>
@@ -175,7 +176,7 @@ const Page = () => {
                     </div>
 
                     {/* tracking */}
-                    <div className='bg-white w-[700px] p-10 shadow-lg rounded-md'>
+                    <div className='bg-white m-2 p-10 shadow-lg rounded-md'>
                         <h1 className='text-3xl font-semibold mb-5'>Theo dõi lịch chăm sóc</h1>
                         {dateList.length > 0 ? (
                             <div className='flex gap-3 flex-wrap'>
@@ -193,7 +194,7 @@ const Page = () => {
                         ) : (
                             <p>Đang tải</p>
                         )}
-                        <div className='m-2 mt-7 shadow-2xl rounded-xl flex '>
+                        <div className=' mt-7 shadow-2xl rounded-xl flex '>
                             {groupedTasks.length > 0 ? (
                                 <Accordion key={selectedDate?.toISOString()} selectionMode="multiple">
                                     {groupedTasks.map((group) => {
@@ -221,7 +222,13 @@ const Page = () => {
                                                         <h3 className={task.haveEvidence ? 'text-green-500' : ''}>
                                                             {task.description}
                                                         </h3>
-                                                        <Button onClick={() => { setSelectedCat(task.petProfile), onOpenCat() }}>Xem mèo</Button>
+                                                        <Button
+                                                            className="bg-gradient-to-r from-maincolor to-[#db6eb3] text-white"
+                                                            onClick={() => { setSelectedCat(task.petProfile), onOpenCat() }}
+                                                        >
+                                                            <FontAwesomeIcon icon={faPaw} />
+                                                            Xem mèo
+                                                        </Button>
 
 
                                                         <Button

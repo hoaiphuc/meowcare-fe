@@ -354,6 +354,8 @@ export type Transaction = {
   toUserId: string;
   fromUserEmail: string;
   toUserEmail: string;
+  fromUserWalletHistoryAmount: number;
+  toUserWalletHistoryAmount: number;
 };
 
 export type Notification = {
@@ -363,4 +365,12 @@ export type Notification = {
   timestamp: string;
   isRead: boolean;
   createdAt: Date;
+};
+
+export type RequestWithdrawal = {
+  userId: string;
+  balance: number;
+  bankNumber: string;
+  fullName: string;
+  bankName: string;
 };

@@ -25,3 +25,11 @@
 .li {
   @apply font-medium text-[16px] text-black;
 }
+
+.time {
+  @apply font-semibold;
+}
+
+.childService {
+  @apply ml-3;
+}
