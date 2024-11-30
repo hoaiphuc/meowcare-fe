@@ -304,6 +304,43 @@ export type Report = {
   description: string;
 };
 
+export type Transactions = {
+  totalPages: number;
+  totalElements: number;
+  pageable: {
+    paged: true;
+    pageNumber: number;
+    pageSize: number;
+    offset: number;
+    sort: [
+      {
+        direction: string;
+        nullHandling: string;
+        ascending: true;
+        property: string;
+        ignoreCase: true;
+      }
+    ];
+    unpaged: true;
+  };
+  size: number;
+  number: number;
+  sort: [
+    {
+      direction: string;
+      nullHandling: string;
+      ascending: true;
+      property: string;
+      ignoreCase: boolean;
+    }
+  ];
+  numberOfElements: 0;
+  first: true;
+  last: true;
+  empty: true;
+  content: [Transaction];
+};
+
 export type Transaction = {
   id: string;
   amount: number;

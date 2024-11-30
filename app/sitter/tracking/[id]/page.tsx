@@ -508,6 +508,18 @@ const Tracking = () => {
     }, [filteredTasks]);
 
 
+    //complete booking
+    const completeBooking = () => {
+        try {
+            axiosClient(`booking-orders/status/${param.id}?status=COMPLETED`)
+                .then(() => {
+
+                })
+                .catch(() => { })
+        } catch (error) {
+
+        }
+    }
 
     return (
         <div className='flex justify-center items-start my-10 gap-3'>
@@ -531,6 +543,7 @@ const Tracking = () => {
                                         <h2>Ngày bắt đầu: {DateFormat(dataOrder.startDate)}</h2>
                                         <h2>Ngày kết thúc: {DateFormat(dataOrder.endDate)}</h2>
                                         <h2>Ghi chú: {dataOrder.note}</h2>
+                                        <Button className='' onClick={() => completeBooking()}>Hoàn thành dịch vụ</Button>
                                     </div>
                                 </Tab>
                                 <Tab key="chat" title="Nhắn tin">

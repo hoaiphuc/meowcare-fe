@@ -1,16 +1,16 @@
 'use client'
 
-import { Transaction, UserLocal } from '@/app/constants/types/homeType';
+import { Transactions, UserLocal } from '@/app/constants/types/homeType';
 import axiosClient from '@/app/lib/axiosClient'
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import styles from './transaction.module.css'
 import { Pagination } from '@nextui-org/react';
 import { format } from 'date-fns';
 
 const Page = () => {
-    const [transactions, setTransactions] = useState<Transaction[]>([]);
+    const [transactions, setTransactions] = useState<Transactions>();
     const [page, setPage] = useState(1);
-    const rowsPerPage = 5;
+    const [pages, setPages] = useState(1);
 
     const getUserFromStorage = () => {
         if (typeof window !== "undefined") {
@@ -24,31 +24,23 @@ const Page = () => {
 
     useEffect(() => {
         try {
-            axiosClient(`transactions/user/${userId}`)
+            axiosClient(`transactions/search/pagination?userId=${userId}&page=${page}&size=10&sort=createdAt&direction=DESC`)
                 .then((res) => {
                     setTransactions(res.data)
+                    setPages(res.data.totalPages)
                 })
                 .catch(() => { })
         } catch (error) {
 
         }
-    }, [userId])
-
-    const pages = Math.ceil(transactions.length / rowsPerPage);
-
-    const items = useMemo(() => {
-        const start = (page - 1) * rowsPerPage;
-        const end = start + rowsPerPage;
-
-        return transactions.slice(start, end);
-    }, [page, transactions]);
+    }, [page, userId])
 
     return (
         <div className="w-[891px] bg-white rounded-2xl shadow-2xl p-5 flex flex-col items-start justify-start text-black">
             <h1 className='text-2xl font-bold'>Lịch sử giao dịch</h1>
-            {items.length > 0 ?
+            {transactions?.content && transactions.content.length > 0 ?
                 <div className='flex flex-col w-full mt-5'>
-                    {items.map((transaction) => (
+                    {transactions.content.map((transaction) => (
                         <div key={transaction.id} >
                             {transaction.toUserId === userId?.toString() ?
                                 <div className='flex items-center justify-between w-full'>
@@ -85,8 +77,8 @@ const Page = () => {
                             <hr className='my-3' />
                         </div>
                     ))}
-                    {transactions.length > 5 &&
-                        <div className="flex w-full justify-center">
+                    {page ? (
+                        <div className={pages < 2 ? "hidden" : "flex w-full justify-center"}>
                             <Pagination
                                 isCompact
                                 showControls
@@ -97,7 +89,9 @@ const Page = () => {
                                 onChange={(page) => setPage(page)}
                             />
                         </div>
-                    }
+                    ) : (
+                        <div>???</div>
+                    )}
                 </div>
                 :
                 <div className='flex justify-center items-center w-full text-2xl mt-36'>Hiện tại chưa có giao dịch nào</div>
