@@ -1,14 +1,23 @@
 'use client'
 
-import { CareSchedules, Order, PetProfile, Task } from '@/app/constants/types/homeType'
+import { CareSchedules, Order, PetProfile, Service, Task } from '@/app/constants/types/homeType'
 import axiosClient from '@/app/lib/axiosClient'
 import { faCheck, faPaw } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { Accordion, AccordionItem, Avatar, Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, useDisclosure } from '@nextui-org/react'
+import { Accordion, AccordionItem, Avatar, Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Textarea, useDisclosure } from '@nextui-org/react'
 import { formatDate } from 'date-fns'
 import { useParams } from 'next/navigation'
 import React, { useCallback, useEffect, useState } from 'react'
 import styles from "./detail.module.css"
+// Import Lightbox and the Video plugin
+import Lightbox from 'yet-another-react-lightbox';
+import Video from 'yet-another-react-lightbox/plugins/video';
+import { Slide } from 'yet-another-react-lightbox';
+
+// Import styles for Lightbox and Video plugin
+import 'yet-another-react-lightbox/styles.css';
+// import 'yet-another-react-lightbox/plugins/video.css';
+
 
 interface TaskEvident {
     id?: string,
@@ -30,6 +39,10 @@ const Page = () => {
     const { isOpen: isOpenCat, onOpen: onOpenCat, onOpenChange: onOpenChangeCat } = useDisclosure();
     const [selectTaskEvidence, setSelectedTaskEvidence] = useState<TaskEvident[]>([])
     const [selectedTask, setSelectedTask] = useState<Task>();
+    const [openImage, setOpenImage] = useState(false);
+    const [currentIndex, setCurrentIndex] = useState(0);
+    const [slides, setSlides] = useState<Slide[]>([]);
+    const [mainService, setMainService] = useState<Service>()
 
     const statusColors: { [key: number]: string } = {
         0: 'text-[#9E9E9E]',
@@ -44,6 +57,32 @@ const Page = () => {
         2: 'Hoàn thành',
         3: 'Chưa hoàn thành',
     };
+
+    const handleEvidenceClick = (index: number) => {
+        setCurrentIndex(index);
+        setOpenImage(true);
+    };
+
+    useEffect(() => {
+        const slidesData: Slide[] = selectTaskEvidence.map((evidence) => {
+            if (evidence.evidenceType === 'PHOTO') {
+                return { src: evidence.photoUrl ?? '/path/to/default-image.jpg' };
+            } else if (evidence.evidenceType === 'VIDEO') {
+                return {
+                    type: 'video',
+                    sources: [
+                        {
+                            src: evidence.videoUrl ?? '/path/to/default-video.mp4',
+                            type: 'video/mp4',
+                        },
+                    ],
+                };
+            }
+            throw new Error('Invalid evidenceType');
+        });
+        setSlides(slidesData);
+    }, [selectTaskEvidence]);
+
 
 
     // Function to generate dates between two dates inclusive
@@ -82,6 +121,7 @@ const Page = () => {
             axiosClient(`booking-orders/${param.id}`)
                 .then((res) => {
                     setDataOrder(res.data)
+                    setMainService(res.data.bookingDetailWithPetAndServices.find((service: Service) => service.serviceType === "MAIN_SERVICE"))
                 })
                 .catch()
             fetchTask()
@@ -198,7 +238,7 @@ const Page = () => {
                         <Avatar src='' className='w-14  h-14 ' />
                         <div>
                             <h2 className='font-semibold'>{dataOrder.sitter.fullName}</h2>
-                            <h1 className='text-[#559070] font-semibold text-xl'>Dịch vụ: {dataOrder.bookingDetailWithPetAndServices[0].service.serviceName}</h1>
+                            <h1 className='text-[#559070] font-semibold text-xl'>Dịch vụ: {mainService?.name}</h1>
                         </div>
                     </div>
 
@@ -324,7 +364,7 @@ const Page = () => {
                 <ModalContent>
                     {(onClose) => (
                         <>
-                            <ModalHeader className="flex flex-col gap-1">Cập nhật hoạt động</ModalHeader>
+                            <ModalHeader className="flex flex-col gap-1">Theo dõi hoạt động</ModalHeader>
                             <ModalBody>
                                 <div className=" font-sans">
                                     {selectedTask &&
@@ -364,10 +404,12 @@ const Page = () => {
                                                 {/* Notes Section */}
                                                 <div className="mb-4">
                                                     <label className="block mb-2 font-bold">Ghi chú từ người chăm sóc:</label>
-                                                    <textarea
+                                                    <Textarea
+                                                        isReadOnly
                                                         placeholder="Hãy ghi chú thông tin về mèo cưng cho chủ mèo yên tâm"
-                                                        className="w-full p-2 border rounded-md border-gray-300 resize-none h-20"
-                                                    ></textarea>
+                                                        // className="w-full p-2 border rounded-md border-gray-300 resize-none h-20"
+                                                        variant='bordered'
+                                                    ></Textarea>
                                                 </div>
 
                                                 {/* Image and Video Section */}
@@ -375,7 +417,7 @@ const Page = () => {
                                                     <label className="block mb-2 font-bold">Hình ảnh và video:</label>
                                                     <div className="flex gap-2">
                                                         {selectTaskEvidence.map((evidence, index) => (
-                                                            <div key={index} className="relative w-36 h-36">
+                                                            <div key={index} className="relative w-36 h-36 cursor-pointer" onClick={() => handleEvidenceClick(index)}>
                                                                 {evidence.evidenceType === 'VIDEO' && (
                                                                     <video className="w-full h-full" controls>
                                                                         <source src={evidence.videoUrl} type="video/mp4" />
@@ -393,8 +435,6 @@ const Page = () => {
                                                 </div>
                                             </div>
                                         </div>
-
-
                                     }
                                 </div>
                             </ModalBody>
@@ -413,6 +453,16 @@ const Page = () => {
                     )}
                 </ModalContent>
             </Modal>
+            {openImage && (
+                <Lightbox
+                    open={openImage}
+                    close={() => setOpenImage(false)}
+                    slides={slides}
+                    index={currentIndex}
+                    plugins={[Video]}
+                />
+            )}
+
         </div>
     )
 }

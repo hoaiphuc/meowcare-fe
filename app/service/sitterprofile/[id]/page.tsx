@@ -140,7 +140,7 @@ const Page = () => {
             {/* 2 */}
             <div className='w-[745px]'>
                 <div className='bg-transparent p-3'>
-                    <PhotoGallery />
+                    <PhotoGallery photos={sitterProfile?.profilePictures} />
                 </div>
                 <div className='mt-20'>
                     <h1 className={styles.h1}>Cat sitter</h1>

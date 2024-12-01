@@ -5,11 +5,11 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Button, Input } from '@nextui-org/react'
 import Image from 'next/image'
 import Link from 'next/link'
-import React, { useEffect, useState } from 'react'
-import axiosClient from '../lib/axiosClient'
-import { useRouter } from 'next/navigation';
-import { toast } from 'react-toastify';
+import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
+import { toast } from 'react-toastify'
 import { Role } from '../constants/types/homeType'
+import axiosClient from '../lib/axiosClient'
 
 const Login = () => {
     const router = useRouter();
@@ -20,7 +20,7 @@ const Login = () => {
     const dataLogin = {
         email: email,
         password: password,
-        deviceId: "123",
+        deviceId: "web",
         deviceName: "web"
     };
 
@@ -36,11 +36,14 @@ const Login = () => {
                 .post('auth/token', dataLogin)
                 .then((response) => {
                     console.log(response.data.user.roles[0].roleName);
-
                     if (typeof window !== "undefined") {
                         localStorage.setItem(
                             'auth-token',
                             JSON.stringify(response.data.token)
+                        );
+                        localStorage.setItem(
+                            'refresh-token',
+                            JSON.stringify(response.data.refreshToken)
                         );
                         localStorage.setItem(
                             'user',

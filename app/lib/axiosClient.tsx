@@ -36,8 +36,34 @@ axiosClient.interceptors.response.use(
         return response;
     },
     (error) => {
+        console.log(error);
         throw error;
+
     }
 );
+
+// axiosClient.interceptors.response.use(
+//     (response) => {
+//         if (response && response.data) {
+//             if (response.data.data) response.data = response.data.data;
+//             return response;
+//         }
+//         return response;
+//     },
+//     (error) => {
+//         if (error.response) {
+//             console.log('Error status:', error.response.status);
+//             console.log('Error message:', error.response.data.message);
+//             console.log('Full response:', error.response.data);
+//         } else if (error.request) {
+//             console.log('No response received:', error.request);
+//         } else {
+//             console.log('Error message:', error.message);
+//         }
+//         return Promise.reject(error);
+//     }
+// );
+
+
 
 export default axiosClient;

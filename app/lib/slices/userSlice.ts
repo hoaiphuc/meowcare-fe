@@ -12,52 +12,14 @@ export const fetchUserProfile = createAsyncThunk<
   { rejectValue: string }
 >("/auth", async (_, thunkAPI) => {
   try {
-    const response = await axiosClient("auth/info");
+    const response = await axiosClient.get("auth/info");
     return response.data as UserType;
   } catch (error) {
-    if (axios.isAxiosError(error) && error.response?.status === 401) {
-      try {
-        // Get tokens from localStorage
-        const refreshToken = localStorage.getItem("refreshToken");
-        const authToken = localStorage.getItem("authToken");
-
-        if (!refreshToken || !authToken) {
-          return thunkAPI.rejectWithValue("Missing tokens for refresh");
-        }
-
-        // Refresh tokens
-        const refreshResponse = await axiosClient.post("auth/refresh", {
-          refreshToken,
-          authToken,
-        });
-
-        const { newAuthToken, newRefreshToken } = refreshResponse.data;
-
-        // Store new tokens in localStorage
-        localStorage.setItem("authToken", newAuthToken);
-        localStorage.setItem("refreshToken", newRefreshToken);
-
-        // Retry original request with new token
-        // axiosClient.defaults.headers.common[
-        //   "Authorization"
-        // ] = `Bearer ${newAuthToken}`;
-        const retryResponse = await axiosClient("auth/info");
-        return retryResponse.data as UserType;
-      } catch (refreshError) {
-        let refreshErrorMessage = "Token refresh failed";
-        if (axios.isAxiosError(refreshError)) {
-          refreshErrorMessage =
-            refreshError.response?.data || refreshError.message;
-        }
-        return thunkAPI.rejectWithValue(refreshErrorMessage);
-      }
-    } else {
-      let errorMessage = "An unexpected error occurred";
-      if (axios.isAxiosError(error)) {
-        errorMessage = error.response?.data || error.message;
-      }
-      return thunkAPI.rejectWithValue(errorMessage);
+    let errorMessage = "An unexpected error occurred";
+    if (axios.isAxiosError(error)) {
+      errorMessage = error.response?.data || error.message;
     }
+    return thunkAPI.rejectWithValue(errorMessage);
   }
 });
 
