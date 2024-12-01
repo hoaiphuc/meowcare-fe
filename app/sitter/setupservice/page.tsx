@@ -1,7 +1,7 @@
 'use client'
 
 import Loading from "@/app/components/Loading"
-import { CatSitter, ConfigService, Service } from "@/app/constants/types/homeType"
+import { CatSitter, ConfigService, Service, UserLocal } from "@/app/constants/types/homeType"
 import axiosClient from "@/app/lib/axiosClient"
 import { useAppDispatch, useAppSelector } from "@/app/lib/hooks"
 import { fetchUserProfile } from "@/app/lib/slices/userSlice"
@@ -35,6 +35,16 @@ const Page = () => {
         INACTIVE: 'Đang ngoại tuyến',
     };
 
+    const getUserFromStorage = () => {
+        if (typeof window !== "undefined") {
+            const storedUser = localStorage.getItem("user");
+            return storedUser ? JSON.parse(storedUser) : null;
+        }
+    };
+
+    const user: UserLocal | null = getUserFromStorage();
+    const sitterId = user?.sitterProfile ? user?.sitterProfile.id : null;
+
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -43,6 +53,15 @@ const Page = () => {
                     axiosClient(`services/sitter/${userProfile?.id}`),
                     axiosClient('config-services'),
                 ]);
+
+                // Handle config services response
+                if (configServicesRes.status === "fulfilled") {
+                    console.log(configServicesRes);
+
+                    setServices(configServicesRes.value.data);
+                } else {
+                    console.error("Failed to fetch config services:", configServicesRes.reason);
+                }
 
                 // Handle sitter profile response
                 if (sitterProfileRes.status === "fulfilled") {
@@ -59,12 +78,7 @@ const Page = () => {
                     console.error("Failed to fetch services:", servicesRes.reason);
                 }
 
-                // Handle config services response
-                if (configServicesRes.status === "fulfilled") {
-                    setServices(configServicesRes.value.data);
-                } else {
-                    console.error("Failed to fetch config services:", configServicesRes.reason);
-                }
+
             } catch (error) {
                 console.error("An unexpected error occurred:", error);
             } finally {
@@ -97,15 +111,26 @@ const Page = () => {
             return
         }
 
-        const newStatus = sitterStatus === "ACTIVE" ? "INACTIVE" : "ACTIVE"
+        if (!sitterProfile) {
+            toast.error("Sitter profile is undefined");
+            return;
+        }
 
+        const newStatus = sitterStatus === "ACTIVE" ? "INACTIVE" : "ACTIVE"
         try {
-            axiosClient.put(`sitter-profiles/status/${userProfile?.id}?status=${newStatus}`)
+            axiosClient.put(`sitter-profiles/status/${sitterId}?status=${newStatus}`)
                 .then(() => {
-                    setSitterStatus(newStatus);
+                    setSitterProfile({
+                        ...sitterProfile,
+                        status: newStatus,
+                    });
+                    setSitterStatus(newStatus)
                     toast.success(`Trạng thái đã được cập nhật thành ${newStatus === "ACTIVE" ? "Đang hoạt động" : "Đang ngoại tuyến"}`);
+                    onOpenChange()
                 })
-                .catch(() => { })
+                .catch(() => {
+                    toast.error("Đã có lỗi xảy ra, vui lòng thử lại sau")
+                })
         } catch (error) {
 
         }
@@ -146,9 +171,9 @@ const Page = () => {
                                 (createdService) => createdService.name === service.name
                             );
                             const isActivated = Boolean(createdService);
-
                             // Use the id from createdService if it exists, otherwise fallback to service.id
                             const idToUse = createdService ? createdService.id : service.id;
+
                             return (
                                 <Link href={`/sitter/servicedetail/${idToUse}`} key={service.id}>
                                     <div className="flex justify-between border-b py-4 cursor-pointer">

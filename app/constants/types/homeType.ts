@@ -39,6 +39,7 @@ export interface UserLocal {
       description: string;
     }
   ];
+  sitterProfile: CatSitter;
 }
 
 export type ProfileSidebarItem = {
@@ -66,9 +67,9 @@ export type PetProfile = {
 };
 
 export type CatSitter = {
+  id: string;
   avatar: string;
   fullName: string;
-  id: string;
   bio: string;
   experience: string;
   sitterId: string;
@@ -78,13 +79,13 @@ export type CatSitter = {
   environment: string;
   maximumQuantity: number;
   status: string;
-  profilePictures: [
-    {
-      id: string;
-      imageName: string;
-      imageUrl: string;
-    }
-  ];
+  profilePictures: [ProfilePicture];
+};
+
+export type ProfilePicture = {
+  id: string;
+  imageName: string;
+  imageUrl: string;
 };
 
 export type SideNavItem = {

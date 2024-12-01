@@ -89,6 +89,8 @@ const ServiceDetail = () => {
                 })
                 .catch((e) => {
                     if (e.response.data.status === 2002) {
+                        console.log(e);
+
                         axiosClient(`config-services/${params.id}`)
                             .then((res) => {
                                 setConfigService(res.data)

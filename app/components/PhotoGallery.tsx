@@ -4,27 +4,21 @@ import 'yet-another-react-lightbox/styles.css';
 import React, { useState } from 'react';
 import Image from 'next/image';
 import Lightbox from 'yet-another-react-lightbox';
+import { ProfilePicture } from '../constants/types/homeType';
 // import dynamic from 'next/dynamic';
 // const Lightbox = dynamic(() => import('yet-another-react-lightbox'), {
 //     ssr: false, // Disable SSR for this component
 // });
 // import { Zoom } from 'yet-another-react-lightbox/plugins';
 
-const PhotoGallery = () => {
-
-    const photos = [
-        { src: '/catwithme/cat1.jpg' },
-        { src: '/catwithme/cat2.jpg' },
-        { src: '/catwithme/cat3.jpg' },
-        { src: '/catwithme/cat4.jpg' },
-        { src: '/catwithme/cat5.jpg' },
-        { src: '/catwithme/cat6.jpg' },
-        { src: '/catwithme/cat7.jpg' },
-
-    ];
+const PhotoGallery = ({ photos }: { photos?: ProfilePicture[] }) => {
 
     const [open, setOpen] = useState(false);
     const [currentIndex, setCurrentIndex] = useState(0);
+
+    if (!photos || photos.length === 0) {
+        return null; // or a fallback UI
+    }
 
     const handleClick = (index: number) => {
         setCurrentIndex(index);
@@ -38,7 +32,7 @@ const PhotoGallery = () => {
                 {photos.slice(0, 3).map((photo, index) => (
                     <div key={index} className="relative cursor-pointer h-[150px]">
                         <Image
-                            src={photo.src}
+                            src={photo.imageUrl}
                             alt={`Photo ${index + 1}`}
                             width={350}
                             height={150}
@@ -51,7 +45,7 @@ const PhotoGallery = () => {
                 {photos.length > 3 && (
                     <div className="relative cursor-pointer max-h-[150px]" onClick={() => handleClick(3)}>
                         <Image
-                            src={photos[3].src}
+                            src={photos[3].imageUrl}
                             alt="View All Photos"
                             width={350}
                             height={150}
@@ -69,7 +63,7 @@ const PhotoGallery = () => {
                 <Lightbox
                     open={open}
                     close={() => setOpen(false)}
-                    slides={photos}
+                    slides={photos.map((photo) => ({ src: photo.imageUrl }))}
                     index={currentIndex}
                 // plugins={[Zoom]}
 
