@@ -15,15 +15,49 @@ export const fetchUserProfile = createAsyncThunk<
     const response = await axiosClient("auth/info");
     return response.data as UserType;
   } catch (error) {
-    let errorMessage = "Đã xảy ra lỗi không xác định";
-    if (axios.isAxiosError(error)) {
-      // Truy cập dữ liệu phản hồi từ server
-      errorMessage = error.response?.data || error.message;
-    } else if (error instanceof Error) {
-      // Xử lý các lỗi khác
-      errorMessage = error.message;
+    if (axios.isAxiosError(error) && error.response?.status === 401) {
+      try {
+        // Get tokens from localStorage
+        const refreshToken = localStorage.getItem("refreshToken");
+        const authToken = localStorage.getItem("authToken");
+
+        if (!refreshToken || !authToken) {
+          return thunkAPI.rejectWithValue("Missing tokens for refresh");
+        }
+
+        // Refresh tokens
+        const refreshResponse = await axiosClient.post("auth/refresh", {
+          refreshToken,
+          authToken,
+        });
+
+        const { newAuthToken, newRefreshToken } = refreshResponse.data;
+
+        // Store new tokens in localStorage
+        localStorage.setItem("authToken", newAuthToken);
+        localStorage.setItem("refreshToken", newRefreshToken);
+
+        // Retry original request with new token
+        // axiosClient.defaults.headers.common[
+        //   "Authorization"
+        // ] = `Bearer ${newAuthToken}`;
+        const retryResponse = await axiosClient("auth/info");
+        return retryResponse.data as UserType;
+      } catch (refreshError) {
+        let refreshErrorMessage = "Token refresh failed";
+        if (axios.isAxiosError(refreshError)) {
+          refreshErrorMessage =
+            refreshError.response?.data || refreshError.message;
+        }
+        return thunkAPI.rejectWithValue(refreshErrorMessage);
+      }
+    } else {
+      let errorMessage = "An unexpected error occurred";
+      if (axios.isAxiosError(error)) {
+        errorMessage = error.response?.data || error.message;
+      }
+      return thunkAPI.rejectWithValue(errorMessage);
     }
-    return thunkAPI.rejectWithValue(errorMessage);
   }
 });
 

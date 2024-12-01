@@ -10,7 +10,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Accordion, AccordionItem, Avatar, Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Tab, Tabs, useDisclosure } from '@nextui-org/react';
 import { formatDate } from 'date-fns';
 import { getDownloadURL, ref, uploadBytes, uploadBytesResumable } from 'firebase/storage';
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'react-toastify';
 import { v4 as uuidv4 } from 'uuid';
@@ -26,6 +26,7 @@ interface TaskEvident {
 
 const Tracking = () => {
     const param = useParams();
+    const router = useRouter();
     const [data, setData] = useState<CareSchedules>();
     const [dataOrder, setDataOrder] = useState<Order>()
     const [dateList, setDateList] = useState<Date[]>([]);
@@ -511,9 +512,10 @@ const Tracking = () => {
     //complete booking
     const completeBooking = () => {
         try {
-            axiosClient(`booking-orders/status/${param.id}?status=COMPLETED`)
+            axiosClient.put(`booking-orders/status/${param.id}?status=COMPLETED`)
                 .then(() => {
-
+                    toast.success("Bạn đã hoàn thành dịch vụ này")
+                    router.push("/sitter/managebooking")
                 })
                 .catch(() => { })
         } catch (error) {

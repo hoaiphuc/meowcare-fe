@@ -22,7 +22,7 @@ const Page = () => {
     const { userProfile } = useAppSelector((state) => state.user);
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
     const [sitterProfile, setSitterProfile] = useState<CatSitter>();
-    const [sitterStatus, setSitterStatus] = useState();
+    const [sitterStatus, setSitterStatus] = useState("");
     const [isLoading, setIsLoading] = useState(true);
 
     const statusColors: { [key: string]: string } = {
@@ -96,9 +96,15 @@ const Page = () => {
             toast.error("Bạn cần thêm thông tin cơ bản trước")
             return
         }
+
+        const newStatus = sitterStatus === "ACTIVE" ? "INACTIVE" : "ACTIVE"
+
         try {
-            axiosClient("sitter-profiles/status/")
-                .then(() => { })
+            axiosClient.put(`sitter-profiles/status/${userProfile?.id}?status=${newStatus}`)
+                .then(() => {
+                    setSitterStatus(newStatus);
+                    toast.success(`Trạng thái đã được cập nhật thành ${newStatus === "ACTIVE" ? "Đang hoạt động" : "Đang ngoại tuyến"}`);
+                })
                 .catch(() => { })
         } catch (error) {
 
@@ -118,7 +124,7 @@ const Page = () => {
                                 ? userProfile.avatar
                                 : '/User-avatar.png'
                         }
-                        alt="" className="w-16 h-14 rounded-full"
+                        alt="" className="w-16 h-16 rounded-full"
                     />
                     <div >
                         <h1 className="text-3xl font-semibold">

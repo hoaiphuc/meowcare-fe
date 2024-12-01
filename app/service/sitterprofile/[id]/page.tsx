@@ -12,16 +12,18 @@ import 'yet-another-react-lightbox/styles.css';
 import PhotoGallery from '@/app/components/PhotoGallery';
 import axiosClient from '@/app/lib/axiosClient';
 import { useParams } from 'next/navigation';
-import { CatSitter } from '@/app/constants/types/homeType';
+import { CatSitter, Service } from '@/app/constants/types/homeType';
+import Loading from '@/app/components/Loading';
 
 
 
 const Page = () => {
     const params = useParams();
-    // const { sitterId } = params;
     const [sitterProfile, setSitterProfile] = useState<CatSitter | undefined>();
     const [isClicked, setIsClicked] = useState(false);
     const [isUser, setIsUser] = useState<boolean>();
+    const [isLoading, setIsLoading] = useState(true);
+    const [services, setServices] = useState<Service[]>([])
 
     // check user
     useEffect(() => {
@@ -49,6 +51,42 @@ const Page = () => {
             console.log(error);
         }
     }, [params])
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const [sitterProfileRes, servicesRes] = await Promise.allSettled([
+                    axiosClient(`sitter-profiles/sitter/${params.id}`),
+                    axiosClient(`services/sitter/${params.id}`),
+                ]);
+
+                // Handle sitter profile response
+                if (sitterProfileRes.status === "fulfilled") {
+                    setSitterProfile(sitterProfileRes.value.data);
+                } else {
+                    console.error("Failed to fetch sitter profile:", sitterProfileRes.reason);
+                }
+
+                // Handle services response
+                if (servicesRes.status === "fulfilled") {
+                    setServices(servicesRes.value.data);
+                } else {
+                    console.error("Failed to fetch services:", servicesRes.reason);
+                }
+
+            } catch (error) {
+                console.error("An unexpected error occurred:", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchData();
+    }, [params]);
+
+    if (isLoading) {
+        return <Loading />;
+    }
 
     return (
         <div className='flex flex-cols-2 my-10 gap-10 px-16 justify-center'>
@@ -81,35 +119,17 @@ const Page = () => {
                 <div className='shadow-xl p-4 border-[0.5px] rounded-md mt-20'>
                     <h1 className={styles.h1}>Dịch vụ</h1>
                     <div className=' flex flex-col gap-3'>
-                        <div className='flex'>
-                            {/* <Image src='/besitter/camera-pet.png' alt='' width={64} height={54} className='max-h-[54px]' /> */}
-                            <Icon icon="cbi:camera-pet" className='text-black w-12 h-11' />
-                            <div className='text-secondary font-semibold'>
-                                <h1 className='text-text text-xl font-semibold'>Gửi thú cưng</h1>
-                                <p className={styles.p}>Tại nhà người chăm sóc</p>
-                                <p className={styles.p}>Giá <span className='text-[#2B764F]'>100.000đ</span> <span className='font-semibold'>mỗi đêm</span></p>
+                        {services && services.filter((service) => service.serviceType === "MAIN_SERVICE").map((ser) => (
+                            <div className='flex' key={ser.id}>
+                                <Icon icon="cbi:camera-pet" className='text-black w-12 h-11' />
+                                <div className='text-secondary font-semibold'>
+                                    <h1 className='text-text text-xl font-semibold'>{ser.name}</h1>
+                                    <p className={styles.p}>{ser.actionDescription}</p>
+                                    <p className={styles.p}>Giá <span className='text-[#2B764F]'>{ser.price.toLocaleString("de")}đ</span> <span className='font-semibold'>mỗi đêm</span></p>
+                                </div>
                             </div>
-                        </div>
-                        <div className='flex'>
-                            <Icon icon="mdi:home-find" className='text-black w-12 h-11' />
-                            <div className='text-secondary font-semibold'>
-                                <h1 className='text-text text-xl font-semibold'>Trông tại nhà</h1>
-                                <p className={styles.p}>Tại nhà bạn</p>
-                                <p className={styles.p}>Giá <span className='text-[#2B764F]'>150.000đ</span> <span className='font-semibold'>mỗi đêm</span></p>
-                            </div>
-                        </div>
+                        ))}
                         <Button className={styles.button}>Xem chi tiết giá</Button>
-                    </div>
-
-                    <div className='my-5 flex flex-col'>
-                        <h1 className={styles.h1}>Dịch vụ thêm có phí</h1>
-                        <ul className={styles.li}>
-                            <li>Chải lông mèo: <span className='text-[#2B764F]'>50.000đ</span></li>
-                            <li>Vệ sinh tai và mắt: <span className='text-[#2B764F]'>30.000đ</span></li>
-                            <li>Cho ăn thức ăn đặc biệt: <span className='text-[#2B764F]'>30.000đ</span></li>
-                            <li>Bổ sung vitamin: <span className='text-[#2B764F]'>30.000đ</span></li>
-                        </ul>
-                        <Button className={styles.button}>Xem chi tiết yêu cầu thêm </Button>
                     </div>
 
                     <h1 className={styles.h1}>Thời gian làm việc</h1>
@@ -129,9 +149,15 @@ const Page = () => {
                 </div>
                 <hr className={styles.hr} />
 
-                <h1 className={styles.h1}>Thời gian chăm sóc </h1>
-                <p className={styles.p}>6:00 - 7:00 AM: Cho mèo ăn sáng và vệ sinh khay cát</p>
-                <p className={styles.p}>  7:00 - 9:00 AM: Quan sát sức khỏe và chơi với mèo</p>
+                <h1 className={styles.h1}>Thời gian chăm sóc</h1>
+                {services && services.filter((service) => service.serviceType === "CHILD_SERVICE").map((ser) => (
+                    <div key={ser.id} className='flex text-xl items-center gap-3'>
+                        <FontAwesomeIcon icon={faCircle} className="text-xs" size='2xs' />
+                        <div className={styles.time}>{ser.startTime} giờ - {ser.endTime} giờ: </div>
+                        <p className={styles.childService}>{ser.name}</p>
+                    </div>
+                ))}
+
                 <hr className={styles.hr} />
 
                 {/* Feedback */}

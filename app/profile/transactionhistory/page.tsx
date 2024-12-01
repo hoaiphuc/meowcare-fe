@@ -52,7 +52,12 @@ const Page = () => {
                                     </div>
                                     <div className='flex flex-col justify-start items-end'>
                                         <h2 className={`${styles.h1} text-green-500`}>+{transaction.amount.toLocaleString('de-DE')}đ</h2>
-                                        <p className={styles.p}>Thành công</p>
+                                        <p >Số dư ví:
+                                            <span className={""}>
+                                                {transaction.toUserWalletHistoryAmount !== undefined && transaction.toUserWalletHistoryAmount !== null
+                                                    ? transaction.toUserWalletHistoryAmount.toLocaleString("de-DE")
+                                                    : '0'}
+                                            </span>đ</p>
                                     </div>
                                 </div>
                                 :
@@ -70,7 +75,13 @@ const Page = () => {
                                         </div>
                                         <div className='flex flex-col justify-start items-end'>
                                             <h2 className={styles.h1}>-{transaction.amount.toLocaleString('de-DE')}đ</h2>
-                                            <p className={styles.p}>Thành công</p>
+                                            <p >Số dư ví:
+                                                <span className={''}>
+                                                    {transaction.fromUserWalletHistoryAmount !== undefined && transaction.fromUserWalletHistoryAmount !== null
+                                                        ? transaction.fromUserWalletHistoryAmount.toLocaleString("de-DE")
+                                                        : '0'}
+                                                </span>đ</p>
+
                                         </div>
                                     </div>
                                 </div>}
