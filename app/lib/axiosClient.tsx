@@ -74,7 +74,7 @@ axiosClient.interceptors.response.use(
             try {
                 // Call refresh API
                 const refreshResponse = await axios.post(
-                    `${process.env.NEXT_PUBLIC_BASE_API}/auth/refresh`,
+                    `${process.env.NEXT_PUBLIC_BASE_API}auth/refresh`,
                     {
                         token: getToken(),
                         refreshToken,
