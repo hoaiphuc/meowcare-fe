@@ -7,7 +7,7 @@ import { useParams, useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 import styles from "./servicedetail.module.css"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCircleInfo, faPlus } from '@fortawesome/free-solid-svg-icons';
+import { faCircleInfo, faPlus, faTrash } from '@fortawesome/free-solid-svg-icons';
 import Loading from '@/app/components/Loading';
 import { toast } from 'react-toastify';
 import { v4 as uuidv4 } from 'uuid';
@@ -136,7 +136,7 @@ const ServiceDetail = () => {
             return;
         }
 
-        if (childServices.length < 5) {
+        if (childServices.length < 2) {
             toast.error("Bạn phải tạo ít nhất 5 khung thời gian cho dịch vụ này")
             return;
         }
@@ -223,10 +223,11 @@ const ServiceDetail = () => {
         setChildServices((prevState) => [...prevState, newService]);
     };
 
+    //delete child Service
 
     return (
         <div className='flex flex-col justify-center items-center my-10 text-black'>
-            <div className='w-[600px] flex flex-col gap-5'>
+            <div className='w-[800px] flex flex-col gap-5'>
                 <h1 className={styles.title}>{service ? service?.name : configService?.name}</h1>
                 <h2>{service?.actionDescription}</h2>
                 <div className='flex bg-[#F3F5F7] p-5 rounded-2xl gap-2'>
@@ -288,6 +289,7 @@ const ServiceDetail = () => {
                                             handleInputTextChange(childService.id, 'name', e.target.value)
                                         }
                                     />
+                                    <FontAwesomeIcon icon={faTrash} />
                                 </div>
                             ))}
                             <Button className="flex items-center justify-center p-4 bg-white border border-gray-200 rounded-md shadow-sm gap-2" onClick={() => addTime()}>

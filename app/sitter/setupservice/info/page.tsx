@@ -76,7 +76,7 @@ const Info = () => {
 
     return (
         <div className='flex items-center justify-center my-10'>
-            <div className='flex flex-col gap-5 '>
+            <div className='flex flex-col gap-5 max-w-[1000px]'>
                 <div className=' text-center'>
                     <h1 className='text-4xl font-semibold mb-5'>Thông tin cá nhân của bạn</h1>
                     <h3 className={styles.h3}>
@@ -92,54 +92,60 @@ const Info = () => {
                 <div className='mt-5 flex flex-col gap-2'>
                     <h2 className={styles.h2}>Kinh nghiệm</h2>
                     <h3 className={styles.h3}>Số năm kinh nghiệm của bạn</h3>
-                    <Input />
+                    <Input value={sitterData?.experience} name='experience' onChange={handleInputChange} />
                 </div>
 
                 <div className='mt-5 flex flex-col gap-2'>
                     <h2 className={styles.h2}>Kỹ năng của bạn</h2>
-                    <Autocomplete
-                        className=""
-                        selectedKey={''}>
-                        {CatSitterSkill.map((item, index) => (
-                            <AutocompleteItem
-                                key={index}
-                                value={item.id}
-                                onClick={() => handleSelect(item)}
-                                endContent={
-                                    selectedItems.some(
-                                        (selection) => selection.id === item.id
-                                    ) && (
-                                        <FontAwesomeIcon
-                                            icon={faCheck}
-                                            size="xl"
-                                            className="mr-2 text-green-500"
-                                        />
-                                    )
-                                }
-                            >
-                                {item.skill}
-                            </AutocompleteItem>
-                        ))}
-                    </Autocomplete>
-                    <div className="flex mt-2 flex-wrap w-[800px]">
-                        {selectedItems.map((item: Skill) => (
-                            <Chip
-                                key={item.id}
-                                color={"primary"}
-                                className="mr-2 mt-2"
-                                endContent={<FontAwesomeIcon icon={faXmark}
-                                    size="xl"
-                                    className="mr-1 cursor-pointer"
-                                    onClick={() => handleDeleteSelection(item)}
-                                />}>
-                                {item.skill}
-                            </Chip>
-                        ))}
+                    <div className='flex bg-white p-3 h-full rounded-md shadow-md items-center justify-center'>
+                        <div className="flex mt-2 flex-wrap">
+                            {selectedItems.map((item: Skill) => (
+                                <Chip
+                                    key={item.id}
+                                    color={"primary"}
+                                    className="mr-2 mt-2 h-10"
+                                    endContent={<FontAwesomeIcon icon={faXmark}
+                                        size="xl"
+                                        className="mr-1 cursor-pointer"
+                                        onClick={() => handleDeleteSelection(item)}
+                                    />}>
+                                    {item.skill}
+                                </Chip>
+                            ))}
+                            <Autocomplete
+                                className="w-500 h-10 mt-2"
+                                size='md'
+                                selectedKey={''}>
+                                {CatSitterSkill.map((item, index) => (
+                                    <AutocompleteItem
+                                        key={index}
+                                        value={item.id}
+                                        onClick={() => handleSelect(item)}
+                                        endContent={
+                                            selectedItems.some(
+                                                (selection) => selection.id === item.id
+                                            ) && (
+                                                <FontAwesomeIcon
+                                                    icon={faCheck}
+                                                    size="xl"
+                                                    className="mr-2 text-green-500"
+                                                />
+                                            )
+                                        }
+                                    >
+                                        {item.skill}
+                                    </AutocompleteItem>
+                                ))}
+                            </Autocomplete>
+                        </div>
+
                     </div>
+
+
                 </div>
                 <Button onClick={handleCreate} className='text-white bg-maincolor'>Lưu</Button>
             </div>
-        </div>
+        </div >
     )
 }
 
