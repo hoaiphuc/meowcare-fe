@@ -15,6 +15,7 @@ import {
   PieChart,
   Pie,
   Cell,
+  ResponsiveContainer,
 } from "recharts";
 import axiosClient from "../lib/axiosClient";
 
@@ -43,9 +44,18 @@ const Page = () => {
   ];
 
   const discountData = [
-    { name: "Chiết khấu từ dịch vụ A", value: 500 },
-    { name: "Chiết khấu từ dịch vụ B", value: 300 },
-    { name: "Chiết khấu từ dịch vụ C", value: 200 },
+    { name: "Tháng 1", value: 100000 },
+    { name: "Tháng 2", value: 500000 },
+    { name: "Tháng 3", value: 300000 },
+    { name: "Tháng 4", value: 240000 },
+    { name: "Tháng 5", value: 400000 },
+    { name: "Tháng 6", value: 100000 },
+    { name: "Tháng 7", value: 50000 },
+    { name: "Tháng 8", value: 100000 },
+    { name: "Tháng 9", value: 200000 },
+    { name: "Tháng 10", value: 500000 },
+    { name: "Tháng 11", value: 300000 },
+    { name: "Tháng 12", value: 200000 },
   ];
 
   useEffect(() => {
@@ -110,7 +120,7 @@ const Page = () => {
   // Tính số lượng chủ mèo
   const catOwners = totalUser && sitter ? totalUser - sitter : 0;
   return (
-    <div className="flex flex-col items-center w-full m-10 gap-10">
+    <div className="flex flex-col w-full m-10 gap-10">
       {/* Tổng quan */}
       <div className="grid grid-cols-4 gap-5">
         <CardChart
@@ -146,22 +156,19 @@ const Page = () => {
       </div>
 
       {/* Biểu đồ thống kê */}
-      <div className="flex flex-col gap-10">
-        {/* Thống kê tổng đặt lịch */}
-        <div>
-          <h2 className="font-semibold text-2xl">Thống kê tổng đặt lịch</h2>
-          <LineChart
-            width={1000}
-            height={300}
-            data={bookingData}
-            margin={{ top: 5, right: 20, bottom: 5, left: 0 }}
-          >
-            <Line type="monotone" dataKey="bookings" stroke="#8884d8" />
-            <CartesianGrid stroke="#ccc" strokeDasharray="5 5" />
-            <XAxis dataKey="month" />
-            <YAxis />
-            <Tooltip />
-          </LineChart>
+      <div className="flex flex-col gap-10 mt-10">
+        {/* Tổng đặt lịch */}
+        <div className="bg-white p-5 rounded-md shadow-md">
+          <h2 className="font-semibold text-lg mb-5">Thống kê tổng đặt lịch</h2>
+          <ResponsiveContainer width="100%" height={300}>
+            <LineChart data={bookingData}>
+              <Line type="monotone" dataKey="bookings" stroke="#8884d8" />
+              <CartesianGrid stroke="#ccc" strokeDasharray="5 5" />
+              <XAxis dataKey="month" />
+              <YAxis />
+              <Tooltip />
+            </LineChart>
+          </ResponsiveContainer>
         </div>
 
         {/* Thống kê rút tiền */}
@@ -195,8 +202,8 @@ const Page = () => {
             Tổng số tiền chiết khấu mà website có được
           </h2>
           <BarChart
-            width={1000}
-            height={300}
+            width={1500}
+            height={600}
             data={discountData}
             margin={{ top: 5, right: 20, bottom: 5, left: 0 }}
           >
