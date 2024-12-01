@@ -13,6 +13,9 @@ export const fetchUserProfile = createAsyncThunk<
 >("/auth", async (_, thunkAPI) => {
   try {
     const response = await axiosClient("auth/info");
+    // if (response.status === 401) {
+    //   const response = await axiosClient("auth/refresh");
+    // }
     return response.data as UserType;
   } catch (error) {
     let errorMessage = "Đã xảy ra lỗi không xác định";

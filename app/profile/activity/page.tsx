@@ -52,9 +52,9 @@ const Page = () => {
     }, [userId, page])
 
     return (
-        <div className="w-[891px]  bg-white rounded-2xl shadow-2xl">
+        <div className="w-[891px] bg-white rounded-2xl shadow-2xl py-10">
             <div className="ml-20 w-full gap-5 flex flex-col">
-                <h1 className="text-2xl font-bold pt-10">Hoạt động</h1>
+                <h1 className="text-2xl font-bold">Hoạt động</h1>
                 <div className='flex gap-3'>
                     <Button
                         className={`${styles.button} ${filterStatus === 'ALL' ? styles.activeButton : ''}`}
@@ -93,7 +93,7 @@ const Page = () => {
                         Đã hủy
                     </Button>
                 </div>
-                <div>
+                <div className=''>
                     {data ? (
                         data.content
                             .filter((activity) =>
@@ -138,7 +138,7 @@ const Page = () => {
                             })
                     ) : (
                         <div className='flex justify-center items-center'>
-                            <h1>Hiện tại không có hoạt động nào</h1>
+                            <h1 className=''>Hiện tại không có hoạt động nào</h1>
                         </div>
                     )}
                     {page ? (

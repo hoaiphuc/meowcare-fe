@@ -10,6 +10,14 @@ import { useParams } from 'next/navigation'
 import React, { useCallback, useEffect, useState } from 'react'
 import styles from "./detail.module.css"
 
+interface TaskEvident {
+    id?: string,
+    file?: File;
+    photoUrl?: string,
+    videoUrl?: string,
+    evidenceType: string
+}
+
 const Page = () => {
     const param = useParams();
     const [data, setData] = useState<CareSchedules>();
@@ -18,7 +26,10 @@ const Page = () => {
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
     const [filteredTasks, setFilteredTasks] = useState<Task[]>([]);
     const [selectedCat, setSelectedCat] = useState<PetProfile | null>()
+    const { isOpen, onOpen, onOpenChange } = useDisclosure();
     const { isOpen: isOpenCat, onOpen: onOpenCat, onOpenChange: onOpenChangeCat } = useDisclosure();
+    const [selectTaskEvidence, setSelectedTaskEvidence] = useState<TaskEvident[]>([])
+    const [selectedTask, setSelectedTask] = useState<Task>();
 
     const statusColors: { [key: number]: string } = {
         0: 'text-[#9E9E9E]',
@@ -163,6 +174,22 @@ const Page = () => {
         }
     }, [filteredTasks]);
 
+    const handleOpenUpdate = (task: Task) => {
+        try {
+            axiosClient(`task-evidences/task/${task.id}`)
+                .then((res) => {
+                    setSelectedTaskEvidence(res.data)
+                })
+                .catch(() => { })
+        } catch (error) {
+
+        }
+        setSelectedTask(task);
+        onOpen();
+        console.log(task)
+    }
+
+
     return (
         <div className='w-[891px] bg-white rounded-2xl shadow-2xl'>
             {dataOrder &&
@@ -230,10 +257,10 @@ const Page = () => {
                                                             Xem mèo
                                                         </Button>
 
-
                                                         <Button
                                                             className="bg-btnbg text-white px-7"
-                                                        // onClick={() => handleOpenUpdate(task)}
+                                                            onClick={() => handleOpenUpdate(task)}
+
                                                         >
                                                             Xem hoạt động
                                                         </Button>
@@ -244,7 +271,9 @@ const Page = () => {
                                     })}
                                 </Accordion>
                             ) : (
-                                <p>Hôm nay không có lịch chăm sóc phụ</p>
+                                <div className='flex items-center justify-center w-full'>
+                                    <p>Vui lòng chọn ngày để xem hoạt động</p>
+                                </div>
                             )}
                         </div>
                     </div>
@@ -283,6 +312,100 @@ const Page = () => {
                             </ModalBody>
                             <ModalFooter>
                                 <Button color="danger" variant="light" onClick={() => { onClose() }}>
+                                    Trở lại
+                                </Button>
+                            </ModalFooter>
+                        </>
+                    )}
+                </ModalContent>
+            </Modal>
+
+            <Modal isOpen={isOpen} onOpenChange={onOpenChange} isDismissable={false} isKeyboardDismissDisabled={true} size='3xl'>
+                <ModalContent>
+                    {(onClose) => (
+                        <>
+                            <ModalHeader className="flex flex-col gap-1">Cập nhật hoạt động</ModalHeader>
+                            <ModalBody>
+                                <div className=" font-sans">
+                                    {selectedTask &&
+                                        <div className="p-4">
+                                            {/* Time and Status */}
+                                            <div className="mb-4 text-sm">
+                                                <div className='flex'>
+                                                    <strong className='whitespace-pre'>Khung giờ: </strong>
+                                                    <p>
+                                                        {new Date(selectedTask.startTime).toLocaleTimeString([], {
+                                                            hour: '2-digit',
+                                                            minute: '2-digit',
+                                                            hour12: false,
+                                                        })}{' '}
+                                                        -{' '}
+                                                        {new Date(selectedTask.endTime).toLocaleTimeString([], {
+                                                            hour: '2-digit',
+                                                            minute: '2-digit',
+                                                            hour12: false,
+                                                        })}
+                                                    </p>
+                                                </div>
+                                                <div>
+                                                    <strong className='whitespace-pre'>Ngày: </strong>{formatDate(new Date(selectedTask.startTime).toLocaleDateString(), 'dd/MM/yyyy')}
+                                                </div>
+                                                <div className='flex'>
+                                                    <strong className='whitespace-pre'>Trạng thái: </strong>
+                                                    <p className={statusColors[selectedTask.status]}>
+                                                        {statusLabels[selectedTask.status]}
+                                                    </p>
+                                                </div>
+                                            </div>
+
+
+                                            <div>
+
+                                                {/* Notes Section */}
+                                                <div className="mb-4">
+                                                    <label className="block mb-2 font-bold">Ghi chú từ người chăm sóc:</label>
+                                                    <textarea
+                                                        placeholder="Hãy ghi chú thông tin về mèo cưng cho chủ mèo yên tâm"
+                                                        className="w-full p-2 border rounded-md border-gray-300 resize-none h-20"
+                                                    ></textarea>
+                                                </div>
+
+                                                {/* Image and Video Section */}
+                                                <div className="mb-4">
+                                                    <label className="block mb-2 font-bold">Hình ảnh và video:</label>
+                                                    <div className="flex gap-2">
+                                                        {selectTaskEvidence.map((evidence, index) => (
+                                                            <div key={index} className="relative w-36 h-36">
+                                                                {evidence.evidenceType === 'VIDEO' && (
+                                                                    <video className="w-full h-full" controls>
+                                                                        <source src={evidence.videoUrl} type="video/mp4" />
+                                                                        Your browser does not support the video tag.
+                                                                    </video>
+                                                                )}
+                                                                {evidence.evidenceType === 'PHOTO' && (
+                                                                    <Avatar className="w-full h-full" radius="sm" src={evidence.photoUrl} />
+                                                                )}
+
+                                                            </div>
+                                                        ))}
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+                                    }
+                                </div>
+                            </ModalBody>
+                            <ModalFooter>
+                                <Button
+                                    color="danger"
+                                    variant="light"
+                                    onClick={() => {
+                                        onClose();
+                                    }}
+                                >
                                     Trở lại
                                 </Button>
                             </ModalFooter>
