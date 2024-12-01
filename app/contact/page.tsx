@@ -1,3 +1,4 @@
+import Image from "next/image";
 import React from "react";
 
 const Contact: React.FC = () => {
@@ -21,7 +22,7 @@ const Contact: React.FC = () => {
         }}
       >
         <div style={{ textAlign: "center", marginBottom: "20px" }}>
-          <img
+          <Image
             src="/meow.png" // Thay đường dẫn này bằng đường dẫn tới logo của bạn
             alt="Logo"
             style={{

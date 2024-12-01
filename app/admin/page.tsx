@@ -65,7 +65,7 @@ const Page = () => {
         .then((res) => {
           setTotalUser(res.data);
         })
-        .catch(() => {});
+        .catch(() => { });
 
       // Người nuôi mèo
       axiosClient(`users/count/USER`)
@@ -98,27 +98,36 @@ const Page = () => {
         .then((res) => {
           setTotalBookings(res.data);
         })
-        .catch(() => {});
+        .catch(() => { });
 
       // Thống kê rút tiền
       axiosClient("/withdrawals/total")
         .then((res) => {
           setTotalWithdrawals(res.data);
         })
-        .catch(() => {});
+        .catch(() => { });
 
       // Tổng số tiền chiết khấu website có được
       axiosClient("/discounts/total")
         .then((res) => {
           setTotalDiscountEarned(res.data);
         })
-        .catch(() => {});
+        .catch(() => { });
     } catch (error) {
       console.log(error);
     }
   }, []);
   // Tính số lượng chủ mèo
   const catOwners = totalUser && sitter ? totalUser - sitter : 0;
+
+  useEffect(() => {
+    console.log(catOwner);
+    console.log(catOwners);
+    console.log(totalBookings);
+    console.log(totalWithdrawals);
+    console.log(totalDiscountEarned);
+
+  }, [])
   return (
     <div className="flex flex-col w-full m-10 gap-10">
       {/* Tổng quan */}
