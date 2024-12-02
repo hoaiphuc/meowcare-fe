@@ -24,7 +24,7 @@ const Page = () => {
 
     useEffect(() => {
         try {
-            axiosClient(`transactions/search/pagination?userId=${userId}&page=${page}&size=10&sort=createdAt&direction=DESC`)
+            axiosClient(`transactions/search/pagination?userId=${userId}&status=COMPLETED&page=${page}&size=10&sort=createdAt&direction=DESC`)
                 .then((res) => {
                     setTransactions(res.data)
                     setPages(res.data.totalPages)

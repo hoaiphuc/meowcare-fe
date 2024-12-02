@@ -28,7 +28,7 @@ const MapComponent = ({ onLocationChange }: MapProps) => {
                 '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
         }).addTo(mapRef.current);
 
-        // Create a custom icon
+        // Create a custom icon with aria-label for accessibility
         const icon = L.divIcon({
             html: `<div style="background-color: #2B764F; color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-weight: bold;">🐈</div>`,
             className: "", // Remove default class to prevent unwanted styles
@@ -48,21 +48,31 @@ const MapComponent = ({ onLocationChange }: MapProps) => {
 
                 const { lat, lng } = e.latlng;
                 onLocationChange(lat, lng); // Pass the lat and lng to the parent component
+
+                // Create the marker with the custom icon
                 marker = L.marker(e.latlng, { icon: icon }).addTo(mapRef.current!);
             });
         }
 
         // Cleanup on component unmount
-        return () => {
-            if (mapRef.current) {
-                mapRef.current.off(); // Remove all event listeners
-                mapRef.current.remove(); // Remove map instance
-            }
-            mapRef.current = null;
-        };
+        // return () => {
+        //     if (mapRef.current) {
+        //         mapRef.current.off(); // Remove all event listeners
+        //         mapRef.current.remove(); // Remove map instance
+        //     }
+        //     mapRef.current = null;
+        // };
     }, [onLocationChange]);
 
-    return <div id="map" style={{ height: "500px", width: "100%" }} />;
+    return (
+        <div
+            id="map"
+            role="application" // Set the role to 'application' for complex interactive elements
+            aria-label="Map for selecting a location by clicking on the map" // Describes the purpose of the map
+            style={{ height: "500px", width: "100%" }}
+            tabIndex={0} // Make the map container focusable for keyboard navigation
+        />
+    );
 };
 
 export default MapComponent;

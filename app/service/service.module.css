@@ -35,7 +35,7 @@
   opacity: 0.6;
 }
 
-h2 {
+.h2 {
   @apply font-bold text-[16px] text-black;
 }
 
@@ -68,7 +68,7 @@ h2 {
   box-shadow: -4px 0 0 0 #1b7cd5; /* Simulates a left border without affecting layout */
 }
 
-.options-container {
+.optionsContainer {
   display: flex;
   justify-content: center;
 }
@@ -96,4 +96,46 @@ h2 {
 .option:last-child {
   border-top-right-radius: 10px;
   border-bottom-right-radius: 10px;
+}
+
+/* Styles for the input field to make it look like a typical search bar */
+.searchInput {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 16px;
+  box-sizing: border-box;
+  outline: none;
+}
+
+.searchInput:focus {
+  border-color: #0070f3; /* Change border color when focused */
+  box-shadow: 0 0 5px rgba(0, 112, 243, 0.5);
+}
+
+/* Styles for the dropdown suggestions list */
+.suggestionsDropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  max-height: 200px; /* Limit the height and make it scrollable if needed */
+  overflow-y: auto;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Styles for individual suggestion items */
+.suggestionItem {
+  padding: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.suggestionItem:hover {
+  background-color: #f0f0f0; /* Background color when hovering over an item */
 }

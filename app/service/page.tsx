@@ -1,8 +1,7 @@
 'use client'
 
-import './service.scss';
 import { Avatar, Button, DateRangePicker, Input, Select, SelectItem, Slider } from '@nextui-org/react';
-import data from '@/app/lib/vietnam.json';
+// import data from '@/app/lib/vietnam.json';
 import { useEffect, useRef, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCircle, faStar } from '@fortawesome/free-solid-svg-icons';
@@ -13,32 +12,40 @@ import dynamic from 'next/dynamic';
 const Map = dynamic(() => import('../components/Map'), { ssr: false });
 import axiosClient from '../lib/axiosClient';
 import { CatSitter } from '../constants/types/homeType';
-// import Map from '../components/Map';
+import useGeoapify from '../hooks/useGeoapify';
+import styles from './service.module.css'
 
-interface Province {
-    idProvince: string;
-    name: string;
-}
-
-interface District {
-    idProvince: string;
-    idDistrict: string;
-    name: string;
-}
+// interface GeoapifySuggestion {
+//     properties: {
+//         formatted: string;
+//     };
+// }
 
 const Service = () => {
     const [selectedService, setSelectedService] = useState<string>('1');
-    const [selectedProvince, setSelectedProvince] = useState<string>('');
-    const [filteredDistricts, setFilteredDistricts] = useState<District[]>([]);
-
-    const provinces: Province[] = data.province;
-    const districts: District[] = data.district;
-
     const [catSitters, setCatSitters] = useState<CatSitter[]>([]);
-
     const [price, setPrice] = useState<number[]>([20000, 2000000]);
 
+    //search location 
+    const [address, setAddress] = useState<string>('');
+    // const [geoSuggestions, setGeoSuggestions] = useState([]);
+    // const geoSuggestions = useGeoapify(address);
+    const [query, setQuery] = useState<string>('')
+    const geoSuggestions = useGeoapify(query);
+    const [showSuggestions, setShowSuggestions] = useState<boolean>(false);
 
+    const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const newAddress = e.target.value;
+        setAddress(newAddress);
+        setQuery(newAddress);
+        setShowSuggestions(true)
+    };
+    // Handle suggestion click
+    const handleSuggestionClick = (suggestion: string) => {
+        setAddress(suggestion);
+        setQuery('');
+        setShowSuggestions(false);
+    };
 
     const listItemRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
@@ -62,17 +69,6 @@ const Service = () => {
     const handleServiceChange = (serviceId: string) => {
         setSelectedService(serviceId);
     };
-
-    // Handle province change
-    const handleProvinceChange = (provinceId: string) => {
-        setSelectedProvince(provinceId);
-    };
-
-    // Filter districts when selected province changes
-    useEffect(() => {
-        const newDistricts: District[] = districts.filter(district => district.idProvince === selectedProvince);
-        setFilteredDistricts(newDistricts);
-    }, [districts, selectedProvince]);
 
     //fake favorites button
     const [isClicked, setIsClicked] = useState(false);
@@ -112,7 +108,7 @@ const Service = () => {
                 <Select
                     label="Loại dịch vụ"
                     labelPlacement='outside'
-                    className="select min-w-full"
+                    className={`${styles.h2} min-w-full`}
                     variant="bordered"
                     defaultSelectedKeys={selectedService}
                     onChange={(event) => handleServiceChange(event.target.value)}
@@ -124,40 +120,28 @@ const Service = () => {
                     ))}
                 </Select>
 
-                <Select
-                    label="Địa điểm"
-                    labelPlacement='outside'
-                    placeholder="Tỉnh/Thành Phố"
-                    className="select min-w-full"
-                    variant="bordered"
-                    onChange={(event) => handleProvinceChange(event.target.value)}
-                >
-                    {provinces.map((province) => (
-                        <SelectItem key={province.idProvince} value={province.idProvince}>
-                            {province.name}
-                        </SelectItem>
-                    ))}
-                </Select>
-
-                {/* District Select (filtered by province) */}
-                <Select
-                    aria-label="Quận/Huyện"
-                    placeholder="Quận/Huyện"
-                    className="select min-w-full"
-                    variant="bordered"
-                    disabled={!selectedProvince} // Disable if no province is selected
-                >
-                    {filteredDistricts.length > 0 ? (
-                        filteredDistricts.map((district) => (
-                            <SelectItem key={district.idDistrict} value={district.idDistrict}>
-                                {district.name}
-                            </SelectItem>
-                        ))
-                    ) : (
-                        <SelectItem isDisabled key="no-districts">Vui lòng chọn Tỉnh/Thành phố</SelectItem>
+                <h2 className={styles.h2}>Địa chỉ</h2>
+                <div className="relative">
+                    <Input
+                        className={styles.searchInput}
+                        value={address}
+                        onChange={handleAddressChange}
+                        placeholder="Search for a location"
+                    />
+                    {showSuggestions && geoSuggestions.length > 0 && (
+                        <div className={styles.suggestionsDropdown}>
+                            {geoSuggestions.map((suggestion, index) => (
+                                <div
+                                    key={index}
+                                    className={styles.suggestionItem}
+                                    onClick={() => handleSuggestionClick(suggestion.properties.formatted)}
+                                >
+                                    <p>{suggestion.properties.formatted}</p>
+                                </div>
+                            ))}
+                        </div>
                     )}
-                </Select>
-
+                </div>
 
                 <div>
                     <h2>Đặt lịch</h2>
@@ -170,11 +154,11 @@ const Service = () => {
 
                 <div className='flex flex-col gap-3'>
                     <h2>Số lượng thú cưng</h2>
-                    <div className="options-container">
+                    <div className={styles.optionsContainer}>
                         {options.map((option) => (
                             <div
                                 key={option}
-                                className={`option ${selectedCatNumber === option ? 'selected' : ''}`}
+                                className={`${styles.option} ${selectedCatNumber === option ? `${styles.selected}` : ''}`}
                                 onClick={() => setSelectedCatNumber(option)}
                             >
                                 {option}
@@ -187,14 +171,14 @@ const Service = () => {
                         {Array.isArray(price) && price.map((b) => `$${b}`).join(" – ")}
                     </p> */}
                 <div>
-                    <h2 className='mb-3'>Giá mỗi giờ</h2>
+                    <h2 className={styles.h2}>Giá mỗi giờ</h2>
                     <div className='flex gap-3 justify-center items-center'>
                         <Input
                             aria-label="Giá tối thiểu"
                             type="number"
                             value={price[0].toString().toLocaleString()}
                             onChange={(e) => handleInputChange(0, e.target.value)}
-                            className="input"
+                            className={styles.input}
                             endContent={
                                 <div className="pointer-events-none flex items-center">
                                     <span className="text-default-400 text-small">đ</span>
@@ -207,7 +191,7 @@ const Service = () => {
                             type="number"
                             value={price[1].toString().toLocaleString()}
                             onChange={(e) => handleInputChange(1, e.target.value)}
-                            className="input"
+                            className={styles.input}
                             endContent={
                                 <div className="pointer-events-none flex items-center">
                                     <span className="text-default-400 text-small">đ</span>
