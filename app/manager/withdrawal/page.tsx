@@ -1,9 +1,8 @@
 "use client";
 
-import { UserType } from "@/app/constants/types/homeType";
+import { Transaction } from "@/app/constants/types/homeType";
 import axiosClient from "@/app/lib/axiosClient";
 import {
-  Button,
   Pagination,
   Table,
   TableBody,
@@ -12,16 +11,29 @@ import {
   TableHeader,
   TableRow,
 } from "@nextui-org/react";
+import { format } from "date-fns";
 import React, { useEffect, useMemo, useState } from "react";
 
 const Page = () => {
   const [page, setPage] = useState(1);
-  const [data, setData] = useState<UserType[]>([]);
+  const [data, setData] = useState<Transaction[]>([]);
   const rowsPerPage = 10;
+
+  const statusColors: { [key: string]: string } = {
+    PENDING: "text-[#9E9E9E]", // Chờ duyệt - gray
+    COMPLETED: "text-[#4CAF50]", // Hoàn thành - green
+    FAILED: "text-[#DC3545]", // Đã hủy - Red
+  };
+
+  const statusLabels: { [key: string]: string } = {
+    PENDING: "Chờ thanh toán",
+    COMPLETED: "Giao dịch thành công",
+    FAILED: "Giao dịch thất bại",
+  };
 
   useEffect(() => {
     try {
-      axiosClient("users")
+      axiosClient("transactions")
         .then((res) => {
           setData(res.data);
         })
@@ -43,7 +55,7 @@ const Page = () => {
 
   return (
     <div className="flex flex-col justify-start w-full mx-10 gap-5 my-3">
-      <h1 className="font-semibold text-3xl">Người Dùng Trên Hệ Thống</h1>
+      <h1 className="font-semibold text-3xl">Yêu cầu rút tiền</h1>
       <Table
         aria-label="Example table with client side pagination"
         bottomContent={
@@ -64,23 +76,27 @@ const Page = () => {
         }}
       >
         <TableHeader>
-          <TableColumn key="name">Tên</TableColumn>
-          <TableColumn key="role">Email</TableColumn>
-          <TableColumn key="status">Số điện thoại</TableColumn>
-          <TableColumn key="status">Vai trò</TableColumn>
+          <TableColumn key="name">Người thực hiện</TableColumn>
+          <TableColumn key="name">Tên ngân hàng</TableColumn>
+          <TableColumn key="name">Số tài khoản</TableColumn>
+          <TableColumn key="name">Ngày thực hiện</TableColumn>
+          <TableColumn key="role">Số tiền</TableColumn>
           <TableColumn key="status">Trạng thái</TableColumn>
-          <TableColumn key="status">Hành động</TableColumn>
         </TableHeader>
         <TableBody items={items}>
-          {(item) => (
-            <TableRow key={item.id}>
-              <TableCell>{item.fullName}</TableCell>
-              <TableCell>{item.email}</TableCell>
-              <TableCell>{item.phoneNumber}</TableCell>
-              <TableCell>{item.roleName}</TableCell>
-              <TableCell>{item.status}</TableCell>
+          {(transaction) => (
+            <TableRow key={transaction.id}>
+              <TableCell>{transaction.fromUserEmail}</TableCell>
+              <TableCell>{transaction.toUserEmail}</TableCell>
+              <TableCell>{transaction.paymentMethod}</TableCell>
               <TableCell>
-                <Button>Cập nhật</Button>
+                {format(new Date(transaction.updatedAt), "HH:mm | dd/MM/yyyy")}
+              </TableCell>
+              <TableCell>
+                {transaction.amount.toLocaleString("de-DE")}đ
+              </TableCell>
+              <TableCell className={statusColors[transaction.status]}>
+                {statusLabels[transaction.status]}
               </TableCell>
             </TableRow>
           )}
