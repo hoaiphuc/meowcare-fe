@@ -12,6 +12,7 @@ export type UserType = {
   roleName: string;
   status: number;
   gender: string;
+  address: string;
 };
 
 export type FormRegister = {
@@ -79,6 +80,8 @@ export type CatSitter = {
   environment: string;
   maximumQuantity: number;
   status: string;
+  latitude: number;
+  longitude: number;
   profilePictures: [ProfilePicture];
 };
 
@@ -106,6 +109,8 @@ export type Service = {
   endTime: number;
   startTime: number;
   isBasicService: boolean;
+  isNew: boolean;
+  isDeleted: boolean;
 };
 
 export type ConfigService = {

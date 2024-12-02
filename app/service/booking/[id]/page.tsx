@@ -8,7 +8,7 @@ import { faClock } from '@fortawesome/free-regular-svg-icons'
 // import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import axiosClient from '@/app/lib/axiosClient'
-import { CatSitter, PetProfile, Service } from '@/app/constants/types/homeType'
+import { CatSitter, PetProfile, Service, UserType } from '@/app/constants/types/homeType'
 import Image from 'next/image'
 import { toast } from 'react-toastify'
 import { today, getLocalTimeZone } from '@internationalized/date';
@@ -43,6 +43,7 @@ const Page = () => {
     const [sitter, setSitter] = useState<CatSitter>()
     const [paymentMethod, setPaymentMethod] = useState("")
     const [selectedServiceName, setSelectedServiceName] = useState("")
+    const [userData, setUserData] = useState<UserType>()
     const catFoods = [
         { id: '1', foodName: 'Cá' },
         { id: '2', foodName: 'Thịt' },
@@ -71,8 +72,6 @@ const Page = () => {
                 try {
                     const userObj = JSON.parse(user);
                     setUserId(userObj.id);
-                    console.log(userObj.id);
-
                 } catch (e) {
                     console.error('Failed to parse user from localStorage', e);
                 }
@@ -117,6 +116,13 @@ const Page = () => {
             axiosClient(`/pet-profiles/user/${userId}`)
                 .then((res) => {
                     setPets(res.data);
+                })
+                .catch((e) => {
+                    console.log(e);
+                })
+            axiosClient(`/users/${userId}`)
+                .then((res) => {
+                    setUserData(res.data);
                 })
                 .catch((e) => {
                     console.log(e);
@@ -343,9 +349,9 @@ const Page = () => {
                         <Input placeholder='Nhập loại thức ăn cụ thể' isDisabled={!isSelected} variant="bordered" className='input' />
 
                         <h2 className={styles.h2}>Thông tin cá nhân</h2>
-                        <Input placeholder='Họ và tên' variant='bordered' onChange={(e) => setName(e.target.value)} />
-                        <Input type='number' placeholder='Số điện thoại' variant='bordered' onChange={(e) => setPhoneNumber(e.target.value)} className="no-spinner" />
-                        <Input placeholder='Địa chỉ của bạn' variant='bordered' onChange={(e) => setAddress(e.target.value)} />
+                        <Input placeholder='Họ và tên' variant='bordered' value={userData?.fullName} onChange={(e) => setName(e.target.value)} />
+                        <Input type='number' placeholder='Số điện thoại' value={userData?.phoneNumber} variant='bordered' onChange={(e) => setPhoneNumber(e.target.value)} className="no-spinner" />
+                        <Input placeholder='Địa chỉ của bạn' value={userData?.address} variant='bordered' onChange={(e) => setAddress(e.target.value)} />
 
                         <h2 className={styles.h2}>Lời nhắn</h2>
                         <Textarea placeholder='VD: chia sẽ về sở thích của mèo' variant='bordered' onChange={(e) => setNote(e.target.value)} />

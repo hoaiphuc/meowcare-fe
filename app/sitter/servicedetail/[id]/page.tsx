@@ -4,7 +4,7 @@ import { ConfigService, Service, UserLocal } from '@/app/constants/types/homeTyp
 import axiosClient from '@/app/lib/axiosClient';
 import { Button, Input, TimeInput, TimeInputValue } from '@nextui-org/react';
 import { useParams, useRouter } from 'next/navigation'
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import styles from "./servicedetail.module.css"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCircleInfo, faPlus, faTrash } from '@fortawesome/free-solid-svg-icons';
@@ -37,6 +37,8 @@ const ServiceDetail = () => {
         type: "",
         price: 0, // Default price value
         isBasicService: false, // Default boolean value
+        isNew: true,
+        isDeleted: false,
     }]);
 
     //check valid
@@ -52,7 +54,7 @@ const ServiceDetail = () => {
     const user: UserLocal | null = getUserFromStorage();
     const userId = user?.id;
 
-    useEffect(() => {
+    const fetchChildeService = useCallback(() => {
         try {
             axiosClient(`/services/sitter/${userId}/type?serviceType=CHILD_SERVICE&status=ACTIVE`)
                 .then((res) => {
@@ -65,6 +67,10 @@ const ServiceDetail = () => {
 
         }
     }, [userId])
+
+    useEffect(() => {
+        fetchChildeService()
+    }, [fetchChildeService])
 
     useEffect(() => {
         setIsLoading(true)
@@ -167,47 +173,101 @@ const ServiceDetail = () => {
     };
 
 
-    const handleUpdate = () => {
+    const handleUpdate = async () => {
+        setIsLoading(true); // Show a loading indicator
         try {
-            axiosClient.put(`services/${serviceData.id}`, serviceData)
-                .then(() => { })
-                .catch(() => { })
+            // Separate child services by their state
+            const toAdd = childServices.filter((service) => service.isNew);
+            const toUpdate = childServices.filter((service) => !service.isNew && !service.isDeleted);
+            const toDelete = childServices.filter((service) => service.isDeleted);
+
+            // Perform API calls
+            const addPromises = toAdd.map((service) =>
+                axiosClient.post("services", {
+                    ...service,
+                    id: undefined, // Remove ID for new services
+                })
+            );
+            const updatePromises = toUpdate.map((service) =>
+                axiosClient.put(`services/${service.id}`, service)
+            );
+            const deletePromises = toDelete.map((service) =>
+                axiosClient.delete(`services/${service.id}`)
+            );
+
+            // Execute all operations concurrently
+            await Promise.all([...addPromises, ...updatePromises, ...deletePromises]);
+
+            // Refetch the updated list from the server
+            fetchChildeService();
+
+            toast.success("Cập nhật thành công!");
         } catch (error) {
-
+            console.error(error);
+            toast.error("Có lỗi xảy ra trong quá trình cập nhật!");
+        } finally {
+            setIsLoading(false); // Hide loading indicator
         }
-
-    }
+    };
 
     if (isLoading) {
         return <Loading />;
     }
 
-    const handleInputServiceChange = (
-        id: string,
-        field: string,
-        value: TimeInputValue
-    ) => {
-        // const formattedTime = `${value.hour.toString().padStart(2, '0')}:${value.minute.toString().padStart(2, '0')}`;
-        const formattedTime = `${value.hour.toString().padStart(2, '0')}`;
+    // const handleInputServiceChange = (
+    //     id: string,
+    //     field: string,
+    //     value: TimeInputValue
+    // ) => {
+    //     // const formattedTime = `${value.hour.toString().padStart(2, '0')}:${value.minute.toString().padStart(2, '0')}`;
+    //     const formattedTime = `${value.hour.toString().padStart(2, '0')}`;
+    //     setChildServices((prev) =>
+    //         prev.map((service) =>
+    //             service.id === id ? { ...service, [field]: formattedTime } : service
+    //         )
+    //     );
+    // };
+    // const handleInputTextChange = (
+    //     id: string,
+    //     field: string,
+    //     value: string
+    // ) => {
+    //     setChildServices((prev) =>
+    //         prev.map((service) =>
+    //             service.id === id ? { ...service, [field]: value } : service
+    //         )
+    //     );
+    // };
+
+    const handleInputChildChange = (id: string, field: string, value: TimeInputValue | string) => {
+        if (field === "startTime" || field === "endTime") {
+            // Check if `value` is of type `TimeInputValue`
+            if (typeof value === "object" && "hour" in value && "minute" in value) {
+                const formattedTime = `${value.hour.toString().padStart(2, '0')}`;
+                console.log(formattedTime);
+
+                setChildServices((prev) =>
+                    prev.map((service) =>
+                        service.id === id ? { ...service, [field]: formattedTime } : service
+                    )
+                );
+                return;
+            } else {
+                toast.error("Invalid time value");
+                return;
+            }
+        }
+
         setChildServices((prev) =>
             prev.map((service) =>
-                service.id === id ? { ...service, [field]: formattedTime } : service
-            )
-        );
-    };
-    const handleInputTextChange = (
-        id: string,
-        field: string,
-        value: string
-    ) => {
-        setChildServices((prev) =>
-            prev.map((service) =>
-                service.id === id ? { ...service, [field]: value } : service
+                service.id === id
+                    ? { ...service, [field]: value, isNew: service.isNew ?? false }
+                    : service
             )
         );
     };
 
-    const addTime = () => {
+    const addNewChildService = () => {
         const newService: Service = {
             id: uuidv4(),
             name: "",
@@ -218,12 +278,23 @@ const ServiceDetail = () => {
             type: "",
             price: 0,
             isBasicService: false,
+            isNew: true,
+            isDeleted: false,
         };
 
         setChildServices((prevState) => [...prevState, newService]);
     };
 
     //delete child Service
+    const markAsDeleted = (id: string) => {
+        setChildServices((prev) =>
+            prev.map((service) =>
+                service.id === id
+                    ? { ...service, isDeleted: true }
+                    : service
+            )
+        );
+    };
 
     return (
         <div className='flex flex-col justify-center items-center my-10 text-black'>
@@ -258,7 +329,7 @@ const ServiceDetail = () => {
                     <div>
                         <h1 className={styles.title}>Thời gian hoạt động</h1>
                         <div className="flex flex-col gap-6 p-6 bg-gradient-to-r from-blue-50 via-white to-blue-50 rounded-md shadow-md">
-                            {childServices.map((childService: Service) => (
+                            {childServices.filter((childService) => !childService.isDeleted).map((childService: Service) => (
                                 <div
                                     className="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-md shadow-sm gap-5"
                                     key={childService.id}
@@ -270,7 +341,7 @@ const ServiceDetail = () => {
                                             hourCycle={24}
                                             granularity="minute"
                                             value={new Time(childService.startTime)}
-                                            onChange={(e) => handleInputServiceChange(childService.id, 'startTime', e)}
+                                            onChange={(e) => handleInputChildChange(childService.id, 'startTime', e)}
                                         />
                                         -
                                         <TimeInput
@@ -279,20 +350,20 @@ const ServiceDetail = () => {
                                             hourCycle={24}
                                             granularity="minute"
                                             value={new Time(childService.endTime)}
-                                            onChange={(e) => handleInputServiceChange(childService.id, 'endTime', e)}
+                                            onChange={(e) => handleInputChildChange(childService.id, 'endTime', e)}
                                         />
                                     </div>
                                     <Input
                                         label="Tên dịch vụ"
                                         value={childService.name}
                                         onChange={(e) =>
-                                            handleInputTextChange(childService.id, 'name', e.target.value)
+                                            handleInputChildChange(childService.id, 'name', e.target.value)
                                         }
                                     />
-                                    <FontAwesomeIcon icon={faTrash} />
+                                    <FontAwesomeIcon icon={faTrash} onClick={() => markAsDeleted(childService.id)} className='cursor-pointer' />
                                 </div>
                             ))}
-                            <Button className="flex items-center justify-center p-4 bg-white border border-gray-200 rounded-md shadow-sm gap-2" onClick={() => addTime()}>
+                            <Button className="flex items-center justify-center p-4 bg-white border border-gray-200 rounded-md shadow-sm gap-2" onClick={addNewChildService}>
                                 <FontAwesomeIcon icon={faPlus} /> Tạo thêm không giờ
                             </Button>
                         </div>

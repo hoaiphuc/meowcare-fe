@@ -8,6 +8,12 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCheck, faXmark } from '@fortawesome/free-solid-svg-icons'
 import axiosClient from '@/app/lib/axiosClient'
 import { CatSitter, UserLocal } from '@/app/constants/types/homeType'
+import { useRouter } from 'next/navigation'
+import "leaflet/dist/leaflet.css";
+import dynamic from 'next/dynamic';
+const MapComponent = dynamic(() => import('@/app/components/MapPick'), {
+    ssr: false,
+});;
 
 interface Skill {
     id: number;
@@ -15,6 +21,7 @@ interface Skill {
 }
 
 const Info = () => {
+    const router = useRouter()
     const [selectedItems, setSelectedItems] = useState<Skill[]>([]);
     const [sitterData, setSitterData] = useState<CatSitter>();
 
@@ -65,7 +72,9 @@ const Info = () => {
     const handleCreate = () => {
         try {
             axiosClient.post("sitter-profiles", sitterData)
-                .then(() => { })
+                .then(() => {
+                    router.push("/sitter/setupservice")
+                })
                 .catch(() => {
 
                 })
@@ -73,6 +82,14 @@ const Info = () => {
 
         }
     }
+
+    const handleLocationChange = (lat: number, lng: number) => {
+        setSitterData((prevData) => ({
+            ...prevData,
+            latitude: lat,
+            longitude: lng,
+        }) as CatSitter);
+    };
 
     return (
         <div className='flex items-center justify-center my-10'>
@@ -97,7 +114,7 @@ const Info = () => {
 
                 <div className='mt-5 flex flex-col gap-2'>
                     <h2 className={styles.h2}>Kỹ năng của bạn</h2>
-                    <div className='flex bg-white p-3 h-full rounded-md shadow-md items-center justify-center'>
+                    <div className='flex bg-white p-3 h-full rounded-md shadow-md items-start justify-start'>
                         <div className="flex mt-2 flex-wrap">
                             {selectedItems.map((item: Skill) => (
                                 <Chip
@@ -113,7 +130,7 @@ const Info = () => {
                                 </Chip>
                             ))}
                             <Autocomplete
-                                className="w-500 h-10 mt-2"
+                                className="w-[300px] h-10 mt-2"
                                 size='md'
                                 selectedKey={''}>
                                 {CatSitterSkill.map((item, index) => (
@@ -140,9 +157,17 @@ const Info = () => {
                         </div>
 
                     </div>
-
-
                 </div>
+
+                {/* location */}
+                <div className='mt-5 flex flex-col gap-2'>
+                    <h2 className={styles.h2}>Địa chỉ</h2>
+                    <Input value={sitterData?.location} name='location' onChange={handleInputChange} />
+                </div>
+
+                <MapComponent onLocationChange={handleLocationChange} />
+
+
                 <Button onClick={handleCreate} className='text-white bg-maincolor'>Lưu</Button>
             </div>
         </div >
