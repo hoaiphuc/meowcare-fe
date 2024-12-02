@@ -239,8 +239,10 @@ const Page = () => {
                             }
                             <Link href={"/sitter/setupservice/info"} className={styles.h3}>Thông tin cơ bản</Link>
                         </div>
-                        <h3 className={styles.h3}>Chi tiết</h3>
-                        <h3 className={styles.h3}>Ảnh</h3>
+                        <div className="flex items-center gap-3">
+                            <FontAwesomeIcon icon={faXmark} className="text-red-500" size="2x" />
+                            <h3 className={styles.h3}>Thông tin liên lạc khẩn cấp</h3>
+                        </div>
                     </div>
                 </div>
             </div>

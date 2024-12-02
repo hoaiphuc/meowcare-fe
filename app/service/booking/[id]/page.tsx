@@ -406,7 +406,7 @@ const Page = () => {
             </div>
 
             {/* Modal payment */}
-            <Modal isOpen={isOpen} onOpenChange={onOpenChange} size='4xl' className='mt-32'>
+            <Modal isOpen={isOpen} onOpenChange={onOpenChange} size='4xl' className='mt-32 h-[800px] overflow-auto'>
                 <ModalContent>
                     {() => (
                         <>
@@ -474,7 +474,7 @@ const Page = () => {
                                                 <div className='border border-black p-3'>
                                                     <Radio value="atm" className='px-5' onClick={() => setPaymentMethod("PAY_WITH_ATM")}>
                                                         <div className='flex items-center'>
-                                                            <Image src='/nganhang.png' alt='' width={50} height={90} className='mx-3 w-[70px] h-[40px]' />
+                                                            <Image src='/nganhang.png' alt='' width={50} height={90} className='mx-3 w-[54px] h-[54px]' />
                                                             <div>
                                                                 <h1 className={styles.paymentHeading1}>Thanh toán qua ngân hàng</h1>
                                                                 <h2 className={styles.paymentHeading2}>Thanh toán bằng số tài khoản</h2>

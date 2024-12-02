@@ -328,7 +328,7 @@ const ServiceDetail = () => {
                 {!service?.isBasicService &&
                     <div>
                         <h1 className={styles.title}>Thời gian hoạt động</h1>
-                        <div className="flex flex-col gap-6 p-6 bg-gradient-to-r from-blue-50 via-white to-blue-50 rounded-md shadow-md">
+                        <div className="flex flex-col gap-6 p-6 bg-gradient-to-r from-blue-50 via-white to-blue-50 rounded-md shadow-md my-3">
                             {childServices.filter((childService) => !childService.isDeleted).map((childService: Service) => (
                                 <div
                                     className="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-md shadow-sm gap-5"

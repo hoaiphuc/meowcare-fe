@@ -1,5 +1,5 @@
 .h1 {
-  @apply text-[20px] font-semibold my-2 pb-2 border-b text-maincolor;
+  @apply text-[26px] font-semibold my-2 pb-2 border-b text-maincolor;
 }
 
 .h2 {

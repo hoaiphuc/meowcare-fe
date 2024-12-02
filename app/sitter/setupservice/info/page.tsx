@@ -84,6 +84,9 @@ const Info = () => {
     }
 
     const handleLocationChange = (lat: number, lng: number) => {
+        console.log(lat);
+        console.log(lng);
+
         setSitterData((prevData) => ({
             ...prevData,
             latitude: lat,
@@ -108,8 +111,7 @@ const Info = () => {
 
                 <div className='mt-5 flex flex-col gap-2'>
                     <h2 className={styles.h2}>Kinh nghiệm</h2>
-                    <h3 className={styles.h3}>Số năm kinh nghiệm của bạn</h3>
-                    <Input value={sitterData?.experience} name='experience' onChange={handleInputChange} />
+                    <Textarea placeholder="Hãy cho mọi người biết về kinh nghiệm chăm sóc mèo của bạn" value={sitterData?.experience} name='experience' onChange={handleInputChange} />
                 </div>
 
                 <div className='mt-5 flex flex-col gap-2'>
