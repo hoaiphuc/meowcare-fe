@@ -82,11 +82,14 @@ axiosClient.interceptors.response.use(
                     }
                 );
 
-                const { newAuthToken, newRefreshToken } = refreshResponse.data;
+                const { newAuthToken, newRefreshToken } = refreshResponse.data.data;
+                console.log(refreshResponse.data.data);
 
                 // Store new tokens
-                localStorage.setItem('auth-token', newAuthToken);
-                localStorage.setItem('refresh-token', newRefreshToken);
+                if (typeof window !== "undefined") {
+                    localStorage.setItem('auth-token', JSON.stringify(newAuthToken));
+                    localStorage.setItem('refresh-token', JSON.stringify(newRefreshToken));
+                }
 
                 // Update headers for the original request
                 axiosClient.defaults.headers.common[

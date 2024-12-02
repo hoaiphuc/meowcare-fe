@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import styles from './info.module.css'
 import { Autocomplete, AutocompleteItem, Button, Chip, Input, Textarea } from '@nextui-org/react'
 import CatSitterSkill from '@/app/lib/CatSitterSkill.json'
@@ -8,6 +8,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCheck, faXmark } from '@fortawesome/free-solid-svg-icons'
 import axiosClient from '@/app/lib/axiosClient'
 import { CatSitter, UserLocal } from '@/app/constants/types/homeType'
+import { useRouter } from 'next/navigation'
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
 
 interface Skill {
     id: number;
@@ -15,8 +18,10 @@ interface Skill {
 }
 
 const Info = () => {
+    const router = useRouter()
     const [selectedItems, setSelectedItems] = useState<Skill[]>([]);
     const [sitterData, setSitterData] = useState<CatSitter>();
+    const mapRef = useRef<L.Map | null>(null);
 
     const getUserFromStorage = () => {
         if (typeof window !== "undefined") {
@@ -65,7 +70,9 @@ const Info = () => {
     const handleCreate = () => {
         try {
             axiosClient.post("sitter-profiles", sitterData)
-                .then(() => { })
+                .then(() => {
+                    router.push("/sitter/setupservice")
+                })
                 .catch(() => {
 
                 })
@@ -73,6 +80,66 @@ const Info = () => {
 
         }
     }
+
+    // Map initialization
+    useEffect(() => {
+        if (mapRef.current) return; // Prevent map from being re-initialized
+
+        // Ensure the map container exists
+        const mapContainer = document.getElementById("map");
+        if (!mapContainer) {
+            console.error("Map container not found");
+            return;
+        }
+
+        // Initialize map centered on Ho Chi Minh City (coordinates: 10.8231, 106.6297)
+        mapRef.current = L.map(mapContainer).setView([10.8231, 106.6297], 12);
+
+        // Load and display tile layer (OpenStreetMap tiles)
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+            attribution:
+                '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        }).addTo(mapRef.current);
+
+        // Create a custom icon
+        const icon = L.divIcon({
+            html: `<div style="background-color: #2B764F; color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-weight: bold;">🐈</div>`,
+            className: "", // Remove default class to prevent unwanted styles
+            iconSize: [24, 24],
+            iconAnchor: [12, 24],
+        });
+
+        // Add click event listener
+        let marker: L.Marker | null = null;
+
+        // Use a type guard to ensure mapRef.current is not null
+        if (mapRef.current) {
+            mapRef.current.on("click", (e: L.LeafletMouseEvent) => {
+                if (marker) {
+                    mapRef.current?.removeLayer(marker);
+                }
+                console.log(e.latlng); // e.latlng contains the latitude and longitude
+                setSitterData({
+                    ...sitterData,
+                    latitude: e.latlng.lat,
+                    longitude: e.latlng.lng,
+                } as CatSitter);
+                marker = L.marker(e.latlng, { icon: icon }).addTo(mapRef.current!);
+            });
+        }
+
+        // Cleanup on component unmount
+        return () => {
+            if (mapRef.current) {
+                mapRef.current.off(); // Remove all event listeners
+                mapRef.current.remove(); // Remove map instance
+            }
+            mapRef.current = null;
+        };
+    }, []);
+
+
+
 
     return (
         <div className='flex items-center justify-center my-10'>
@@ -97,7 +164,7 @@ const Info = () => {
 
                 <div className='mt-5 flex flex-col gap-2'>
                     <h2 className={styles.h2}>Kỹ năng của bạn</h2>
-                    <div className='flex bg-white p-3 h-full rounded-md shadow-md items-center justify-center'>
+                    <div className='flex bg-white p-3 h-full rounded-md shadow-md items-start justify-start'>
                         <div className="flex mt-2 flex-wrap">
                             {selectedItems.map((item: Skill) => (
                                 <Chip
@@ -113,7 +180,7 @@ const Info = () => {
                                 </Chip>
                             ))}
                             <Autocomplete
-                                className="w-500 h-10 mt-2"
+                                className="w-[300px] h-10 mt-2"
                                 size='md'
                                 selectedKey={''}>
                                 {CatSitterSkill.map((item, index) => (
@@ -140,9 +207,21 @@ const Info = () => {
                         </div>
 
                     </div>
-
-
                 </div>
+
+                {/* location */}
+                <div className='mt-5 flex flex-col gap-2'>
+                    <h2 className={styles.h2}>Địa chỉ</h2>
+                    <Input value={sitterData?.location} name='location' onChange={handleInputChange} />
+                </div>
+
+                <div></div>
+                <div
+                    id="map"
+                    style={{ height: "500px", width: "100%", float: "right" }}
+                />
+
+
                 <Button onClick={handleCreate} className='text-white bg-maincolor'>Lưu</Button>
             </div>
         </div >
