@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import styles from './info.module.css'
 import { Autocomplete, AutocompleteItem, Button, Chip, Input, Textarea } from '@nextui-org/react'
 import CatSitterSkill from '@/app/lib/CatSitterSkill.json'
@@ -9,8 +9,11 @@ import { faCheck, faXmark } from '@fortawesome/free-solid-svg-icons'
 import axiosClient from '@/app/lib/axiosClient'
 import { CatSitter, UserLocal } from '@/app/constants/types/homeType'
 import { useRouter } from 'next/navigation'
-import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import dynamic from 'next/dynamic';
+const MapComponent = dynamic(() => import('@/app/components/MapPick'), {
+    ssr: false,
+});;
 
 interface Skill {
     id: number;
@@ -21,7 +24,6 @@ const Info = () => {
     const router = useRouter()
     const [selectedItems, setSelectedItems] = useState<Skill[]>([]);
     const [sitterData, setSitterData] = useState<CatSitter>();
-    const mapRef = useRef<L.Map | null>(null);
 
     const getUserFromStorage = () => {
         if (typeof window !== "undefined") {
@@ -81,65 +83,13 @@ const Info = () => {
         }
     }
 
-    // Map initialization
-    useEffect(() => {
-        if (mapRef.current) return; // Prevent map from being re-initialized
-
-        // Ensure the map container exists
-        const mapContainer = document.getElementById("map");
-        if (!mapContainer) {
-            console.error("Map container not found");
-            return;
-        }
-
-        // Initialize map centered on Ho Chi Minh City (coordinates: 10.8231, 106.6297)
-        mapRef.current = L.map(mapContainer).setView([10.8231, 106.6297], 12);
-
-        // Load and display tile layer (OpenStreetMap tiles)
-        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-            attribution:
-                '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-        }).addTo(mapRef.current);
-
-        // Create a custom icon
-        const icon = L.divIcon({
-            html: `<div style="background-color: #2B764F; color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-weight: bold;">🐈</div>`,
-            className: "", // Remove default class to prevent unwanted styles
-            iconSize: [24, 24],
-            iconAnchor: [12, 24],
-        });
-
-        // Add click event listener
-        let marker: L.Marker | null = null;
-
-        // Use a type guard to ensure mapRef.current is not null
-        if (mapRef.current) {
-            mapRef.current.on("click", (e: L.LeafletMouseEvent) => {
-                if (marker) {
-                    mapRef.current?.removeLayer(marker);
-                }
-                console.log(e.latlng); // e.latlng contains the latitude and longitude
-                setSitterData({
-                    ...sitterData,
-                    latitude: e.latlng.lat,
-                    longitude: e.latlng.lng,
-                } as CatSitter);
-                marker = L.marker(e.latlng, { icon: icon }).addTo(mapRef.current!);
-            });
-        }
-
-        // Cleanup on component unmount
-        return () => {
-            if (mapRef.current) {
-                mapRef.current.off(); // Remove all event listeners
-                mapRef.current.remove(); // Remove map instance
-            }
-            mapRef.current = null;
-        };
-    }, []);
-
-
-
+    const handleLocationChange = (lat: number, lng: number) => {
+        setSitterData((prevData) => ({
+            ...prevData,
+            latitude: lat,
+            longitude: lng,
+        }) as CatSitter);
+    };
 
     return (
         <div className='flex items-center justify-center my-10'>
@@ -215,11 +165,7 @@ const Info = () => {
                     <Input value={sitterData?.location} name='location' onChange={handleInputChange} />
                 </div>
 
-                <div></div>
-                <div
-                    id="map"
-                    style={{ height: "500px", width: "100%", float: "right" }}
-                />
+                <MapComponent onLocationChange={handleLocationChange} />
 
 
                 <Button onClick={handleCreate} className='text-white bg-maincolor'>Lưu</Button>
