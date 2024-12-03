@@ -95,12 +95,9 @@ const Page = () => {
     //get basic service
     useEffect(() => {
         try {
-            axiosClient(`services/sitter/${params.id}`)
+            axiosClient(`services/sitter/${params.id}/type?serviceType=MAIN_SERVICE&status=ACTIVE`)
                 .then((res) => {
-                    const filteredServices = res.data.filter(
-                        (service: Service) => service.serviceType === "MAIN_SERVICE"
-                    );
-                    setServices(filteredServices);
+                    setServices(res.data);
                 })
                 .catch((e) => {
                     console.log(e);
