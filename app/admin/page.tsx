@@ -12,11 +12,11 @@ const Page = () => {
   const [catOwner, setCatOwner] = useState<number>();
   const [manager, setManager] = useState<number>();
   const [sitter, setSitter] = useState<number>();
-  const [totalBookings, setTotalBookings] = useState<number>(0);
+  // const [totalBookings, setTotalBookings] = useState<number>(0);
   const [totalWithdrawals, setTotalWithdrawals] = useState<number>(0);
   const [totalDiscountEarned, setTotalDiscountEarned] = useState<number>(0);
-  const [bookingData, setBookingData] = useState<any[]>([]);
-  const [discountData, setDiscountData] = useState<any[]>([]);
+  const [bookingData, setBookingData] = useState<unknown[]>([]);
+  const [discountData, setDiscountData] = useState<unknown[]>([]);
 
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
@@ -55,14 +55,14 @@ const Page = () => {
         .then((res: { data: React.SetStateAction<number | undefined> }) => {
           setTotalUser(res.data);
         })
-        .catch(() => {});
+        .catch(() => { });
 
       // Người nuôi mèo
       axiosClient(`users/count/USER`)
         .then((res: { data: React.SetStateAction<number | undefined> }) => {
           setCatOwner(res.data);
         })
-        .catch((e: any) => {
+        .catch((e: unknown) => {
           console.log(e);
         });
       // Người chăm sóc mèo
@@ -70,7 +70,7 @@ const Page = () => {
         .then((res: { data: React.SetStateAction<number | undefined> }) => {
           setManager(res.data);
         })
-        .catch((e: any) => {
+        .catch((e: unknown) => {
           console.log(e);
         });
 
@@ -79,7 +79,7 @@ const Page = () => {
         .then((res: { data: React.SetStateAction<number | undefined> }) => {
           setSitter(res.data);
         })
-        .catch((e: any) => {
+        .catch((e: unknown) => {
           console.log(e);
         });
 
@@ -88,14 +88,14 @@ const Page = () => {
         .then((res: { data: React.SetStateAction<number> }) => {
           setTotalWithdrawals(res.data);
         })
-        .catch(() => {});
+        .catch(() => { });
 
       // Tổng số tiền chiết khấu website có được
       axiosClient('/discounts/total')
         .then((res: { data: React.SetStateAction<number> }) => {
           setTotalDiscountEarned(res.data);
         })
-        .catch(() => {});
+        .catch(() => { });
     } catch (error) {
       console.log(error);
     }
@@ -179,7 +179,7 @@ const Page = () => {
   useEffect(() => {
     console.log(catOwner);
     console.log(catOwners);
-    console.log(totalBookings);
+    // console.log(totalBookings);
     console.log(totalWithdrawals);
     console.log(totalDiscountEarned);
   }, []);
