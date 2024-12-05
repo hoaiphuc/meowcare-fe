@@ -149,7 +149,7 @@ const Page = () => {
                 </div>
                 <hr className={styles.hr} />
 
-                <h1 className={styles.h1}>Thời gian chăm sóc</h1>
+                <h1 className={styles.h1}>Lịch trình chăm sóc dự kiến</h1>
                 {services && services.filter((service) => service.serviceType === "CHILD_SERVICE").map((ser) => (
                     <div key={ser.id} className='flex text-xl items-center gap-3'>
                         <FontAwesomeIcon icon={faCircle} className="text-xs" size='2xs' />

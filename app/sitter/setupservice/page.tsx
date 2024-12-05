@@ -18,7 +18,6 @@ const Page = () => {
     const [services, setServices] = useState<ConfigService[]>([])
     const [createdServices, setCreatedServices] = useState<Service[]>([])
     const dispatch = useAppDispatch();
-    const [showAll, setShowAll] = useState(false);
     const { userProfile } = useAppSelector((state) => state.user);
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
     const [sitterProfile, setSitterProfile] = useState<CatSitter>();
@@ -164,7 +163,7 @@ const Page = () => {
                     </div>
                 </div>
                 <div className="mt-10">
-                    <h1 className={styles.h1}>Cài đặt dịch vụ</h1>
+                    <h1 className={styles.h1}>Cài đặt loại dịch vụ</h1>
                     <div className="flex flex-col gap-5">
                         {services.filter((service) => service.serviceType === "MAIN_SERVICE").map((service) => {
                             const createdService = createdServices.find(
@@ -189,41 +188,19 @@ const Page = () => {
                                 </Link>
                             )
                         })}
-                        {/* addition service  */}
 
-                        <h1 className={showAll ? `${styles.h1}` : "hidden"}>Dịch vụ thêm</h1>
-                        {showAll && services.filter((service) => service.serviceType === "ADDITION_SERVICE").map((service) => {
-                            const createdService = createdServices.find(
-                                (createdService) => createdService.name === service.name
-                            );
-                            const isActivated = Boolean(createdService);
-
-                            const idToUse = createdService ? createdService.id : service.id;
-                            return (
-                                <Link href={`/sitter/servicedetail/${idToUse}`} key={service.id}>
-                                    <div className="flex justify-between border-b py-4 cursor-pointer">
-                                        <div className="flex gap-3">
-                                            <Image src='/noimage.jpg' alt="" width={50} height={50} className="rounded-md" />
-                                            <div>
-                                                <h2 className={styles.h2}>{service.name}</h2>
-                                                {isActivated ? <h2 className="text-green-500">Đã kích hoạt</h2> : <h2 className="text-[#A46950]">Chưa kích hoạt</h2>}
-                                            </div>
-                                        </div>
-                                        <FontAwesomeIcon icon={faChevronRight} />
+                        <Link href={`/sitter/otherservice`}>
+                            <div className="flex justify-between border-b py-4 cursor-pointer">
+                                <div className="flex gap-3">
+                                    <Image src='/noimage.jpg' alt="" width={50} height={50} className="rounded-md" />
+                                    <div>
+                                        <h2 className={styles.h2}>Dịch vụ khác</h2>
                                     </div>
-                                </Link>
-                            )
-                        })}
+                                </div>
+                                <FontAwesomeIcon icon={faChevronRight} />
+                            </div>
+                        </Link>
 
-                        {services.length > 2 && (
-                            <Button
-                                onClick={() => setShowAll(!showAll)}
-                                variant="bordered"
-                                className=""
-                            >
-                                {showAll ? 'Thu gọn' : 'Xem thêm'}
-                            </Button>
-                        )}
                     </div>
                 </div>
 
