@@ -8,11 +8,11 @@ import { fetchUserProfile } from "@/app/lib/slices/userSlice"
 import { faCheck, faChevronRight, faCircle, faEye, faRectangleList, faStarHalfStroke, faUnlock, faUsers, faXmark } from "@fortawesome/free-solid-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { Avatar, Button, Modal, ModalBody, ModalContent, ModalFooter, useDisclosure } from "@nextui-org/react"
-import Image from "next/image"
 import Link from "next/link"
 import { useEffect, useState } from "react"
 import styles from "./setupservice.module.css"
 import { toast } from "react-toastify"
+import { Icon } from "@iconify/react/dist/iconify.js"
 
 const Page = () => {
     const [services, setServices] = useState<ConfigService[]>([])
@@ -177,7 +177,7 @@ const Page = () => {
                                 <Link href={`/sitter/servicedetail/${idToUse}`} key={service.id}>
                                     <div className="flex justify-between border-b py-4 cursor-pointer">
                                         <div className="flex gap-3">
-                                            <Image src='/noimage.jpg' alt="" width={50} height={50} className="rounded-md" />
+                                            <Icon icon="cbi:camera-pet" className='text-[#902C6C] w-12 h-11 mr-2' />
                                             <div>
                                                 <h2 className={styles.h2}>{service.name}</h2>
                                                 {isActivated ? <h2 className="text-green-500">Đã kích hoạt</h2> : <h2 className="text-[#A46950]">Chưa kích hoạt</h2>}
@@ -192,7 +192,7 @@ const Page = () => {
                         <Link href={`/sitter/otherservice`}>
                             <div className="flex justify-between border-b py-4 cursor-pointer">
                                 <div className="flex gap-3">
-                                    <Image src='/noimage.jpg' alt="" width={50} height={50} className="rounded-md" />
+                                    <Icon icon="mdi:home-find-outline" className='text-[#902C6C] w-12 h-11 mr-2' />
                                     <div>
                                         <h2 className={styles.h2}>Dịch vụ khác</h2>
                                     </div>
