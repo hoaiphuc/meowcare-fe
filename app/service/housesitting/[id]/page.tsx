@@ -1,6 +1,6 @@
 'use client'
 
-import { Autocomplete, AutocompleteItem, Avatar, Button, Chip, DateRangePicker, DateValue, Input, Modal, ModalBody, ModalContent, ModalFooter, Radio, RadioGroup, Select, SelectItem, Textarea, useDisclosure } from '@nextui-org/react'
+import { Avatar, Button, Chip, DateRangePicker, DateValue, Input, Modal, ModalBody, ModalContent, ModalFooter, Radio, RadioGroup, Select, SelectItem, Textarea, TimeInput, TimeInputValue, useDisclosure } from '@nextui-org/react'
 import React, { useEffect, useMemo, useState } from 'react'
 import styles from './housesitting.module.css'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -10,9 +10,10 @@ import axiosClient from '@/app/lib/axiosClient'
 import { CatSitter, PetProfile, Service, UserType } from '@/app/constants/types/homeType'
 import Image from 'next/image'
 import { toast } from 'react-toastify'
-import { today, getLocalTimeZone } from '@internationalized/date';
+import { today, getLocalTimeZone, Time } from '@internationalized/date';
 import { format } from 'date-fns'
-import { faCheck, faXmark } from '@fortawesome/free-solid-svg-icons'
+import { faPlus, faTrash } from '@fortawesome/free-solid-svg-icons'
+import { v4 as uuidv4 } from 'uuid';
 
 interface BookingDetail {
     quantity: number;
@@ -27,7 +28,6 @@ const HouseSitting = () => {
     const [pets, setPets] = useState<PetProfile[]>([]);
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
     const [bookingId, setBookingId] = useState();
-    const [childServices, setChildServices] = useState<Service[]>([])
     const [services, setServices] = useState<Service[]>([])
     const [name, setName] = useState('');
     const [phoneNumber, setPhoneNumber] = useState('');
@@ -51,11 +51,6 @@ const HouseSitting = () => {
     const [userId, setUserId] = useState<string | null>(null);
 
     useEffect(() => {
-        axiosClient(`services/sitter/${params.id}/type?serviceType=CHILD_SERVICE&status=ACTIVE`)
-            .then((res) => {
-                setChildServices(res.data)
-            })
-            .catch(() => { })
         axiosClient(`sitter-profiles/sitter/${params.id}`)
             .then((res) => {
                 setSitter(res.data)
@@ -140,6 +135,8 @@ const HouseSitting = () => {
     }, [userId])
 
     const handleBooking = () => {
+        console.log(selectedServices);
+
         const bookingDetails: BookingDetail[] = [];
 
 
@@ -151,17 +148,7 @@ const HouseSitting = () => {
                     serviceId: service.id,
                 });
             })
-
-            childServices.forEach((service) => {
-                bookingDetails.push({
-                    quantity: 1,
-                    petProfileId: petId,
-                    serviceId: service.id,
-                });
-            });
         });
-
-
 
         //add date
         if (!dateRange.startDate || !dateRange.endDate) {
@@ -253,18 +240,64 @@ const HouseSitting = () => {
     }, [dateRange])
 
     //select service
-    const handleSelect = (item: Service) => {
-        if (!selectedServices.includes(item)) {
-            setSelectedServices([...selectedServices, item])
-        } else {
-            setSelectedServices(selectedServices.filter(selection => selection !== item))
+    const handleInputServiceChange = (id: string, field: string, value: TimeInputValue | string, duration?: number) => {
+        if (field === "startTime") {
+            // Check if `value` is of type `TimeInputValue`
+            if (typeof value === "object" && "hour" in value && "minute" in value) {
+                const startHour = value.hour;
+                const startMinute = value.minute;
+                const startTimeInMinutes = startHour * 60 + startMinute;
+                // const formattedTime = `${startHour.toString().padStart(2, "0")}:${startMinute.toString().padStart(2, "0")}`;
 
+                const endTimeInMinutes = duration ? startTimeInMinutes + duration : undefined;
+                console.log(duration);
+
+                setSelectedServices((prev) =>
+                    prev.map((service) =>
+                        service.id === id
+                            ? { ...service, startTime: startHour, endTime: endTimeInMinutes }
+                            : service
+                    )
+                );
+                return;
+            } else {
+                toast.error("Invalid time value");
+                return;
+            }
         }
-    }
 
-    const handleDeleteSelection = (item: Service) => {
-        setSelectedServices(selectedServices.filter(selection => selection !== item))
-    }
+        setSelectedServices((prev) =>
+            prev.map((service) =>
+                service.id === id
+                    ? { ...service, [field]: value, isNew: service.isNew ?? false }
+                    : service
+            )
+        );
+    };
+
+    const removeService = (id: string) => {
+        setSelectedServices((prev) => prev.filter((service) => service.id != id))
+    };
+
+
+    const addNewChildService = () => {
+        const newService: Service = {
+            id: uuidv4(),
+            name: "",
+            serviceType: "ADDITION_SERVICE",
+            actionDescription: "",
+            endTime: 0,
+            startTime: 0,
+            type: "",
+            price: 0,
+            duration: 1,
+            isBasicService: false,
+            isNew: true,
+            isDeleted: false,
+        };
+
+        setSelectedServices((prevState) => [...prevState, newService]);
+    };
 
     return (
         <div className='flex flex-col items-center justify-start my-12'>
@@ -274,62 +307,52 @@ const HouseSitting = () => {
                 <div className='flex flex-col gap-3 w-[586px]'>
                     <div className='flex flex-col gap-3'>
                         <h2 className={styles.h2}>Chọn dịch vụ</h2>
-                        {/* <Select
-                            aria-label='service'
-                            labelPlacement='outside'
-                            className="select min-w-full"
-                            variant="bordered"
-                            defaultSelectedKeys={selectedService}
-                            name='service'
-                            onChange={(e) => handleServiceChange(e.target.value)}
-                        >
-                            {services.map((service) => (
-                                <SelectItem key={service.id} value={service.id}>
-                                    {service.name}
-                                </SelectItem>
-                            ))}
-                        </Select> */}
-                        <div className="flex flex-wrap bg-white border rounded-lg p-2">
-                            {selectedServices.map((item: Service) => (
-                                <Chip
-                                    key={item.id}
-                                    color={"primary"}
-                                    className="mr-2 mt-2 h-10 rounded-lg"
-                                    endContent={<FontAwesomeIcon icon={faXmark}
-                                        size="xl"
-                                        className="mr-1 cursor-pointer"
-                                        onClick={() => handleDeleteSelection(item)}
-                                    />}>
-                                    {item.name}
-                                </Chip>
-                            ))}
-                            <Autocomplete
-                                className="w-[300px] h-10 mt-2"
-                                size='md'
-                                selectedKey={''}>
-                                {services.map((item, index) => (
-                                    <AutocompleteItem
-                                        key={index}
-                                        value={item.id}
-                                        onClick={() => handleSelect(item)}
-                                        endContent={
-                                            selectedServices.some(
-                                                (selection) => selection.id === item.id
-                                            ) && (
-                                                <FontAwesomeIcon
-                                                    icon={faCheck}
-                                                    size="xl"
-                                                    className="mr-2 text-green-500"
-                                                />
-                                            )
-                                        }
+                        <div className="flex flex-col gap-6 p-6 bg-gradient-to-r from-blue-50 via-white to-blue-50 rounded-md shadow-md my-3">
+                            {selectedServices.filter((service) => !service.isDeleted).map((selectedService: Service) => (
+                                <div
+                                    className="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-md shadow-sm gap-5"
+                                    key={selectedService.id}
+                                >
+                                    <Select
+                                        aria-label='service'
+                                        labelPlacement='outside'
+                                        className="select"
+                                        variant="bordered"
+                                        name='service'
+                                        onChange={(e) => handleInputServiceChange(selectedService.id, "serviceId", e.target.value)}
                                     >
-                                        {item.name}
-                                    </AutocompleteItem>
-                                ))}
-                            </Autocomplete>
+                                        {services.map((service) => (
+                                            <SelectItem key={service.id} value={service.id}>
+                                                {service.name}
+                                            </SelectItem>
+                                        ))}
+                                    </Select>
+                                    <div className='flex justify-center items-center gap-3'>
+                                        <TimeInput
+                                            className='w-28'
+                                            label="Giờ bắt đầu"
+                                            hourCycle={24}
+                                            granularity="minute"
+                                            value={new Time(selectedService.startTime)}
+                                            onChange={(e) => handleInputServiceChange(selectedService.id, 'startTime', e, selectedService.duration)}
+                                        />
+                                        -
+                                        <TimeInput
+                                            className='w-28'
+                                            isDisabled
+                                            label="Giờ kết thúc"
+                                            hourCycle={24}
+                                            granularity="minute"
+                                            value={new Time(selectedService.endTime)}
+                                        />
+                                    </div>
+                                    <FontAwesomeIcon icon={faTrash} onClick={() => removeService(selectedService.id)} className='cursor-pointer' />
+                                </div>
+                            ))}
+                            <Button className="flex items-center justify-center p-4 bg-white border border-gray-200 rounded-md shadow-sm gap-2" onClick={addNewChildService}>
+                                <FontAwesomeIcon icon={faPlus} />Chọn thêm dịch vụ
+                            </Button>
                         </div>
-
                         <h2 className={styles.h2}>Chọn ngày</h2>
                         <DateRangePicker
                             label="Ngày đặt lịch"

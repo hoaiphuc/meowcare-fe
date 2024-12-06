@@ -1,6 +1,6 @@
 'use client'
 
-import { Button, Pagination } from '@nextui-org/react'
+import { Button, Pagination, Skeleton } from '@nextui-org/react'
 import React, { useEffect, useState } from 'react'
 import styles from './activity.module.css'
 import { Orders, UserLocal } from '@/app/constants/types/homeType'
@@ -13,6 +13,7 @@ const Page = () => {
     const [filterStatus, setFilterStatus] = useState<string>('ALL');
     const [page, setPage] = useState(1);
     const [pages, setPages] = useState(5);
+    const [isLoading, setIsLoading] = useState(true);
 
     const getUserFromStorage = () => {
         if (typeof window !== "undefined") {
@@ -41,12 +42,16 @@ const Page = () => {
     const userId = user?.id;
 
     useEffect(() => {
+        setIsLoading(true)
         axiosClient(`booking-orders/user/pagination?id=${userId}&page=${page}&size=5&sort=createdAt&direction=DESC`)
             .then((res) => {
                 setData(res.data)
                 setPages(res.data.totalPages)
+                setIsLoading(false)
+
             })
             .catch((e) => {
+                setIsLoading(false)
                 console.log(e);
             })
     }, [userId, page])
@@ -93,71 +98,76 @@ const Page = () => {
                         Đã hủy
                     </Button>
                 </div>
-                <div className=''>
-                    {data ? (
-                        data.content
-                            .filter((activity) =>
-                                filterStatus === 'ALL' || activity.status === filterStatus
-                            )
-                            .map((activity) => {
-                                // Check if bookingDetailWithPetAndServices exists and has data
-                                if (
-                                    activity.bookingDetailWithPetAndServices.length < 1
-                                ) {
-                                    return null; // Skip rendering this activity
-                                }
+                {isLoading ? (
+                    <div><Skeleton /></div>
+                ) : (
+                    <div className=''>
+                        {
+                            data ? (
+                                data.content
+                                    .filter((activity) =>
+                                        filterStatus === 'ALL' || activity.status === filterStatus
+                                    )
+                                    .map((activity) => {
+                                        // Check if bookingDetailWithPetAndServices exists and has data
+                                        if (
+                                            activity.bookingDetailWithPetAndServices.length < 1
+                                        ) {
+                                            return null; // Skip rendering this activity
+                                        }
 
-                                return (
-                                    <div key={activity.id} className='border w-[700px] p-3 rounded-lg flex justify-between my-3'>
-                                        <div>
-                                            <div className='flex'>
-                                                <Icon icon="cbi:camera-pet" className='text-[#902C6C] w-12 h-11 mr-2' />
+                                        return (
+                                            <div key={activity.id} className='border w-[700px] p-3 rounded-lg flex justify-between my-3'>
                                                 <div>
-                                                    <h2>
-                                                        <span className={styles.title}>Dịch vụ: </span>
-                                                        {activity.bookingDetailWithPetAndServices[0].service.serviceName}
-                                                    </h2>
-                                                    <h2>
-                                                        <span className={styles.title}>Người chăm sóc: </span>
-                                                        {activity.sitter.fullName}
-                                                    </h2>
-                                                    <h2>
-                                                        <span className={styles.title}>Mèo của bạn: </span>
-                                                        {activity.bookingDetailWithPetAndServices[0].pet.petName}
-                                                    </h2>
-                                                    <h2><span className={styles.title}>Thời gian: </span></h2>
+                                                    <div className='flex'>
+                                                        <Icon icon="cbi:camera-pet" className='text-[#902C6C] w-12 h-11 mr-2' />
+                                                        <div>
+                                                            <h2>
+                                                                <span className={styles.title}>Dịch vụ: </span>
+                                                                {activity.bookingDetailWithPetAndServices[0].service.serviceName}
+                                                            </h2>
+                                                            <h2>
+                                                                <span className={styles.title}>Người chăm sóc: </span>
+                                                                {activity.sitter.fullName}
+                                                            </h2>
+                                                            <h2>
+                                                                <span className={styles.title}>Mèo của bạn: </span>
+                                                                {activity.bookingDetailWithPetAndServices[0].pet.petName}
+                                                            </h2>
+                                                            <h2><span className={styles.title}>Thời gian: </span></h2>
+                                                        </div>
+                                                    </div>
+                                                    <Button as={Link} href={`/profile/activity/detail/${activity.id}`} className='bg-btnbg text-white rounded-lg mt-3'>Theo dõi lịch</Button>
                                                 </div>
+                                                <h2 className={`${statusColors[activity.status] || 'text-black'}`}>
+                                                    {statusLabels[activity.status] || 'Trạng thái không xác định'}
+                                                </h2>
                                             </div>
-                                            <Button as={Link} href={`/profile/activity/detail/${activity.id}`} className='bg-btnbg text-white rounded-lg mt-3'>Theo dõi lịch</Button>
-                                        </div>
-                                        <h2 className={`${statusColors[activity.status] || 'text-black'}`}>
-                                            {statusLabels[activity.status] || 'Trạng thái không xác định'}
-                                        </h2>
-                                    </div>
-                                );
-                            })
-                    ) : (
-                        <div className='flex justify-center items-center'>
-                            <h1 className=''>Hiện tại không có hoạt động nào</h1>
-                        </div>
-                    )}
-                    {page ? (
-                        <div className={pages <= 1 ? "hidden" : "flex w-full justify-center"}>
-                            <Pagination
-                                isCompact
-                                showControls
-                                showShadow
-                                color="secondary"
-                                page={page}
-                                total={pages}
-                                onChange={(page) => setPage(page)}
-                            />
-                        </div>
-                    ) : (
-                        <div></div>
-                    )}
-                </div>
-
+                                        );
+                                    })
+                            ) : (
+                                <div className='flex justify-center items-center'>
+                                    <h1 className=''>Hiện tại không có hoạt động nào</h1>
+                                </div>
+                            )}
+                        {page ? (
+                            <div className={pages <= 1 ? "hidden" : "flex w-full justify-center"}>
+                                <Pagination
+                                    isCompact
+                                    showControls
+                                    showShadow
+                                    color="secondary"
+                                    page={page}
+                                    total={pages}
+                                    onChange={(page) => setPage(page)}
+                                />
+                            </div>
+                        ) : (
+                            <div></div>
+                        )}
+                    </div>
+                )
+                }
             </div>
         </div >
     )

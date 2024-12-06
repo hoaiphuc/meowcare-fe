@@ -346,7 +346,7 @@ const ServiceDetail = () => {
                                         -
                                         <TimeInput
                                             className='w-28'
-                                            label="Giờ bắt đầu"
+                                            label="Giờ kết thúc"
                                             hourCycle={24}
                                             granularity="minute"
                                             value={new Time(childService.endTime)}
