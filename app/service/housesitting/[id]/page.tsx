@@ -1,11 +1,10 @@
 'use client'
 
-import { Avatar, Button, Checkbox, Chip, DateRangePicker, DateValue, Input, Modal, ModalBody, ModalContent, ModalFooter, Radio, RadioGroup, Select, SelectItem, Textarea, useDisclosure } from '@nextui-org/react'
+import { Autocomplete, AutocompleteItem, Avatar, Button, Chip, DateRangePicker, DateValue, Input, Modal, ModalBody, ModalContent, ModalFooter, Radio, RadioGroup, Select, SelectItem, Textarea, useDisclosure } from '@nextui-org/react'
 import React, { useEffect, useMemo, useState } from 'react'
-import styles from './booking.module.css'
+import styles from './housesitting.module.css'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faClock } from '@fortawesome/free-regular-svg-icons'
-// import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import axiosClient from '@/app/lib/axiosClient'
 import { CatSitter, PetProfile, Service, UserType } from '@/app/constants/types/homeType'
@@ -13,6 +12,7 @@ import Image from 'next/image'
 import { toast } from 'react-toastify'
 import { today, getLocalTimeZone } from '@internationalized/date';
 import { format } from 'date-fns'
+import { faCheck, faXmark } from '@fortawesome/free-solid-svg-icons'
 
 interface BookingDetail {
     quantity: number;
@@ -20,12 +20,10 @@ interface BookingDetail {
     serviceId: string;
 }
 
-const Page = () => {
+const HouseSitting = () => {
     const params = useParams();
-    const [selectedService, setSelectedService] = useState<string>('');
+    const [selectedServices, setSelectedServices] = useState<Service[]>([]);
     const [selectedPet, setSelectedPet] = useState<string[]>([]);
-    const [isSelected, setIsSelected] = useState(false);
-    const [isRequireFood, setIsRequireFood] = useState(false);
     const [pets, setPets] = useState<PetProfile[]>([]);
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
     const [bookingId, setBookingId] = useState();
@@ -42,7 +40,7 @@ const Page = () => {
     });
     const [sitter, setSitter] = useState<CatSitter>()
     const [paymentMethod, setPaymentMethod] = useState("")
-    const [selectedServiceName, setSelectedServiceName] = useState("")
+    // const [selectedServiceName, setSelectedServiceName] = useState("")
     const [userData, setUserData] = useState<UserType>()
     const catFoods = [
         { id: '1', foodName: 'Cá' },
@@ -92,13 +90,13 @@ const Page = () => {
     }, [userData]);
 
     // Handle service change
-    const handleServiceChange = (serviceId: string) => {
-        setSelectedService(serviceId);
-        const selected = services.find((service) => service.id === serviceId);
-        if (selected) {
-            setSelectedServiceName(selected.name);
-        }
-    };
+    // const handleServiceChange = (serviceId: string) => {
+    //     setSelectedService(serviceId);
+    //     const selected = services.find((service) => service.id === serviceId);
+    //     if (selected) {
+    //         setSelectedServiceName(selected.name);
+    //     }
+    // };
 
     const handlePetChange = (petIds: string) => {
         setSelectedPet(petIds.split(','));
@@ -107,10 +105,9 @@ const Page = () => {
     //get basic service
     useEffect(() => {
         try {
-            axiosClient(`services/sitter/${params.id}/type?serviceType=MAIN_SERVICE&status=ACTIVE`)
+            axiosClient(`services/sitter/${params.id}/type?serviceType=ADDITION_SERVICE&status=ACTIVE`)
                 .then((res) => {
                     setServices(res.data);
-                    setSelectedService(res.data[0].id)
                 })
                 .catch((e) => {
                     console.log(e);
@@ -147,11 +144,13 @@ const Page = () => {
 
 
         selectedPet.map((petId) => {
-            bookingDetails.push({
-                quantity: 1,
-                petProfileId: petId,
-                serviceId: selectedService,
-            });
+            selectedServices.forEach((service) => {
+                bookingDetails.push({
+                    quantity: 1,
+                    petProfileId: petId,
+                    serviceId: service.id,
+                });
+            })
 
             childServices.forEach((service) => {
                 bookingDetails.push({
@@ -242,19 +241,30 @@ const Page = () => {
         let totalPerNight = 0;
 
         // Get the selected basic service
-        const basicService = services.find(service => service.id === selectedService);
-        if (basicService) {
-            totalPerNight += basicService.price;
-        }
-
-
+        selectedServices.map((service: Service) => {
+            totalPerNight += service.price;
+        })
 
         return totalPerNight * bookingDetails.numberOfNights * selectedPet.length;
-    }, [services, bookingDetails.numberOfNights, selectedPet.length, selectedService]);
+    }, [bookingDetails.numberOfNights, selectedPet.length, selectedServices]);
 
     useEffect(() => {
 
     }, [dateRange])
+
+    //select service
+    const handleSelect = (item: Service) => {
+        if (!selectedServices.includes(item)) {
+            setSelectedServices([...selectedServices, item])
+        } else {
+            setSelectedServices(selectedServices.filter(selection => selection !== item))
+
+        }
+    }
+
+    const handleDeleteSelection = (item: Service) => {
+        setSelectedServices(selectedServices.filter(selection => selection !== item))
+    }
 
     return (
         <div className='flex flex-col items-center justify-start my-12'>
@@ -264,15 +274,61 @@ const Page = () => {
                 <div className='flex flex-col gap-3 w-[486px]'>
                     <div className='flex flex-col gap-3'>
                         <h2 className={styles.h2}>Loại dịch vụ</h2>
-                        {services.map((service) => (
-                            <h1 key={service.id} >
-                                {service.name}
-                            </h1>
-                        ))}
-                        <Checkbox isSelected={isSelected} onValueChange={setIsSelected} radius='none'>
-                            Dịch vụ đưa đón mèo (1-10km)
-                        </Checkbox>
-                        <Input placeholder='Nhập địa chỉ đưa đoán mèo' isDisabled={!isSelected} variant="bordered" className='input' />
+                        {/* <Select
+                            aria-label='service'
+                            labelPlacement='outside'
+                            className="select min-w-full"
+                            variant="bordered"
+                            defaultSelectedKeys={selectedService}
+                            name='service'
+                            onChange={(e) => handleServiceChange(e.target.value)}
+                        >
+                            {services.map((service) => (
+                                <SelectItem key={service.id} value={service.id}>
+                                    {service.name}
+                                </SelectItem>
+                            ))}
+                        </Select> */}
+                        <div className="flex mt-2 flex-wrap">
+                            {selectedServices.map((item: Service) => (
+                                <Chip
+                                    key={item.id}
+                                    color={"primary"}
+                                    className="mr-2 mt-2 h-10"
+                                    endContent={<FontAwesomeIcon icon={faXmark}
+                                        size="xl"
+                                        className="mr-1 cursor-pointer"
+                                        onClick={() => handleDeleteSelection(item)}
+                                    />}>
+                                    {item.name}
+                                </Chip>
+                            ))}
+                            <Autocomplete
+                                className="w-[300px] h-10 mt-2"
+                                size='md'
+                                selectedKey={''}>
+                                {services.map((item, index) => (
+                                    <AutocompleteItem
+                                        key={index}
+                                        value={item.id}
+                                        onClick={() => handleSelect(item)}
+                                        endContent={
+                                            selectedServices.some(
+                                                (selection) => selection.id === item.id
+                                            ) && (
+                                                <FontAwesomeIcon
+                                                    icon={faCheck}
+                                                    size="xl"
+                                                    className="mr-2 text-green-500"
+                                                />
+                                            )
+                                        }
+                                    >
+                                        {item.name}
+                                    </AutocompleteItem>
+                                ))}
+                            </Autocomplete>
+                        </div>
 
                         <h2 className={styles.h2}>Chọn ngày</h2>
                         <DateRangePicker
@@ -282,7 +338,7 @@ const Page = () => {
                             onChange={(range) => setDateRange({ startDate: range.start, endDate: range.end })}
                         />
 
-                        <h2 className={styles.h2}>Chọn thú cưng của bạn</h2>
+                        <h2 className={styles.h2}>Thêm thú cưng của bạn</h2>
                         <Select
                             items={pets}
                             aria-label='pet'
@@ -333,8 +389,6 @@ const Page = () => {
                             className="select min-w-full"
                             variant="bordered"
                             aria-label='food'
-                            defaultSelectedKeys={selectedService}
-                            onChange={(event) => handleServiceChange(event.target.value)}
                         >
                             {catFoods.map((food) => (
                                 <SelectItem key={food.id} value={food.id}>
@@ -342,11 +396,6 @@ const Page = () => {
                                 </SelectItem>
                             ))}
                         </Select>
-
-                        <Checkbox isSelected={isRequireFood} onValueChange={setIsRequireFood} radius='none'>
-                            Thức ăn theo yêu cầu
-                        </Checkbox>
-                        <Input placeholder='Nhập loại thức ăn cụ thể' isDisabled={!isSelected} variant="bordered" className='input' />
 
                         <h2 className={styles.h2}>Thông tin cá nhân</h2>
                         <Input placeholder='Họ và tên' variant='bordered' value={name} onChange={(e) => setName(e.target.value)} />
@@ -359,11 +408,23 @@ const Page = () => {
                     </div>
                 </div>
                 <div className='w-[427px]'>
+                    <div className='border flex flex-col p-3 rounded-lg gap-3 mb-10'>
+                        <h2 className={styles.h2}>Bảng giá dịch vụ</h2>
+                        {services.map((service) => (
+                            <div className='flex justify-between' key={service.id}>
+                                <h3>{service.name}</h3>
+                                <div className='flex flex-col left-0'>
+                                    <h3 className='text-[#2B764F]'>{service.price.toLocaleString()}đ</h3>
+                                    <h4>giá mỗi đêm</h4>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
 
                     {/* Final price */}
                     <div className='border flex flex-col p-3 rounded-lg gap-3'>
                         <h2 className={styles.h2}>Thông tin đặt lịch </h2>
-                        <h3>Dịch vụ: {services.map((service) => service.name)}</h3>
+                        {/* <h3>Dịch vụ: {selectedServiceName}</h3> */}
                         <div className='flex flex-cols-3 justify-between'>
                             <div>
                                 <h3>Ngày nhận</h3>
@@ -419,7 +480,7 @@ const Page = () => {
                                             <h2 className={styles.h2}>Thông tin đặt lịch của bạn</h2>
                                             <div className='grid grid-cols-2 w-80'>
                                                 <h3 className={styles.h3}>Mã đặt hàng</h3> <h3>123</h3>
-                                                <h3 className={styles.h3}>Dịch vụ</h3> <h3>{selectedServiceName}</h3>
+                                                {/* <h3 className={styles.h3}>Dịch vụ</h3> <h3>{selectedServiceName}</h3> */}
                                                 <h3 className={styles.h3}>Ngày gửi</h3> <h3>{format(new Date(bookingDetails.formattedStartDate), 'dd/MM/yyyy')}</h3>
                                                 <h3 className={styles.h3}>Ngày Nhận</h3> <h3>{format(new Date(bookingDetails.formattedEndDate), 'dd/MM/yyyy')}</h3>
                                                 <h3 className={styles.h3}>Người chăm sóc</h3> <h3>{sitter?.fullName}</h3>
@@ -500,4 +561,4 @@ const Page = () => {
     )
 }
 
-export default Page
+export default HouseSitting
