@@ -107,7 +107,6 @@ const Information = () => {
                     </div>
                     <Input placeholder="Nhập địa chỉ của ban" variant="bordered" className='input' name="address" value={formData.address} onChange={handleInputChange} />
                 </div>
-                <Input placeholder="Nhập số điện thoại" label="Số điện thoại" labelPlacement='outside' variant="bordered" className='input' />
             </div>
         </div>
     )
