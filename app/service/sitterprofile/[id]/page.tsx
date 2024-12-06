@@ -24,6 +24,7 @@ const Page = () => {
     const [isUser, setIsUser] = useState<boolean>();
     const [isLoading, setIsLoading] = useState(true);
     const [services, setServices] = useState<Service[]>([])
+    const [childService, setChildService] = useState<Service[]>([])
 
     // check user
     useEffect(() => {
@@ -55,9 +56,10 @@ const Page = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [sitterProfileRes, servicesRes] = await Promise.allSettled([
+                const [sitterProfileRes, servicesRes, childServiceRes] = await Promise.allSettled([
                     axiosClient(`sitter-profiles/sitter/${params.id}`),
-                    axiosClient(`services/sitter/${params.id}`),
+                    axiosClient(`services/sitter/${params.id}/type?serviceType=MAIN_SERVICE&status=ACTIVE`),
+                    axiosClient(`services/sitter/${params.id}/type?serviceType=CHILD_SERVICE&status=ACTIVE`),
                 ]);
 
                 // Handle sitter profile response
@@ -72,6 +74,12 @@ const Page = () => {
                     setServices(servicesRes.value.data);
                 } else {
                     console.error("Failed to fetch services:", servicesRes.reason);
+                }
+
+                if (childServiceRes.status === "fulfilled") {
+                    setChildService(childServiceRes.value.data);
+                } else {
+                    console.error("Failed to fetch services:", childServiceRes.reason);
                 }
 
             } catch (error) {
@@ -89,8 +97,8 @@ const Page = () => {
     }
 
     return (
-        <div className='flex flex-cols-2 my-10 gap-10 px-16 justify-center'>
-            <div className='flex flex-col gap-2 w-[352px]'>
+        <div className='flex flex-cols-2 my-10 gap-10 justify-center'>
+            <div className='flex flex-col gap-2 w-[452px]'>
                 <div className='min-h-[300px]'>
                     <div className='flow-root'>
                         <Avatar src='/User-avatar.png' className='float-left h-20 w-20' />
@@ -118,20 +126,34 @@ const Page = () => {
 
                 <div className='shadow-xl p-4 border-[0.5px] rounded-md mt-20'>
                     <h1 className={styles.h1}>Dịch vụ</h1>
-                    <div className=' flex flex-col gap-3'>
-                        {services && services.filter((service) => service.serviceType === "MAIN_SERVICE").map((ser) => (
-                            <div className='flex' key={ser.id}>
-                                <Icon icon="cbi:camera-pet" className='text-black w-12 h-11' />
-                                <div className='text-secondary font-semibold'>
-                                    <h1 className='text-text text-xl font-semibold'>{ser.name}</h1>
-                                    <p className={styles.p}>{ser.actionDescription}</p>
-                                    <p className={styles.p}>Giá <span className='text-[#2B764F]'>{ser.price.toLocaleString("de")}đ</span> <span className='font-semibold'>mỗi đêm</span></p>
+                    <div className=' flex flex-col gap-3 my-3'>
+                        {services && services.map((ser) => (
+                            <div className='flex flex-col ' key={ser.id}>
+                                <div className='flex'>
+                                    <Icon icon="cbi:camera-pet" className='text-black w-12 h-11' />
+                                    <div className='text-secondary font-semibold'>
+                                        <h1 className='text-text text-xl font-semibold'>{ser.name}</h1>
+                                        <p className={styles.p}>{ser.actionDescription}</p>
+                                        <p className={styles.p}>Giá <span className='text-[#2B764F]'>{ser.price.toLocaleString("de")}đ</span> <span className='font-semibold'>mỗi đêm</span></p>
+                                    </div>
                                 </div>
+                                <Button as={Link} href={isUser ? `/service/booking/${sitterProfile?.sitterId}` : `/login`} className={styles.button}>Đặt lịch</Button>
                             </div>
                         ))}
-                        <Button className={styles.button}>Xem chi tiết giá</Button>
                     </div>
 
+                    {/* other service */}
+                    <div className='flex flex-col'>
+                        <div className='flex'>
+                            <Icon icon="cbi:camera-pet" className='text-black w-12 h-11' />
+                            <div className='text-secondary font-semibold'>
+                                <h1 className='text-text text-xl font-semibold'>Trông tại nhà</h1>
+                                <p className={styles.p}>Dịch vụ chăm sóc mèo tại nhà của bạn</p>
+                                <p className={styles.p}>Giá <span className='text-[#2B764F]'>100.000đ</span> <span className='font-semibold'>mỗi đêm</span></p>
+                            </div>
+                        </div>
+                        <Button as={Link} href={isUser ? `/service/housesitting/${sitterProfile?.sitterId}` : `/login`} className={styles.button}>Đặt lịch</Button>
+                    </div>
                     <h1 className={styles.h1}>Thời gian làm việc</h1>
                     <p className={styles.p}>Hiện tại tôi đang làm đồ án của trường ĐH FPT. Vì vậy, tôi có thể học ở bất cứ đâu và tôi khá linh hoạt về thời gian.</p>
                 </div>
@@ -150,7 +172,7 @@ const Page = () => {
                 <hr className={styles.hr} />
 
                 <h1 className={styles.h1}>Lịch trình chăm sóc dự kiến</h1>
-                {services && services.filter((service) => service.serviceType === "CHILD_SERVICE").map((ser) => (
+                {childService && childService.map((ser) => (
                     <div key={ser.id} className='flex text-xl items-center gap-3'>
                         <FontAwesomeIcon icon={faCircle} className="text-xs" size='2xs' />
                         <div className={styles.time}>{ser.startTime} giờ - {ser.endTime} giờ: </div>

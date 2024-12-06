@@ -1,0 +1,52 @@
+.h1 {
+  @apply text-5xl font-bold;
+}
+
+.h2 {
+  @apply text-xl font-bold;
+}
+
+.input {
+  @apply w-full h-12 border-black;
+}
+
+/* .input :isdisabled {
+  @apply bg-red-700;
+ } */
+
+.h3 {
+  @apply text-[14px] font-bold text-secondary;
+}
+
+.h4 {
+  @apply text-[10px] font-bold text-secondary;
+}
+
+/* 
+.h1 {
+  @apply font-bold text-[28px];
+}
+
+.h2 {
+  @apply font-bold text-[18px];
+}
+
+.h3 {
+  @apply font-bold text-[14px] text-black;
+} */
+
+.p {
+  @apply font-bold text-[14px] text-secondary;
+}
+
+.money {
+  @apply pl-3 border border-black;
+}
+
+.paymentHeading1 {
+  @apply text-[20px] font-semibold;
+}
+
+.paymentHeading2 {
+  @apply text-[14px];
+}

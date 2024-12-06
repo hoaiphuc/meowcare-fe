@@ -11,7 +11,7 @@
 }
 
 .button {
-  @apply bg-transparent border border-black self-center text-[16px] font-semibold my-3 min-w-60 rounded-full;
+  @apply bg-transparent border bg-maincolor text-white self-center text-[16px] font-semibold my-3 w-full rounded-md;
 }
 
 .p {
