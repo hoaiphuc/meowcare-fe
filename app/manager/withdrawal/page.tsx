@@ -1,8 +1,9 @@
 "use client";
 
-import { Transaction } from "@/app/constants/types/homeType";
+import { RequestWithdrawal } from "@/app/constants/types/homeType";
 import axiosClient from "@/app/lib/axiosClient";
 import {
+  Button,
   Pagination,
   Table,
   TableBody,
@@ -16,24 +17,24 @@ import React, { useEffect, useMemo, useState } from "react";
 
 const Page = () => {
   const [page, setPage] = useState(1);
-  const [data, setData] = useState<Transaction[]>([]);
+  const [data, setData] = useState<RequestWithdrawal[]>([]);
   const rowsPerPage = 10;
 
-  const statusColors: { [key: string]: string } = {
-    PENDING: "text-[#9E9E9E]", // Chờ duyệt - gray
-    COMPLETED: "text-[#4CAF50]", // Hoàn thành - green
-    FAILED: "text-[#DC3545]", // Đã hủy - Red
-  };
+  // const statusColors: { [key: string]: string } = {
+  //   PENDING: "text-[#9E9E9E]", // Chờ duyệt - gray
+  //   COMPLETED: "text-[#4CAF50]", // Hoàn thành - green
+  //   FAILED: "text-[#DC3545]", // Đã hủy - Red
+  // };
 
-  const statusLabels: { [key: string]: string } = {
-    PENDING: "Chờ thanh toán",
-    COMPLETED: "Giao dịch thành công",
-    FAILED: "Giao dịch thất bại",
-  };
+  // const statusLabels: { [key: string]: string } = {
+  //   PENDING: "Chờ thanh toán",
+  //   COMPLETED: "Giao dịch thành công",
+  //   FAILED: "Giao dịch thất bại",
+  // };
 
   useEffect(() => {
     try {
-      axiosClient("transactions")
+      axiosClient("request-withdrawal/getAllRequests")
         .then((res) => {
           setData(res.data);
         })
@@ -60,15 +61,18 @@ const Page = () => {
         aria-label="Example table with client side pagination"
         bottomContent={
           <div className="flex w-full justify-center">
-            <Pagination
-              isCompact
-              showControls
-              showShadow
-              color="secondary"
-              page={page}
-              total={pages}
-              onChange={(page) => setPage(page)}
-            />
+            {
+              items.length > 10 &&
+              <Pagination
+                isCompact
+                showControls
+                showShadow
+                color="secondary"
+                page={page}
+                total={pages}
+                onChange={(page) => setPage(page)}
+              />
+            }
           </div>
         }
         classNames={{
@@ -76,27 +80,31 @@ const Page = () => {
         }}
       >
         <TableHeader>
-          <TableColumn key="name">Người thực hiện</TableColumn>
-          <TableColumn key="name">Tên ngân hàng</TableColumn>
-          <TableColumn key="name">Số tài khoản</TableColumn>
-          <TableColumn key="name">Ngày thực hiện</TableColumn>
+          <TableColumn key="name">Người yêu cầu</TableColumn>
+          <TableColumn key="bankName">Tên ngân hàng</TableColumn>
+          <TableColumn key="bankNumber">Số tài khoản</TableColumn>
+          <TableColumn key="date">Ngày thực hiện</TableColumn>
           <TableColumn key="role">Số tiền</TableColumn>
           <TableColumn key="status">Trạng thái</TableColumn>
+          <TableColumn key="hoat">Hành đồng</TableColumn>
         </TableHeader>
         <TableBody items={items}>
-          {(transaction) => (
-            <TableRow key={transaction.id}>
-              <TableCell>{transaction.fromUserEmail}</TableCell>
-              <TableCell>{transaction.toUserEmail}</TableCell>
-              <TableCell>{transaction.paymentMethod}</TableCell>
+          {(request) => (
+            <TableRow key={request.id}>
+              <TableCell>{request.fullName}</TableCell>
+              <TableCell>{request.bankName}</TableCell>
+              <TableCell>{request.bankNumber}</TableCell>
               <TableCell>
-                {format(new Date(transaction.updatedAt), "HH:mm | dd/MM/yyyy")}
+                {format(new Date(request.createAt), "HH:mm | dd/MM/yyyy")}
               </TableCell>
               <TableCell>
-                {transaction.amount.toLocaleString("de-DE")}đ
+                {request.balance.toLocaleString("de-DE")}đ
               </TableCell>
-              <TableCell className={statusColors[transaction.status]}>
-                {statusLabels[transaction.status]}
+              <TableCell >
+                {request.processStatus}
+              </TableCell>
+              <TableCell >
+                <Button>Chi tiết</Button>
               </TableCell>
             </TableRow>
           )}

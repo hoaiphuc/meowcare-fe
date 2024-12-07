@@ -375,9 +375,12 @@ export type Notification = {
 };
 
 export type RequestWithdrawal = {
+  id: string;
   userId: string;
   balance: number;
   bankNumber: string;
   fullName: string;
   bankName: string;
+  processStatus: string;
+  createAt: string;
 };

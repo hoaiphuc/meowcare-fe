@@ -5,6 +5,7 @@ import axiosClient from '@/app/lib/axiosClient';
 import { Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, useDisclosure } from '@nextui-org/react';
 import React, { useCallback, useEffect, useState } from 'react'
 import styles from "./wallet.module.css"
+import { toast } from 'react-toastify';
 // import { toast } from 'react-toastify';
 
 interface Wallet {
@@ -14,11 +15,14 @@ interface Wallet {
 const Wallet = () => {
     const [wallet, setWallet] = useState<Wallet>()
     const [requestData, setRequestData] = useState<RequestWithdrawal>({
+        id: "",
         userId: "",
         balance: 0,
         bankNumber: "",
         fullName: "",
-        bankName: ""
+        bankName: "",
+        processStatus: "",
+        createAt: "",
     })
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
@@ -66,20 +70,19 @@ const Wallet = () => {
 
 
     const handleSendRequest = () => {
-        // try {
-        //     axiosClient.post("request-withdrawal/createNewRequest", requestData)
-        //         .then(() => {
-        //             fetchWallet()
-        //             toast.success("Gửi yêu cầu thành công")
-        //         })
-        //         .catch(() => {
-        //             toast.error("Có lỗi xảy ra, vui lòng thử lại sau")
-        //         })
-        // } catch (error) {
+        try {
+            axiosClient.post("request-withdrawal/createNewRequest", requestData)
+                .then(() => {
+                    fetchWallet()
+                    toast.success("Gửi yêu cầu thành công")
+                    onOpenChange()
+                })
+                .catch(() => {
+                    toast.error("Có lỗi xảy ra, vui lòng thử lại sau")
+                })
+        } catch (error) {
 
-        // }
-        console.log(requestData);
-
+        }
     }
 
     return (

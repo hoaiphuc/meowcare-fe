@@ -226,6 +226,7 @@ const OtherService = () => {
                     </div> */}
 
                     <Table aria-label="Example static collection table"
+                        className='mt-3'
                         bottomContent={
                             <Button className="flex items-center justify-center p-4 bg-white border border-gray-200 rounded-md shadow-sm gap-2" onClick={addNewChildService}>
                                 <FontAwesomeIcon icon={faPlus} /> Tạo thêm khung giờ
@@ -235,25 +236,43 @@ const OtherService = () => {
                             <TableColumn>Tên dịch vụ</TableColumn>
                             <TableColumn>Giá</TableColumn>
                             <TableColumn>Thời gian/ lần</TableColumn>
+                            <TableColumn>Loại</TableColumn>
                             <TableColumn> </TableColumn>
                         </TableHeader>
                         <TableBody className='mt-3'>
-                            {additionServices.filter((childService) => !childService.isDeleted).map((childService: Service) => (
-                                <TableRow key={childService.id} className='border rounded-lg'>
+                            {additionServices.map((additionService: Service) => (
+                                <TableRow key={additionService.id} >
                                     <TableCell className='pl-0'>
                                         <Input
-                                            value={childService.name}
+                                            value={additionService.name}
                                             onChange={(e) =>
-                                                handleInputChildChange(childService.id, 'name', e.target.value)
+                                                handleInputChildChange(additionService.id, 'name', e.target.value)
                                             }
                                         />
                                     </TableCell>
-                                    <TableCell className=''>
+                                    <TableCell className='w-32'>
                                         <Input
-                                            value={childService.name}
+                                            type='number'
+                                            className='no-spinner'
+                                            value={additionService.price.toString()}
+                                            onChange={(e) =>
+                                                handleInputChildChange(additionService.id, 'price', e.target.value)
+                                            }
                                         />
                                     </TableCell>
-
+                                    <TableCell className='w-28'>
+                                        <Input
+                                            type='number'
+                                            className='no-spinner'
+                                            value={additionService.duration.toString()}
+                                            onChange={(e) =>
+                                                handleInputChildChange(additionService.id, 'duration', e.target.value)
+                                            }
+                                            endContent={
+                                                <p>phút</p>
+                                            }
+                                        />
+                                    </TableCell>
                                     <TableCell className=''>
                                         <Select className="min-h-full max-w-20">
                                             {types.map((animal) => (
@@ -262,7 +281,7 @@ const OtherService = () => {
                                         </Select>
                                     </TableCell>
                                     <TableCell className=''>
-                                        <FontAwesomeIcon icon={faTrash} onClick={() => markAsDeleted(childService.id)} className='cursor-pointer' />
+                                        <FontAwesomeIcon icon={faTrash} onClick={() => markAsDeleted(additionService.id)} className='cursor-pointer' />
                                     </TableCell>
                                 </TableRow>
 
