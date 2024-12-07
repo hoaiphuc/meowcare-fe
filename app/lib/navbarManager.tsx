@@ -37,7 +37,7 @@ export const navbarManager: SideNavItem[] = [
     icon: <FontAwesomeIcon icon={faFlag} className="w-7 h-7 " />,
   },
   {
-    title: "Giao dịch",
+    title: "Yêu cầu rút tiền",
     path: "/manager/withdrawal",
     icon: <FontAwesomeIcon icon={faCoins} className="w-7 h-7" />,
   },

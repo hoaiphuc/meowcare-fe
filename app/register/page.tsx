@@ -67,6 +67,7 @@ const Register = () => {
                         className=''
                         size='lg'
                         type="email"
+                        errorMessage="Email của bạn không tồn tại"
                         placeholder="Email"
                         labelPlacement="outside"
                         onChange={(e) => setEmail(e.target.value)}

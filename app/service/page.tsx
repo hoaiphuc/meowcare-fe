@@ -126,7 +126,7 @@ const Service = () => {
                         className={styles.searchInput}
                         value={address}
                         onChange={handleAddressChange}
-                        placeholder="Search for a location"
+                        placeholder="Nhập địa điểm bạn muốn tìm"
                     />
                     {showSuggestions && geoSuggestions.length > 0 && (
                         <div className={styles.suggestionsDropdown}>

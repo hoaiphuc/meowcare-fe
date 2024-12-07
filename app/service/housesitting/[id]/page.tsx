@@ -240,22 +240,27 @@ const HouseSitting = () => {
     }, [dateRange])
 
     //select service
-    const handleInputServiceChange = (id: string, field: string, value: TimeInputValue | string, duration?: number) => {
+    const handleInputServiceChange = (id: string, field: string, value: TimeInputValue | string, duration: number) => {
+
         if (field === "startTime") {
             // Check if `value` is of type `TimeInputValue`
             if (typeof value === "object" && "hour" in value && "minute" in value) {
                 const startHour = value.hour;
                 const startMinute = value.minute;
                 const startTimeInMinutes = startHour * 60 + startMinute;
-                // const formattedTime = `${startHour.toString().padStart(2, "0")}:${startMinute.toString().padStart(2, "0")}`;
 
-                const endTimeInMinutes = duration ? startTimeInMinutes + duration : undefined;
-                console.log(duration);
+                const endTimeInMinutes = duration ? startTimeInMinutes + duration : startTimeInMinutes;
 
+                // Convert minutes back to hours and minutes
+                const endHour = Math.floor(endTimeInMinutes / 60) % 24;
+                const endMinute = endTimeInMinutes % 60;
+
+                const formattedTime = `${startHour.toString().padStart(2, "0")}:${startMinute.toString().padStart(2, "0")}`;
+                const formattedEndTime = `${endHour.toString().padStart(2, "0")}:${endMinute.toString().padStart(2, "0")}`;
                 setSelectedServices((prev) =>
                     prev.map((service) =>
                         service.id === id
-                            ? { ...service, startTime: startHour, endTime: endTimeInMinutes }
+                            ? { ...service, startTime: formattedTime, endTime: formattedEndTime }
                             : service
                     )
                 );
@@ -265,14 +270,6 @@ const HouseSitting = () => {
                 return;
             }
         }
-
-        setSelectedServices((prev) =>
-            prev.map((service) =>
-                service.id === id
-                    ? { ...service, [field]: value, isNew: service.isNew ?? false }
-                    : service
-            )
-        );
     };
 
     const removeService = (id: string) => {
@@ -286,8 +283,8 @@ const HouseSitting = () => {
             name: "",
             serviceType: "ADDITION_SERVICE",
             actionDescription: "",
-            endTime: 0,
-            startTime: 0,
+            endTime: "",
+            startTime: "",
             type: "",
             price: 0,
             duration: 1,
@@ -297,6 +294,11 @@ const HouseSitting = () => {
         };
 
         setSelectedServices((prevState) => [...prevState, newService]);
+    };
+
+    const parseTimeString = (timeString: string) => {
+        const [hour, minute] = timeString.split(':').map(Number);
+        return { hour, minute };
     };
 
     return (
@@ -319,7 +321,19 @@ const HouseSitting = () => {
                                         className="select"
                                         variant="bordered"
                                         name='service'
-                                        onChange={(e) => handleInputServiceChange(selectedService.id, "serviceId", e.target.value)}
+                                        onChange={(e) => {
+                                            const chosenService = services.find(service => service.id === e.target.value);
+                                            if (chosenService) {
+                                                // Update the selected service in `selectedServices` with the chosen duration from `services`
+                                                setSelectedServices((prev) =>
+                                                    prev.map((item) =>
+                                                        item.id === selectedService.id
+                                                            ? { ...item, serviceId: chosenService.id, duration: chosenService.duration }
+                                                            : item
+                                                    )
+                                                );
+                                            }
+                                        }}
                                     >
                                         {services.map((service) => (
                                             <SelectItem key={service.id} value={service.id}>
@@ -333,7 +347,7 @@ const HouseSitting = () => {
                                             label="Giờ bắt đầu"
                                             hourCycle={24}
                                             granularity="minute"
-                                            value={new Time(selectedService.startTime)}
+                                            value={new Time(parseTimeString(selectedService.startTime).hour, parseTimeString(selectedService.startTime).minute)}
                                             onChange={(e) => handleInputServiceChange(selectedService.id, 'startTime', e, selectedService.duration)}
                                         />
                                         -
@@ -343,7 +357,7 @@ const HouseSitting = () => {
                                             label="Giờ kết thúc"
                                             hourCycle={24}
                                             granularity="minute"
-                                            value={new Time(selectedService.endTime)}
+                                            value={new Time(parseTimeString(selectedService.endTime).hour, parseTimeString(selectedService.endTime).minute)}
                                         />
                                     </div>
                                     <FontAwesomeIcon icon={faTrash} onClick={() => removeService(selectedService.id)} className='cursor-pointer' />
