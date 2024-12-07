@@ -17,7 +17,7 @@ import { showConfirmationDialog } from '@/app/components/confirmationDialog';
 const Page = () => {
     const { isOpen: isOpenAdd, onOpen: onOpenAdd, onOpenChange: onOpenChangeAdd } = useDisclosure();
     const { isOpen: isOpenUpdate, onOpen: onOpenUpdate, onOpenChange: onOpenChangeUpdate } = useDisclosure();
-    const [selectBreed, setSelectBreed] = useState<string>('');
+    // const [selectBreed, setSelectBreed] = useState<string>('');
     //image data
     const [selectedImage, setSelectedImage] = useState<File | null>(null);
     const [previewImage, setPreviewImage] = useState<string | null>(null);
@@ -32,7 +32,7 @@ const Page = () => {
         petName: '',
         profilePicture: '',
         age: '',
-        breed: selectBreed,
+        breed: "",
         species: '',
         weight: '',
         gender: '',
@@ -143,15 +143,20 @@ const Page = () => {
     }
 
     const handleOpenUpdatePet = (id: string) => {
-        onOpenUpdate()
         try {
             axiosClient(`pet-profiles/${id}`)
                 .then((res) => {
                     setUpdatePet(res.data)
+                    // const matchedBreed = CatBreed.find((breed) => breed.breed === res.data.breed);
+                    // if (matchedBreed) {
+                    //     setBreed(matchedBreed.id);
+                    // }
                 })
                 .catch((e) => {
                     console.log(e);
                 })
+            onOpenUpdate()
+
         } catch (error) {
             console.log(error);
         }
@@ -224,8 +229,21 @@ const Page = () => {
 
     //handle breed change
     const handleBreedChange = (breedId: string) => {
-        setSelectBreed(breedId);
+        const selectedBreed = CatBreed.find((breed) => breed.id.toString() === breedId)?.breed || "";
+        setPetData((prev) => ({
+            ...prev,
+            breed: selectedBreed,
+        }));
     };
+
+    const handleUpdateBreedChange = (breedId: string) => {
+        const selectedBreed = CatBreed.find((breed) => breed.id.toString() === breedId)?.breed || "";
+        setUpdatePet((prev) => ({
+            ...prev,
+            breed: selectedBreed,
+        }));
+    };
+
 
     //delete pet profile
     const handleDelete = async (petId: string) => {
@@ -476,7 +494,7 @@ const Page = () => {
                                     <div className='flex flex-col gap-5'>
                                         <div className='flex gap-5'>
                                             <Input label={<h1 className={styles.heading1}>Tên bé mèo</h1>} placeholder='Tên' labelPlacement='outside' name='petName' value={updatePet.petName} onChange={handleUpdateInputChange} />
-                                            <Input label={<h1 className={styles.heading1}>Tuổi</h1>} placeholder='Nhập tuổi cho bé mèo' labelPlacement='outside' name='age' value={updatePet.age} onChange={handleUpdateInputChange} />
+                                            <Input type='number' label={<h1 className={styles.heading1}>Tuổi</h1>} placeholder='Nhập tuổi cho bé mèo' labelPlacement='outside' name='age' value={updatePet.age} onChange={handleUpdateInputChange} />
                                             <RadioGroup
                                                 label={<h1 className={styles.heading1}>Giới tính</h1>}
                                                 className='w-full'
@@ -484,8 +502,8 @@ const Page = () => {
                                                 onValueChange={handleUpdateGenderChange}
                                             >
                                                 <div className='flex gap-3'>
-                                                    <Radio value="buenos-aires">Bé đực</Radio>
-                                                    <Radio value="sydney">Bé cái</Radio>
+                                                    <Radio value="Bé đực">Bé đực</Radio>
+                                                    <Radio value="Bé cái">Bé cái</Radio>
                                                 </div>
                                             </RadioGroup>
                                         </div>
@@ -496,19 +514,29 @@ const Page = () => {
                                                 placeholder="Giống mèo của bạn"
                                                 className="select"
                                                 variant="bordered"
-                                                onChange={(event) => handleBreedChange(event.target.value)}
+                                                selectedKeys={CatBreed.find((breed) => breed.breed === updatePet.breed)?.id.toString()}
+                                                onChange={(event) => {
+                                                    handleUpdateBreedChange(event.target.value);
+                                                }}
                                             >
                                                 {CatBreed.map((breed) => (
-                                                    <SelectItem key={breed.id} value={breed.id}>
+                                                    <SelectItem key={breed.id} value={breed.breed}>
                                                         {breed.breed}
                                                     </SelectItem>
                                                 ))}
                                             </Select>
-                                            <Input label={<h1 className={styles.heading1}>Cân nặng</h1>} placeholder='Kg' labelPlacement='outside' />
+                                            <Input type='number' name='weight' value={updatePet.weight} onChange={handleUpdateInputChange} label={<h1 className={styles.heading1}>Cân nặng</h1>} placeholder='Kg' labelPlacement='outside' />
                                         </div>
                                     </div>
                                 </div>
-                                <Textarea label={<h1 className={styles.heading1}>Những thông tin mà người chăm sóc mèo cần lưu ý</h1>} placeholder='Thêm hướng dẫn chăm sóc để phù hợp với bé mèo của bạn' labelPlacement='outside' />
+                                <Textarea
+                                    name='description'
+                                    value={updatePet.description}
+                                    onChange={handleUpdateInputChange}
+                                    label={<h1 className={styles.heading1}>Những thông tin mà người chăm sóc mèo cần lưu ý</h1>}
+                                    placeholder='Thêm hướng dẫn chăm sóc để phù hợp với bé mèo của bạn'
+                                    labelPlacement='outside'
+                                />
                             </ModalBody>
                             <ModalFooter className='flex justify-center items-center flex-col'>
                                 <Button color="primary" onPress={() => handleUpdatePet()} className='rounded-full'>
