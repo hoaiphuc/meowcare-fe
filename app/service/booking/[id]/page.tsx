@@ -28,7 +28,6 @@ const Page = () => {
     const [isRequireFood, setIsRequireFood] = useState(false);
     const [pets, setPets] = useState<PetProfile[]>([]);
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
-    const [bookingId, setBookingId] = useState();
     const [childServices, setChildServices] = useState<Service[]>([])
     const [services, setServices] = useState<Service[]>([])
     const [name, setName] = useState('');
@@ -101,7 +100,11 @@ const Page = () => {
     };
 
     const handlePetChange = (petIds: string) => {
-        setSelectedPet(petIds.split(','));
+        if (petIds)
+            setSelectedPet(petIds.split(','));
+        else {
+            setSelectedPet([])
+        }
     }
 
     //get basic service
@@ -141,6 +144,18 @@ const Page = () => {
             console.log(error);
         }
     }, [userId])
+
+    const handleOpenBooking = () => {
+        if (!dateRange.startDate || !dateRange.endDate) {
+            toast.error("Vui lòng chọn ngày bắt đầu và ngày kết thúc");
+            return;
+        }
+        if (selectedPet.length < 1) {
+            toast.error("Vui lòng chọn ít nhất 1 bé mèo");
+            return;
+        }
+        onOpen();
+    }
 
     const handleBooking = () => {
         const bookingDetails: BookingDetail[] = [];
@@ -182,36 +197,48 @@ const Page = () => {
             address: address,
             note: note,
             startDate,
-            endDate
+            endDate,
+            paymentMethod: paymentMethod === "CAPTURE_WALLET" || paymentMethod === "PAY_WITH_ATM" ? "MOMO" : "WALLET"
         }
 
-        try {
+        if (paymentMethod === "CAPTURE_WALLET" || paymentMethod === "PAY_WITH_ATM") {
+            try {
+                axiosClient.post(`booking-orders/with-details`, data)
+                    .then((res) => {
+                        axiosClient.post(`booking-orders/payment-url?id=${res.data.id}&requestType=${paymentMethod}&redirectUrl=${process.env.NEXT_PUBLIC_BASE_URL}/payment-result`)
+                            .then((res) => {
+                                window.open(res.data.payUrl, '_self');
+                            })
+                            .catch(() => {
+                                toast.error("Thanh toán thất bại, vui lòng thử lại sau")
+                            })
+                    })
+                    .catch((e) => {
+                        console.log(e);
+                    })
+            } catch (error) {
+                console.log(error);
+            }
+        } else {
             axiosClient.post(`booking-orders/with-details`, data)
-                .then((res) => {
-                    setBookingId(res.data.id)
-                    onOpen();
-                })
-                .catch((e) => {
-                    console.log(e);
-                })
-        } catch (error) {
-            console.log(error);
+                .then()
+                .catch()
         }
     }
 
-    const handlePay = () => {
-        try {
-            axiosClient.post(`booking-orders/payment-url?id=${bookingId}&requestType=${paymentMethod}&redirectUrl=${process.env.NEXT_PUBLIC_BASE_URL}/payment-result`)
-                .then((res) => {
-                    window.open(res.data.payUrl, '_self');
-                })
-                .catch(() => {
-                    toast.error("Thanh toán thất bại, vui lòng thử lại sau")
-                })
-        } catch (error) {
-            console.log(error);
-        }
-    }
+    // const handlePay = () => {
+    //     try {
+    //         axiosClient.post(`booking-orders/payment-url?id=${bookingId}&requestType=${paymentMethod}&redirectUrl=${process.env.NEXT_PUBLIC_BASE_URL}/payment-result`)
+    //             .then((res) => {
+    //                 window.open(res.data.payUrl, '_self');
+    //             })
+    //             .catch(() => {
+    //                 toast.error("Thanh toán thất bại, vui lòng thử lại sau")
+    //             })
+    //     } catch (error) {
+    //         console.log(error);
+    //     }
+    // }
 
     // Function to convert DateValue to Date
     const convertDateValueToDate = (dateValue: DateValue): Date => {
@@ -390,7 +417,7 @@ const Page = () => {
             </div>
 
             <div className='mt-10'>
-                <Button onPress={handleBooking} className='bg-[#2E67D1] text-white text-[16px] font-semibold rounded-full w-[483px]'>Đặt lịch và thanh toán</Button>
+                <Button onPress={() => handleOpenBooking()} className='bg-[#2E67D1] text-white text-[16px] font-semibold rounded-full w-[483px]'>Đặt lịch và thanh toán</Button>
             </div>
 
             {/* Modal payment */}
@@ -471,7 +498,18 @@ const Page = () => {
                                                     </Radio>
                                                 </div>
                                                 <div className='border border-black p-3'>
-                                                    <Radio value="cash" className='px-5' aria-label='j'>
+                                                    <Radio value="wallet" className='px-5' aria-label='wallet' onClick={() => setPaymentMethod("WALLET")}>
+                                                        <div className='flex items-center'>
+                                                            <Image src='/ewallet.png' alt='' width={51} height={44} className='mx-3 w-[71px] h-[54px]' />
+                                                            <div>
+                                                                <h1 className={styles.paymentHeading1}>Thanh toán bằng ví</h1>
+                                                                <h2 className={styles.paymentHeading2}>Thanh toán bằng ví của bạn</h2>
+                                                            </div>
+                                                        </div>
+                                                    </Radio>
+                                                </div>
+                                                <div className='border border-black p-3'>
+                                                    <Radio value="cash" className='px-5' aria-label='cash' onClick={() => setPaymentMethod("CASH")}>
                                                         <div className='flex items-center'>
                                                             <Image src='/cash.png' alt='' width={51} height={44} className='mx-3 w-[71px] h-[54px]' />
                                                             <div>
@@ -488,7 +526,7 @@ const Page = () => {
                                 </div>
                             </ModalBody>
                             <ModalFooter className='w-full flex justify-center'>
-                                <Button className='bg-btnbg text-white w-[206px] rounded-full h-[42px]' onPress={() => handlePay()}>
+                                <Button className='bg-btnbg text-white w-[206px] rounded-full h-[42px]' onPress={() => handleBooking()}>
                                     Thanh toán
                                 </Button>
                             </ModalFooter>
