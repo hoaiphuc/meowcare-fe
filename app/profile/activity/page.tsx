@@ -124,7 +124,7 @@ const Page = () => {
                                                         <div>
                                                             <h2>
                                                                 <span className={styles.title}>Dịch vụ: </span>
-                                                                {activity.bookingDetailWithPetAndServices[0].service.serviceName}
+                                                                {activity.bookingDetailWithPetAndServices[0].service.name}
                                                             </h2>
                                                             <h2>
                                                                 <span className={styles.title}>Người chăm sóc: </span>

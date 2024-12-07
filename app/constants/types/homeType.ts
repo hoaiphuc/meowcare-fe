@@ -107,8 +107,8 @@ export type Service = {
   type: string;
   actionDescription: string;
   price: number;
-  endTime?: number;
-  startTime: number;
+  startTime: string;
+  endTime: string;
   isBasicService: boolean;
   isNew: boolean;
   isDeleted: boolean;
@@ -219,7 +219,7 @@ export type Order = {
       };
       service: {
         id: string;
-        serviceName: string;
+        name: string;
         otherName: string;
         additionDescription: string;
         serviceType: string;

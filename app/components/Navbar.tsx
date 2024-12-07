@@ -85,6 +85,7 @@ const Navbar = () => {
             }
             if (!userProfile) {
                 await dispatch(fetchUserProfile());
+                setIsLoading(false); // Loading complete
             }
             setIsLoading(false); // Loading complete
         };
