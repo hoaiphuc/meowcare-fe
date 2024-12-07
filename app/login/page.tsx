@@ -97,6 +97,7 @@ const Login = () => {
                         className=''
                         size='lg'
                         type="email"
+                        errorMessage="Email của bạn không tồn tại"
                         placeholder="Email"
                         labelPlacement="outside"
                         endContent={

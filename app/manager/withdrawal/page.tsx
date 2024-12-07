@@ -2,18 +2,25 @@
 
 import { RequestWithdrawal } from "@/app/constants/types/homeType";
 import axiosClient from "@/app/lib/axiosClient";
+import { faBars } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   Button,
+  Dropdown,
+  DropdownItem,
+  DropdownMenu,
+  DropdownTrigger,
   Pagination,
   Table,
   TableBody,
   TableCell,
   TableColumn,
   TableHeader,
-  TableRow,
+  TableRow
 } from "@nextui-org/react";
 import { format } from "date-fns";
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { toast } from "react-toastify";
 
 const Page = () => {
   const [page, setPage] = useState(1);
@@ -53,6 +60,34 @@ const Page = () => {
 
     return data.slice(start, end);
   }, [page, data]);
+
+  const handleAccept = (id: string) => {
+    try {
+      axiosClient(`request-withdrawal/completeRequest/${id}`)
+        .then(() => {
+          toast.success("Bạn đã chấp nhận yêu cầu này")
+        })
+        .catch(() => {
+          toast.error("Đã có lỗi xảy ra")
+        })
+    } catch (error) {
+
+    }
+  }
+
+  const hanldeDeny = (id: string) => {
+    try {
+      axiosClient(`request-withdrawal/cancelRequest/${id}`)
+        .then(() => {
+          toast.success("Bạn đã từ chối yêu cầu này")
+        })
+        .catch(() => {
+          toast.error("Đã có lỗi xảy ra")
+        })
+    } catch (error) {
+
+    }
+  }
 
   return (
     <div className="flex flex-col justify-start w-full mx-10 gap-5 my-3">
@@ -104,7 +139,19 @@ const Page = () => {
                 {request.processStatus}
               </TableCell>
               <TableCell >
-                <Button>Chi tiết</Button>
+                <Dropdown>
+                  <DropdownTrigger>
+                    <Button variant="bordered">
+                      <FontAwesomeIcon icon={faBars} />
+                    </Button>
+                  </DropdownTrigger>
+                  <DropdownMenu aria-label="Static Actions">
+                    <DropdownItem key="new" onClick={() => handleAccept(request.id)}>Chấp nhận</DropdownItem>
+                    <DropdownItem key="delete" className="text-danger" color="danger" onClick={() => hanldeDeny(request.id)}>
+                      Từ chối
+                    </DropdownItem>
+                  </DropdownMenu>
+                </Dropdown>
               </TableCell>
             </TableRow>
           )}
