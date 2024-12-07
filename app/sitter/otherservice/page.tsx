@@ -25,6 +25,7 @@ const OtherService = () => {
         startTime: "",
         endTime: "",
         type: "",
+        duration: 0,
         price: 0, // Default price value
         isBasicService: false, // Default boolean value
         isNew: true,
@@ -162,6 +163,7 @@ const OtherService = () => {
             endTime: "",
             type: "",
             price: 0,
+            duration: 0,
             isBasicService: false,
             isNew: true,
             isDeleted: false,

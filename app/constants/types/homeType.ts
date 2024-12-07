@@ -102,7 +102,7 @@ export type SideNavItem = {
 export type Service = {
   id: string;
   name: string;
-  duration?: number;
+  duration: number;
   serviceType: string;
   type: string;
   actionDescription: string;

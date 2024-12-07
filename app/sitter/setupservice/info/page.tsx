@@ -177,6 +177,7 @@ const Info = () => {
                     <h2 className={styles.h2}>Kỹ năng của bạn</h2>
                     <Autocomplete
                         className=" h-10 mt-2"
+                        placeholder="Tìm kiếm kỹ năng bạn sở hữu"
                         size='md'
                         selectedKey={''}>
                         {CatSitterSkill.map((item, index) => (

@@ -35,6 +35,7 @@ const ServiceDetail = () => {
         startTime: "",
         endTime: "",
         type: "",
+        duration: 0,
         price: 0, // Default price value
         isBasicService: false, // Default boolean value
         isNew: true,
@@ -280,6 +281,7 @@ const ServiceDetail = () => {
             startTime: "",
             endTime: "",
             type: "",
+            duration: 0,
             price: 0,
             isBasicService: false,
             isNew: true,

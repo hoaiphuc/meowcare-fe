@@ -71,7 +71,7 @@ const Page = () => {
                             <h1 className='text-black p-5 text-2xl font-semibold'>Yêu cầu này chưa được đặt</h1>
                         </div>
                         <div className='bg-[#FFE3D5] text-black p-5 rounded-md shadow-xl font-medium flex flex-col gap-3'>
-                            <h1>{data.bookingDetailWithPetAndServices[0].service.serviceName}</h1>
+                            <h1>{data.bookingDetailWithPetAndServices[0].service.name}</h1>
                             <h1>15 tháng 10 - 16 tháng 10</h1>
                             <h1>Giờ bắt đầu: 5:00 sáng</h1>
                             <h1>Giờ kết thúc: 5:00 chiều</h1>
