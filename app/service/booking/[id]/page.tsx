@@ -13,6 +13,7 @@ import Image from 'next/image'
 import { toast } from 'react-toastify'
 import { today, getLocalTimeZone } from '@internationalized/date';
 import { format } from 'date-fns'
+import Link from 'next/link'
 
 interface BookingDetail {
     quantity: number;
@@ -291,17 +292,17 @@ const Page = () => {
 
     return (
         <div className='flex flex-col items-center justify-start my-12'>
-            <h1 className={styles.h1}>Đặt lịch</h1>
+            <h1 className={styles.h1}>Gửi thú cưng</h1>
             <div className='flex flex-row items-start justify-center gap-8 mt-10'>
                 {/* 1 */}
                 <div className='flex flex-col gap-3 w-[486px]'>
                     <div className='flex flex-col gap-3'>
-                        <h2 className={styles.h2}>Loại dịch vụ</h2>
+                        {/* <h2 className={styles.h2}>Loại dịch vụ</h2>
                         {services.map((service) => (
                             <h1 key={service.id} >
                                 {service.name}
                             </h1>
-                        ))}
+                        ))} */}
 
                         <h2 className={styles.h2}>Chọn ngày</h2>
                         <DateRangePicker
@@ -312,6 +313,7 @@ const Page = () => {
                         />
 
                         <h2 className={styles.h2}>Chọn thú cưng của bạn</h2>
+                        <h3>Nếu bạn chưa thêm hồ sơ thú cưng, <Link href="/profile/pet" className='underline font-semibold'>thêm tại đây</Link> </h3>
                         <Select
                             items={pets}
                             aria-label='pet'
@@ -353,7 +355,6 @@ const Page = () => {
                                     </div>
                                 </SelectItem>
                             )}
-
                         </Select>
 
                         <h2 className={styles.h2}>Chọn thức ăn cho mèo</h2>

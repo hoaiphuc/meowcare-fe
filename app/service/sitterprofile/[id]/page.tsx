@@ -118,7 +118,7 @@ const Page = () => {
             <div className='flex flex-col gap-2 w-[352px]'>
                 <div className='min-h-[300px]'>
                     <div className='flow-root'>
-                        <Avatar src='/User-avatar.png' className='float-left h-20 w-20' />
+                        <Avatar src={sitterProfile?.avatar ?? '/User-avatar.png'} className='float-left h-20 w-20' />
                         <button onClick={() => handleClick()} className='float-right w-10 h-10 border-none'>
                             <Icon icon="mdi:heart" className={`transition-colors w-10 h-10 ${isClicked ? 'text-red-500  ' : ''}`} />
                         </button>
@@ -139,15 +139,15 @@ const Page = () => {
                 </div>
 
                 <div className='items-center shadow-xl p-4 border-[0.5px] rounded-md mt-20'>
-                    <h1 className={styles.h1}>Dịch vụ</h1>
+                    <h1 className={styles.h1}>Loại dịch vụ</h1>
                     <div className=' flex flex-col gap-3 my-3'>
                         {services && services.map((ser) => (
                             <div className='flex flex-col ' key={ser.id}>
                                 <div className='flex'>
                                     <Icon icon="cbi:camera-pet" className='text-black w-12 h-11' />
                                     <div className='text-secondary font-semibold'>
-                                        <h1 className='text-text text-xl font-semibold'>{ser.name}</h1>
-                                        <p className={styles.p}>{ser.actionDescription}</p>
+                                        <h1 className='text-text text-xl font-semibold'>Gửi thú cưng</h1>
+                                        <p className={styles.p}>Gửi thú cưng đến nhà người chăm sóc</p>
                                         <p className={styles.p}>Giá <span className='text-[#2B764F]'>{ser.price.toLocaleString("de")}đ</span> <span className='font-semibold'>mỗi đêm</span></p>
                                     </div>
                                 </div>
@@ -159,11 +159,11 @@ const Page = () => {
                     {/* other service */}
                     <div className='flex flex-col'>
                         <div className='flex'>
-                            <Icon icon="cbi:camera-pet" className='text-black w-12 h-11' />
+                            <Icon icon="mdi:home-find-outline" className='text-black w-12 h-11' />
                             <div className='text-secondary font-semibold'>
                                 <h1 className='text-text text-xl font-semibold'>Đặt dịch vụ</h1>
                                 <p className={styles.p}>Dịch vụ chăm sóc mèo tại nhà của bạn</p>
-                                <p className={styles.p}>Giá <span className='text-[#2B764F]'>100.000đ</span> <span className='font-semibold'>mỗi đêm</span></p>
+                                {/* <p className={styles.p}>Giá <span className='text-[#2B764F]'>100.000đ</span> <span className='font-semibold'>mỗi đêm</span></p> */}
                             </div>
                         </div>
                         <Button as={Link} href={isUser ? `/service/housesitting/${sitterProfile?.sitterId}` : `/login`} className={styles.button}>Đặt lịch</Button>

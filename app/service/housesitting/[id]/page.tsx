@@ -298,7 +298,7 @@ const HouseSitting = () => {
 
     return (
         <div className='flex flex-col items-center justify-start my-12'>
-            <h1 className={styles.h1}>Đặt lịch</h1>
+            <h1 className={styles.h1}>Đặt dịch vụ</h1>
             <div className='flex flex-row items-start justify-center gap-8 mt-10'>
                 {/* 1 */}
                 <div className='flex flex-col gap-3 w-[586px]'>

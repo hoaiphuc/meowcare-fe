@@ -14,7 +14,7 @@ import axiosClient from '../lib/axiosClient';
 
 const Profile = () => {
     const dispatch = useAppDispatch();
-    const { userProfile, loading, error } = useAppSelector((state) => state.user);
+    const { userProfile, loading } = useAppSelector((state) => state.user);
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
     const [isVisible, setIsVisible] = useState(false);
     const toggleVisibility = () => setIsVisible(!isVisible);
@@ -49,13 +49,6 @@ const Profile = () => {
         setIsEditing(false);
     };
 
-    if (loading) {
-        return <div>Đang tải...</div>;
-    }
-
-    if (error) {
-        return <div>{error}</div>;
-    }
 
     const handleUpdatePassword = (id: string) => {
         if (newPassword !== repeatPassword) {
