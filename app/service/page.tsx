@@ -4,7 +4,7 @@ import { Avatar, Button, DateRangePicker, Input, Select, SelectItem, Slider } fr
 // import data from '@/app/lib/vietnam.json';
 import { useEffect, useRef, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCircle, faStar } from '@fortawesome/free-solid-svg-icons';
+import { faCircle, faMagnifyingGlass, faStar } from '@fortawesome/free-solid-svg-icons';
 import { faCircleCheck } from '@fortawesome/free-regular-svg-icons';
 import { Icon } from '@iconify/react';
 import Link from 'next/link';
@@ -104,9 +104,9 @@ const Service = () => {
     return (
         <div className='flex flex-cols-3 p-[5px] justify-center'>
             {/* 1 */}
-            <div className='bg-[#FFF6ED] w-[310px] h-[617px] flex flex-col gap-5 p-[10px] rounded-xl'>
+            <div className='bg-[#FFF6ED] w-[310px] h-[617px] flex flex-col gap-3 p-[10px] rounded-xl'>
                 <Select
-                    label="Loại dịch vụ"
+                    label={<h2 className={styles.h2}>Loại dịch vụ</h2>}
                     labelPlacement='outside'
                     className={`${styles.h2} min-w-full`}
                     variant="bordered"
@@ -125,6 +125,7 @@ const Service = () => {
                     <Input
                         className={styles.searchInput}
                         value={address}
+                        variant='bordered'
                         onChange={handleAddressChange}
                         placeholder="Nhập địa điểm bạn muốn tìm"
                     />
@@ -143,17 +144,15 @@ const Service = () => {
                     )}
                 </div>
 
-                <div>
-                    <h2>Đặt lịch</h2>
-                    <DateRangePicker
-                        label="Stay duration"
-                        className="max-w-[388px]"
-                        variant="bordered"
-                    />
-                </div>
+                <h2 className={styles.h2}>Đặt lịch</h2>
+                <DateRangePicker
+                    label="Stay duration"
+                    className="max-w-[388px]"
+                    variant="bordered"
+                />
 
                 <div className='flex flex-col gap-3'>
-                    <h2>Số lượng thú cưng</h2>
+                    <h2 className={styles.h2}>Số lượng thú cưng</h2>
                     <div className={styles.optionsContainer}>
                         {options.map((option) => (
                             <div
@@ -217,7 +216,10 @@ const Service = () => {
                 </div>
 
                 <div className='flex items-center justify-end'>
-                    <Button className='h-12 w-10 font-semibold' variant='bordered'>Tìm kiếm</Button>
+                    <Button className='h-12 w-28 font-semibold' variant='bordered'>
+                        <FontAwesomeIcon icon={faMagnifyingGlass} />
+                        Tìm kiếm
+                    </Button>
                 </div>
             </div>
 
@@ -232,7 +234,7 @@ const Service = () => {
                                     ref={(el) => {
                                         listItemRefs.current[catSitter.id] = el;
                                     }}
-                                    className='selectDiv min-w-full border-b pb-3 bg-[#FFF6ED]'>
+                                    className={`${styles.selectDiv} min-w-full border-b pb-3 bg-[#FFF6ED]`}>
                                     <Link href={`/service/sitterprofile/${catSitter.sitterId}`}>
                                         <div className='flex gap-3 cursor-pointer'>
                                             <Avatar
@@ -280,18 +282,18 @@ const Service = () => {
                                                 icon={faStar}
                                                 className='text-[#F8B816] size-4'
                                             />
-                                            <p className=' text-[14px] font-normal'>{catSitter.rating ? catSitter.rating : 'Chưa có đánh giá'}</p>
+                                            <p className='text-[14px] font-normal'>{catSitter.rating ? catSitter.rating : 'Chưa có đánh giá'}</p>
                                             <FontAwesomeIcon
                                                 icon={faCircle}
                                                 className='text-text size-1 self-center px-1'
                                             />
                                             {/* <p className=' text-[14px] font-normal'>{catSitter.reviews} Đánh giá</p> */}
-                                            <p className=' text-[14px] font-normal'>20 Đánh giá</p>
+                                            <p className='text-[14px] font-normal'>20 Đánh giá</p>
                                         </div>
                                         <p className='text-[14px] my-2'>
                                             {catSitter.bio}
                                         </p>
-                                        <div className='flex  font-semibold text-[#66625F]'>
+                                        <div className='flex font-semibold text-[#66625F]'>
                                             <FontAwesomeIcon
                                                 icon={faCircleCheck}
                                                 className='text-green-600 size-4 self-center px-1'

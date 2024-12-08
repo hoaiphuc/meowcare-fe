@@ -2,7 +2,7 @@
 
 import { faCircle, faStar } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Avatar, Button } from '@nextui-org/react';
+import { Avatar, Button, Calendar, DateValue } from '@nextui-org/react';
 // import Image from 'next/image';
 import React, { useEffect, useState } from 'react'
 import { Icon } from '@iconify/react';
@@ -97,9 +97,25 @@ const Page = () => {
         return <Loading />;
     }
 
+    // Define unavailable dates
+    const unavailableDates = [
+        new Date(2024, 11, 25), // December 25, 2024
+        new Date(2024, 11, 31), // December 31, 2024
+    ];
+
+    // Function to check if a date is unavailable
+    const isDateUnavailable = (date: DateValue) => {
+        const dateToCheck = new Date(date.year, date.month - 1, date.day);
+        return unavailableDates.some(
+            (unavailableDate) =>
+                unavailableDate.getFullYear() === dateToCheck.getFullYear() &&
+                unavailableDate.getMonth() === dateToCheck.getMonth() &&
+                unavailableDate.getDate() === dateToCheck.getDate()
+        );
+    };
     return (
         <div className='flex flex-cols-2 my-10 gap-10 justify-center'>
-            <div className='flex flex-col gap-2 w-[452px]'>
+            <div className='flex flex-col gap-2 w-[352px]'>
                 <div className='min-h-[300px]'>
                     <div className='flow-root'>
                         <Avatar src='/User-avatar.png' className='float-left h-20 w-20' />
@@ -122,7 +138,7 @@ const Page = () => {
                     </div>
                 </div>
 
-                <div className='shadow-xl p-4 border-[0.5px] rounded-md mt-20'>
+                <div className='items-center shadow-xl p-4 border-[0.5px] rounded-md mt-20'>
                     <h1 className={styles.h1}>Dịch vụ</h1>
                     <div className=' flex flex-col gap-3 my-3'>
                         {services && services.map((ser) => (
@@ -145,15 +161,28 @@ const Page = () => {
                         <div className='flex'>
                             <Icon icon="cbi:camera-pet" className='text-black w-12 h-11' />
                             <div className='text-secondary font-semibold'>
-                                <h1 className='text-text text-xl font-semibold'>Trông tại nhà</h1>
+                                <h1 className='text-text text-xl font-semibold'>Đặt dịch vụ</h1>
                                 <p className={styles.p}>Dịch vụ chăm sóc mèo tại nhà của bạn</p>
                                 <p className={styles.p}>Giá <span className='text-[#2B764F]'>100.000đ</span> <span className='font-semibold'>mỗi đêm</span></p>
                             </div>
                         </div>
                         <Button as={Link} href={isUser ? `/service/housesitting/${sitterProfile?.sitterId}` : `/login`} className={styles.button}>Đặt lịch</Button>
                     </div>
-                    <h1 className={styles.h1}>Thời gian làm việc</h1>
-                    <p className={styles.p}>Hiện tại tôi đang làm đồ án của trường ĐH FPT. Vì vậy, tôi có thể học ở bất cứ đâu và tôi khá linh hoạt về thời gian.</p>
+
+                    {/* Calender  */}
+                    <div className='w-full'>
+                        <h1 className={styles.h1}>Thời gian làm việc</h1>
+                        <div className='flex justify-center'>
+                            <Calendar isReadOnly aria-label="Date (Unavailable)" isDateUnavailable={isDateUnavailable} className='' />
+                        </div>
+                    </div>
+
+                    <div className='w-full'>
+                        <h1 className={styles.h1}>Vị trí</h1>
+                        <div className='flex justify-center'>
+
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -163,9 +192,11 @@ const Page = () => {
                     <PhotoGallery photos={sitterProfile?.profilePictures} />
                 </div>
                 <div className='mt-20'>
-                    <h1 className={styles.h1}>Cat sitter</h1>
-                    <h1 className={styles.h1}>Kinh nghiệm chăm sóc mèo:</h1>
+                    <h1 className={styles.h1}>Giới thiệu</h1>
                     <p className={styles.p}>{sitterProfile?.bio}</p>
+
+                    <h1 className={styles.h1}>Kinh nghiệm chăm sóc mèo:</h1>
+                    <p className={styles.p}>{sitterProfile?.experience}</p>
                 </div>
                 <hr className={styles.hr} />
 
@@ -204,14 +235,11 @@ const Page = () => {
                         </h3>
                     ))}
                 </div>
-                <h2 className='text-[18px] my-3 font-semibold'>Thông tin về nơi ở</h2>
-                <p className={styles.p}>Sống trong một ngôi nhà</p>
+                {/* <h2 className='text-[18px] my-3 font-semibold'>Thông tin về nơi ở</h2>
+                <p className={styles.p}>Sống trong một ngôi nhà</p> */}
 
                 <h1 className='mt-10 text-xl font-semibold'>An toàn, tin cậy & môi trường</h1>
-                <p className={styles.p}>Hiện tại tôi có một căn hộ nhỏ. Tuy nhiên, tôi có thể chăm sóc chúng tại căn hộ của tôi khi không có lựa chọn nào khác. Tôi có thể đến căn hộ của bạn trong thời gian còn lại.Tôi có gắn camera theo dõi quá trình chăm sóc nếu bạn muốn xem quá trìnhỨng dụng giám sát: App(name) IOSSau khi booking tôi sẽ gửi tài khoản mật khẩu để bạn có thể theo dõi quá trình chăm sóc.</p>
-
-                <h1 className='mt-10 text-xl font-semibold'>Thông tin muốn biết về thú cưng của bạn</h1>
-                <p className={styles.p}>Rất muốn biết tính khí của thú cưng của bạn và bất kỳ loại thức ăn cụ thể nào mà chúng cần hoặc nếu bạn cũng có thể cung cấp những thứ này. Tôi cũng muốn biết chúng được huấn luyện đi vệ sinh tốt như thế nào và nếu bạn cần tôi cung cấp hộp vệ sinh hay không (chỉ dành cho mèo).</p>
+                <p className={styles.p}>{sitterProfile?.environment}</p>
             </div>
         </div>
     )
