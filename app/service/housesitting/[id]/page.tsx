@@ -4,7 +4,7 @@ import { Avatar, Button, Chip, DatePicker, DateValue, Input, Modal, ModalBody, M
 import React, { useEffect, useMemo, useState } from 'react'
 import styles from './housesitting.module.css'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import axiosClient from '@/app/lib/axiosClient'
 import { CatSitter, PetProfile, Service, UserType } from '@/app/constants/types/homeType'
 import Image from 'next/image'
@@ -20,6 +20,7 @@ interface BookingDetail {
 }
 
 const HouseSitting = () => {
+    const router = useRouter()
     const params = useParams();
     const [selectedServices, setSelectedServices] = useState<Service[]>([]);
     const [selectedPet, setSelectedPet] = useState<string[]>([]);
@@ -34,7 +35,6 @@ const HouseSitting = () => {
     const [selectedDate, setSelectedDate] = useState<DateValue | null>(null);
     const [sitter, setSitter] = useState<CatSitter>()
     const [paymentMethod, setPaymentMethod] = useState("")
-    // const [selectedServiceName, setSelectedServiceName] = useState([])
     const [userData, setUserData] = useState<UserType>()
     const catFoods = [
         { id: '1', foodName: 'Cá' },
@@ -182,24 +182,37 @@ const HouseSitting = () => {
             address: address,
             note: note,
             startDate,
+            paymentMethod: paymentMethod === "CAPTURE_WALLET" || paymentMethod === "PAY_WITH_ATM" ? "MOMO" : "WALLET"
         }
 
-        try {
+        if (paymentMethod === "CAPTURE_WALLET" || paymentMethod === "PAY_WITH_ATM") {
+            try {
+                axiosClient.post(`booking-orders/with-details`, data)
+                    .then((res) => {
+                        axiosClient.post(`booking-orders/payment-url?id=${res.data.id}&requestType=${paymentMethod}&redirectUrl=${process.env.NEXT_PUBLIC_BASE_URL}/payment-result`)
+                            .then((res) => {
+                                window.open(res.data.payUrl, '_self');
+                            })
+                            .catch(() => {
+                                toast.error("Thanh toán thất bại, vui lòng thử lại sau")
+                            })
+                    })
+                    .catch((e) => {
+                        console.log(e);
+                    })
+            } catch (error) {
+                console.log(error);
+            }
+        } else {
             axiosClient.post(`booking-orders/with-details`, data)
-                .then((res) => {
-                    axiosClient.post(`booking-orders/payment-url?id=${res.data.id}&requestType=${paymentMethod}&redirectUrl=${process.env.NEXT_PUBLIC_BASE_URL}/payment-result`)
-                        .then((res) => {
-                            window.open(res.data.payUrl, '_self');
-                        })
-                        .catch(() => {
-                            toast.error("Thanh toán thất bại, vui lòng thử lại sau")
-                        })
+                .then(() => {
+                    router.push("/payment-result?resultCode=0")
+                    toast.success("Đã đặt lịch thành công, hãy chờ người chăm sóc chấp nhận")
                 })
-                .catch((e) => {
-                    console.log(e);
+                .catch(() => {
+                    router.push("/payment-result?resultCode=1")
+                    toast.error("Có lỗi xảy ra, vui lòng thử lại sau")
                 })
-        } catch (error) {
-            console.log(error);
         }
     }
 

@@ -36,7 +36,7 @@
 }
 
 .h2 {
-  @apply font-bold text-[16px] text-black;
+  @apply font-bold text-[16px] text-black mt-3;
 }
 
 .input {
@@ -101,12 +101,14 @@
 /* Styles for the input field to make it look like a typical search bar */
 .searchInput {
   width: 100%;
-  padding: 10px;
-  border: 1px solid #ccc;
+  height: 30px;
+  /* padding: 10px; */
+  /* border: 1px solid #ccc; */
   border-radius: 8px;
   font-size: 16px;
   box-sizing: border-box;
   outline: none;
+  background-color: transparent;
 }
 
 .searchInput:focus {
