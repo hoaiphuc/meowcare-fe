@@ -72,6 +72,12 @@ axiosClient.interceptors.response.use(
             }
 
             try {
+                if (typeof window !== "undefined") {
+                    localStorage.removeItem('auth-token');
+                }
+                delete axiosClient.defaults.headers.common['Authorization'];
+                delete originalRequest.headers['Authorization'];
+
                 // Call refresh API
                 const refreshResponse = await axios.post(
                     `${process.env.NEXT_PUBLIC_BASE_API}auth/refresh`,

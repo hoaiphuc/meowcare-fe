@@ -13,6 +13,7 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { v4 as uuidv4 } from 'uuid';
 import { storage } from '@/app/utils/firebase';
 import { showConfirmationDialog } from '@/app/components/confirmationDialog';
+import Loading from '@/app/components/Loading';
 
 const Page = () => {
     const { isOpen: isOpenAdd, onOpen: onOpenAdd, onOpenChange: onOpenChangeAdd } = useDisclosure();
@@ -50,6 +51,7 @@ const Page = () => {
         description: '',
     });
     const [userId, setUserId] = useState<string | null>(null);
+    const [isLoading, setIsLoading] = useState(false)
 
     useEffect(() => {
         if (typeof window !== 'undefined') {
@@ -100,6 +102,7 @@ const Page = () => {
 
     //add pet
     const handleAddPet = async () => {
+        setIsLoading(true)
         try {
             let profilePictureUrl = '';
             if (selectedImage) {
@@ -132,13 +135,16 @@ const Page = () => {
                         profilePicture: '',
                     });
                     fetchPets();
+                    setIsLoading(false)
                 })
                 .catch((e) => {
                     console.log(e);
+                    setIsLoading(false)
                 })
 
         } catch (error) {
             console.log(error);
+            setIsLoading(false)
         }
     }
 
@@ -325,6 +331,11 @@ const Page = () => {
         }
     };
 
+
+    if (isLoading) {
+        return <Loading />;
+    }
+
     return (
         <div className="w-[891px] bg-white rounded-2xl shadow-2xl p-5 flex flex-col items-start justify-start">
             <h1 className='text-2xl font-bold'>Thú cưng của bạn</h1>
@@ -446,7 +457,14 @@ const Page = () => {
                                 </div>
 
 
-                                <Textarea label={<h1 className={styles.heading1}>Những thông tin mà người chăm sóc mèo cần lưu ý</h1>} placeholder='Thêm hướng dẫn chăm sóc để phù hợp với bé mèo của bạn' labelPlacement='outside' />
+                                <Textarea
+                                    name='description'
+                                    value={petData.description}
+                                    onChange={handleInputChange}
+                                    label={<h1 className={styles.heading1}>Những thông tin mà người chăm sóc mèo cần lưu ý</h1>}
+                                    placeholder='Thêm hướng dẫn chăm sóc để phù hợp với bé mèo của bạn'
+                                    labelPlacement='outside'
+                                />
                             </ModalBody>
                             <ModalFooter className='flex justify-center items-center'>
                                 <Button color="primary" onPress={handleAddPet} className='rounded-full'>
