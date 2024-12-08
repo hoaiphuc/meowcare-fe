@@ -2,7 +2,7 @@
 
 import { RequestWithdrawal, UserLocal } from '@/app/constants/types/homeType';
 import axiosClient from '@/app/lib/axiosClient';
-import { Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, useDisclosure } from '@nextui-org/react';
+import { Accordion, AccordionItem, Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, useDisclosure } from '@nextui-org/react';
 import React, { useCallback, useEffect, useState } from 'react'
 import styles from "./wallet.module.css"
 import { toast } from 'react-toastify';
@@ -89,13 +89,26 @@ const Wallet = () => {
         <div className='w-[891px] h-full bg-white rounded-2xl shadow-2xl flex flex-col text-black'>
             <div className=' m-5 flex flex-col gap-4'>
                 <div className='bg-[#FFE3D5] p-5 rounded-md flex'>
-                    <h1>Số dư ví: <span className='text-green-500'>{wallet?.balance.toLocaleString()}</span></h1>
-                    <Button onClick={onOpen}>Yêu cầu rút tiền</Button>
+                    <h1>Số dư ví: <span className='text-green-500'>{wallet?.balance.toLocaleString("de")}đ</span></h1>
                 </div>
                 <div className=' bg-[#FFE3D5] p-5 rounded-md'>
-                    <div>
-                        <h1>Momo</h1>
-                    </div>
+                    <Accordion>
+                        <AccordionItem key="1" aria-label="Accordion 1" title="Rút tiền" className='flex flex-col'>
+                            Bạn có thể yêu cầu rút tiền vào ngày 25 mỗi tháng
+                            <div className='flex gap-3'>
+                                <Input errorMessage={`Số tiền phải ít nhất 20000 và không được nhiều hơn ${wallet?.balance}`} type='number' className='w-52 no-spinner' min={20000} max={wallet?.balance} placeholder="Số tiền muốn rút" />
+                                <Button onClick={onOpen}>Yêu cầu rút tiền</Button>
+                            </div>
+                        </AccordionItem>
+                        <AccordionItem key="2" aria-label="Accordion 2" title="Nạp tiền">
+                            Nạp tiền ít nhất 10.000
+                            <div className='flex gap-3'>
+                                <Input errorMessage={`Số tiền phải ít nhất 10000`} type='number' className='w-52 no-spinner' min={10000} placeholder="Số tiền muốn nạp" />
+                                <Button>Nạp tiền</Button>
+                            </div>
+                        </AccordionItem>
+                    </Accordion>
+
                 </div>
                 <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
                     <ModalContent>
