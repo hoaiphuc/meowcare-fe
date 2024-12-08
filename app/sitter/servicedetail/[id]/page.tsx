@@ -40,6 +40,7 @@ const ServiceDetail = () => {
         isBasicService: false, // Default boolean value
         isNew: true,
         isDeleted: false,
+        serviceId: ''
     }]);
 
     //check valid
@@ -286,6 +287,7 @@ const ServiceDetail = () => {
             isBasicService: false,
             isNew: true,
             isDeleted: false,
+            serviceId: ''
         };
 
         setChildServices((prevState) => [...prevState, newService]);

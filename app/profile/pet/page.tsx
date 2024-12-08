@@ -2,7 +2,7 @@
 
 import { faCat, faCirclePlus, faEye, faMars, faPenClip, faVenus } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { Avatar, Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Radio, RadioGroup, Select, SelectItem, Textarea, useDisclosure } from '@nextui-org/react';
+import { Avatar, Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Radio, RadioGroup, Select, SelectItem, Skeleton, Textarea, useDisclosure } from '@nextui-org/react';
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import styles from './pet.module.css';
 import axiosClient from '@/app/lib/axiosClient';
@@ -13,7 +13,6 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { v4 as uuidv4 } from 'uuid';
 import { storage } from '@/app/utils/firebase';
 import { showConfirmationDialog } from '@/app/components/confirmationDialog';
-import Loading from '@/app/components/Loading';
 
 const Page = () => {
     const { isOpen: isOpenAdd, onOpen: onOpenAdd, onOpenChange: onOpenChangeAdd } = useDisclosure();
@@ -332,148 +331,151 @@ const Page = () => {
     };
 
 
-    if (isLoading) {
-        return <Loading />;
-    }
+    // if (isLoading) {
+    //     return <Loading />;
+    // }
 
     return (
         <div className="w-[891px] bg-white rounded-2xl shadow-2xl p-5 flex flex-col items-start justify-start">
-            <h1 className='text-2xl font-bold'>Thú cưng của bạn</h1>
-            <h2 className='mb-4'>Thêm mèo cưng của bạn hoặc chỉnh sửa thông tin</h2>
-            <div className='grid grid-cols-2 gap-5'>
-                <div
-                    className='flex flex-col items-center justify-center w-[416px] h-[295px] border-dashed border-2 gap-3 cursor-pointer rounded-lg'
-                    onClick={onOpenAdd}
-                >
-                    <FontAwesomeIcon icon={faCirclePlus} className='fa-2x text-[#902C6C]' />
-                    <h1 className='text-xl'>Thêm thú cưng </h1>
-                </div>
-
-                {pets && pets.slice().reverse().map((pet) => (
-                    <div className={styles.pet} key={pet.id}>
+            {isLoading ? <Skeleton /> :
+                <div>
+                    <h1 className='text-2xl font-bold'>Thú cưng của bạn</h1>
+                    <h2 className='mb-4'>Thêm mèo cưng của bạn hoặc chỉnh sửa thông tin</h2>
+                    <div className='grid grid-cols-2 gap-5'>
                         <div
-                            className={`${styles.petWrap} `}
-                            style={
-                                pet.profilePicture
-                                    ? {
-                                        backgroundImage: `url("${pet.profilePicture}")`,
-                                        backgroundPosition: 'center',
-                                        backgroundSize: 'cover',
-                                        backgroundRepeat: 'no-repeat',
-                                    }
-                                    : {
-                                        backgroundColor: '#333',
-                                    }}
+                            className='flex flex-col items-center justify-center w-[416px] h-[295px] border-dashed border-2 gap-3 cursor-pointer rounded-lg'
+                            onClick={onOpenAdd}
                         >
-                            <div className={styles.petInfoWrap}>
-                                <div className={styles.petInfo}>
-                                    <h1 className='text-2xl font-bold'>{pet.petName}</h1>
-                                    <h2 className='text-[18px]'>{pet.breed}</h2>
-                                    <h3 className='text-[16px]'>{pet.age} năm tuổi, {pet.weight}kg {pet.gender === "Bé đực" ? <FontAwesomeIcon icon={faMars} className='text-[#5183CF]' /> : <FontAwesomeIcon icon={faVenus} className='text-[#F5559F]' />}</h3>
+                            <FontAwesomeIcon icon={faCirclePlus} className='fa-2x text-[#902C6C]' />
+                            <h1 className='text-xl'>Thêm thú cưng </h1>
+                        </div>
+                        {pets && pets.slice().reverse().map((pet) => (
+                            <div className={styles.pet} key={pet.id}>
+                                <div
+                                    className={`${styles.petWrap} `}
+                                    style={
+                                        pet.profilePicture
+                                            ? {
+                                                backgroundImage: `url("${pet.profilePicture}")`,
+                                                backgroundPosition: 'center',
+                                                backgroundSize: 'cover',
+                                                backgroundRepeat: 'no-repeat',
+                                            }
+                                            : {
+                                                backgroundColor: '#333',
+                                            }}
+                                >
+                                    <div className={styles.petInfoWrap}>
+                                        <div className={styles.petInfo}>
+                                            <h1 className='text-2xl font-bold'>{pet.petName}</h1>
+                                            <h2 className='text-[18px]'>{pet.breed}</h2>
+                                            <h3 className='text-[16px]'>{pet.age} năm tuổi, {pet.weight}kg {pet.gender === "Bé đực" ? <FontAwesomeIcon icon={faMars} className='text-[#5183CF]' /> : <FontAwesomeIcon icon={faVenus} className='text-[#F5559F]' />}</h3>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className='flex items-center justify-start'>
+                                    <Button onClick={() => handleOpenUpdatePet(pet.id)} className='bg-transparent text-[#902C6C] hover:underline'>
+                                        <FontAwesomeIcon icon={faPenClip} />
+                                        <h1>Chỉnh sửa</h1>
+                                    </Button>
+                                    <Button className='bg-transparent text-[#902C6C] hover:underline'>
+                                        <FontAwesomeIcon icon={faEye} />
+                                        <h1 className=''>Xem</h1>
+                                    </Button>
                                 </div>
                             </div>
-                        </div>
-                        <div className='flex items-center justify-start'>
-                            <Button onClick={() => handleOpenUpdatePet(pet.id)} className='bg-transparent text-[#902C6C] hover:underline'>
-                                <FontAwesomeIcon icon={faPenClip} />
-                                <h1>Chỉnh sửa</h1>
-                            </Button>
-                            <Button className='bg-transparent text-[#902C6C] hover:underline'>
-                                <FontAwesomeIcon icon={faEye} />
-                                <h1 className=''>Xem</h1>
-                            </Button>
-                        </div>
+                        ))}
+
                     </div>
-                ))}
-
-
-            </div>
-
+                </div>
+            }
             <Modal isOpen={isOpenAdd} onOpenChange={onOpenChangeAdd} size='5xl'>
-                <ModalContent>
-                    {() => (
-                        <>
-                            <ModalHeader className="flex items-end gap-2">
-                                <FontAwesomeIcon icon={faCat} className='fa-2x' />
-                                <div className='items-end mb-[-6px]'>
-                                    <h1 className='text-2xl font-bold'>Bé mèo của bạn</h1>
-                                </div>
-                            </ModalHeader>
-                            <ModalBody className='flex gap-5 '>
-                                <div className='flex gap-10'>
-                                    <div className='relative group w-[200px] h-[200px]'>
-                                        <Avatar className='w-full h-full' radius="sm" src={previewImage || '/noimagecat.jpg'} />
-                                        <div className="absolute inset-0 flex items-center justify-center">
-                                            <Button
-                                                onClick={handleImageClick}
-                                                className=' bg-black bg-opacity-50 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300'
-                                            >
-                                                Chọn ảnh cho hồ sơ
-                                            </Button>
-                                        </div>
-                                        <input
-                                            type="file"
-                                            accept='image/*'
-                                            ref={hiddenFileInput}
-                                            onChange={handleImageChange}
-                                            style={{ display: 'none' }}
-                                        />
+                {isLoading ? <Skeleton /> :
+                    <ModalContent>
+                        {() => (
+                            <>
+                                <ModalHeader className="flex items-end gap-2">
+                                    <FontAwesomeIcon icon={faCat} className='fa-2x' />
+                                    <div className='items-end mb-[-6px]'>
+                                        <h1 className='text-2xl font-bold'>Bé mèo của bạn</h1>
                                     </div>
-                                    <div className='flex flex-col gap-5'>
-                                        <div className='flex gap-5'>
-                                            <Input label={<h1 className={styles.heading1}>Tên bé mèo</h1>} placeholder='Tên' labelPlacement='outside' name='petName' value={petData.petName} onChange={handleInputChange} />
-                                            <Input label={<h1 className={styles.heading1}>Tuổi</h1>} placeholder='Nhập tuổi cho bé mèo' labelPlacement='outside' name='age' value={petData.age} onChange={handleInputChange} />
-                                            <RadioGroup
-                                                label={<h1 className={styles.heading1}>Giới tính</h1>}
-                                                className='w-full'
-                                                value={petData.gender}
-                                                onValueChange={handleGenderChange}
-                                            >
-                                                <div className='flex gap-3'>
-                                                    <Radio value="Bé đực">Bé đực</Radio>
-                                                    <Radio value="Bé cái">Bé cái</Radio>
-                                                </div>
-                                            </RadioGroup>
+                                </ModalHeader>
+                                <ModalBody className='flex gap-5 '>
+                                    <div className='flex gap-10'>
+                                        <div className='relative group w-[200px] h-[200px]'>
+                                            <Avatar className='w-full h-full' radius="sm" src={previewImage || '/noimagecat.jpg'} />
+                                            <div className="absolute inset-0 flex items-center justify-center">
+                                                <Button
+                                                    onClick={handleImageClick}
+                                                    className=' bg-black bg-opacity-50 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300'
+                                                >
+                                                    Chọn ảnh cho hồ sơ
+                                                </Button>
+                                            </div>
+                                            <input
+                                                type="file"
+                                                accept='image/*'
+                                                ref={hiddenFileInput}
+                                                onChange={handleImageChange}
+                                                style={{ display: 'none' }}
+                                            />
                                         </div>
-                                        <div className='flex gap-5'>
-                                            <Select
-                                                label="Giống loài"
-                                                labelPlacement='outside'
-                                                placeholder="Giống mèo của bạn"
-                                                className="select"
-                                                variant="bordered"
-                                                onChange={(event) => handleBreedChange(event.target.value)}
-                                            >
-                                                {CatBreed.map((breed) => (
-                                                    <SelectItem key={breed.id} value={breed.id}>
-                                                        {breed.breed}
-                                                    </SelectItem>
-                                                ))}
-                                            </Select>
-                                            <Input label={<h1 className={styles.heading1}>Cân nặng</h1>} placeholder='Kg' labelPlacement='outside' name='weight' value={petData.weight} onChange={handleInputChange} />
+                                        <div className='flex flex-col gap-5'>
+                                            <div className='flex gap-5'>
+                                                <Input label={<h1 className={styles.heading1}>Tên bé mèo</h1>} placeholder='Tên' labelPlacement='outside' name='petName' value={petData.petName} onChange={handleInputChange} />
+                                                <Input label={<h1 className={styles.heading1}>Tuổi</h1>} placeholder='Nhập tuổi cho bé mèo' labelPlacement='outside' name='age' value={petData.age} onChange={handleInputChange} />
+                                                <RadioGroup
+                                                    label={<h1 className={styles.heading1}>Giới tính</h1>}
+                                                    className='w-full'
+                                                    value={petData.gender}
+                                                    onValueChange={handleGenderChange}
+                                                >
+                                                    <div className='flex gap-3'>
+                                                        <Radio value="Bé đực">Bé đực</Radio>
+                                                        <Radio value="Bé cái">Bé cái</Radio>
+                                                    </div>
+                                                </RadioGroup>
+                                            </div>
+                                            <div className='flex gap-5'>
+                                                <Select
+                                                    label="Giống loài"
+                                                    labelPlacement='outside'
+                                                    placeholder="Giống mèo của bạn"
+                                                    className="select"
+                                                    variant="bordered"
+                                                    onChange={(event) => handleBreedChange(event.target.value)}
+                                                >
+                                                    {CatBreed.map((breed) => (
+                                                        <SelectItem key={breed.id} value={breed.id}>
+                                                            {breed.breed}
+                                                        </SelectItem>
+                                                    ))}
+                                                </Select>
+                                                <Input label={<h1 className={styles.heading1}>Cân nặng</h1>} placeholder='Kg' labelPlacement='outside' name='weight' value={petData.weight} onChange={handleInputChange} />
 
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
 
 
-                                <Textarea
-                                    name='description'
-                                    value={petData.description}
-                                    onChange={handleInputChange}
-                                    label={<h1 className={styles.heading1}>Những thông tin mà người chăm sóc mèo cần lưu ý</h1>}
-                                    placeholder='Thêm hướng dẫn chăm sóc để phù hợp với bé mèo của bạn'
-                                    labelPlacement='outside'
-                                />
-                            </ModalBody>
-                            <ModalFooter className='flex justify-center items-center'>
-                                <Button color="primary" onPress={handleAddPet} className='rounded-full'>
-                                    Lưu
-                                </Button>
-                            </ModalFooter>
-                        </>
-                    )}
-                </ModalContent>
+                                    <Textarea
+                                        name='description'
+                                        value={petData.description}
+                                        onChange={handleInputChange}
+                                        label={<h1 className={styles.heading1}>Những thông tin mà người chăm sóc mèo cần lưu ý</h1>}
+                                        placeholder='Thêm hướng dẫn chăm sóc để phù hợp với bé mèo của bạn'
+                                        labelPlacement='outside'
+                                    />
+                                </ModalBody>
+                                <ModalFooter className='flex justify-center items-center'>
+                                    <Button color="primary" onPress={handleAddPet} className='rounded-full'>
+                                        Lưu
+                                    </Button>
+                                </ModalFooter>
+                            </>
+                        )}
+                    </ModalContent>
+                }
             </Modal>
 
             {/* update modal */}
