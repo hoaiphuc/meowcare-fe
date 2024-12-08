@@ -30,6 +30,7 @@ const OtherService = () => {
         isBasicService: false, // Default boolean value
         isNew: true,
         isDeleted: false,
+        serviceId: ''
     }]);
 
     //check valid
@@ -167,6 +168,7 @@ const OtherService = () => {
             isBasicService: false,
             isNew: true,
             isDeleted: false,
+            serviceId: ''
         };
 
         setAdditionServices((prevState) => [...prevState, newService]);

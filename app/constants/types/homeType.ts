@@ -101,6 +101,7 @@ export type SideNavItem = {
 
 export type Service = {
   id: string;
+  serviceId: string;
   name: string;
   duration: number;
   serviceType: string;

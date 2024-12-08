@@ -17,6 +17,8 @@ interface BookingDetail {
     quantity: number;
     petProfileId: string;
     serviceId: string;
+    startTime: Date;
+    endTime: Date;
 }
 
 const HouseSitting = () => {
@@ -156,21 +158,35 @@ const HouseSitting = () => {
     const handleBooking = () => {
         const bookingDetails: BookingDetail[] = [];
 
-
-        selectedPet.map((petId) => {
-            selectedServices.forEach((service) => {
-                bookingDetails.push({
-                    quantity: 1,
-                    petProfileId: petId,
-                    serviceId: service.id,
-                });
-            })
-        });
-
         if (!selectedDate) {
             toast.error("Vui lòng chọn ngày dịch vụ diễn ra");
             return;
         }
+
+        const baseDate = convertDateValueToDate(selectedDate);
+        const year = baseDate.getFullYear();
+        const month = baseDate.getMonth(); // zero-based
+        const day = baseDate.getDate();
+
+        selectedPet.map((petId) => {
+            selectedServices.forEach((service) => {
+                const [startHour, startMinute] = service.startTime.split(':').map(Number);
+                const [endHour, endMinute] = service.endTime.split(':').map(Number);
+
+                const startDateTime = new Date(year, month, day, startHour, startMinute);
+                const endDateTime = new Date(year, month, day, endHour, endMinute);
+
+                bookingDetails.push({
+                    quantity: 1,
+                    petProfileId: petId,
+                    serviceId: service.serviceId,
+                    startTime: startDateTime,
+                    endTime: endDateTime,
+                });
+            })
+        });
+
+
         // Convert DateValue to Date
         const startDate = convertDateValueToDate(selectedDate).toISOString();
 
@@ -276,6 +292,7 @@ const HouseSitting = () => {
         const newService: Service = {
             id: uuidv4(),
             name: "",
+            serviceId: "",
             serviceType: "ADDITION_SERVICE",
             actionDescription: "",
             endTime: "",
@@ -305,7 +322,7 @@ const HouseSitting = () => {
                     <div className='flex flex-col gap-3'>
                         <h2 className={styles.h2}>Chọn dịch vụ</h2>
                         <div className="flex flex-col gap-6 p-6 bg-gradient-to-r from-blue-50 via-white to-blue-50 rounded-md shadow-md my-3">
-                            {selectedServices.filter((service) => !service.isDeleted).map((selectedService: Service) => (
+                            {selectedServices.map((selectedService: Service) => (
                                 <div
                                     className="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-md shadow-sm gap-5"
                                     key={selectedService.id}
@@ -316,6 +333,7 @@ const HouseSitting = () => {
                                         className="select"
                                         variant="bordered"
                                         name='service'
+                                        value={selectedService.id || ""}
                                         onChange={(e) => {
                                             const value = e.target.value;
                                             // If user selected empty value, reset the service fields
@@ -331,6 +349,7 @@ const HouseSitting = () => {
                                             }
 
                                             const choseService = services.find(service => service.id === e.target.value);
+                                            console.log(choseService);
 
                                             if (choseService) {
                                                 setSelectedServices((prev) =>
