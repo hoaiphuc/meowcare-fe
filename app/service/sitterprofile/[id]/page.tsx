@@ -1,6 +1,6 @@
 'use client'
 
-import { faCircle, faMessage, faStar } from '@fortawesome/free-solid-svg-icons';
+import { faCircle, faStar } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Avatar, Button } from '@nextui-org/react';
 // import Image from 'next/image';
@@ -25,7 +25,7 @@ const Page = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [services, setServices] = useState<Service[]>([])
     const [childService, setChildService] = useState<Service[]>([])
-
+    const [skills, setSkills] = useState([])
     // check user
     useEffect(() => {
         if (typeof window !== 'undefined') {
@@ -42,8 +42,9 @@ const Page = () => {
         try {
             axiosClient(`sitter-profiles/sitter/${params.id}`)
                 .then((res) => {
+                    const skill = res.data.skill.split(",").map((s: string) => s.trim())
+                    setSkills(skill)
                     setSitterProfile(res.data);
-                    console.log(res.data);
                 })
                 .catch((e) => {
                     console.log(e);
@@ -117,10 +118,7 @@ const Page = () => {
                         </div>
                     </div>
                     <div className='flex gap-3 w-full mt-7'>
-                        <Button as={Link} href={isUser ? `/service/booking/${sitterProfile?.sitterId}` : `/login`} className='w-full rounded-full text-white bg-[#2E67D1] shadow-sm'>Đặt lịch</Button>
-                        <Button className='rounded-full bg-[#2E67D1] text-white w-8 h-10 border-0'>
-                            <FontAwesomeIcon icon={faMessage} />
-                        </Button>
+                        <Button onClick={() => handleClick()} className='w-full rounded-full text-white bg-[#2E67D1] shadow-sm'>Theo dõi</Button>
                     </div>
                 </div>
 
@@ -199,8 +197,12 @@ const Page = () => {
 
                 <h1 className={styles.h1}>Thông tin về người chăm sóc</h1>
                 <h2 className='text-[18px] my-3 font-semibold'>Kỹ năng</h2>
-                <div className='grid grid-cols-3'>
-                    <h3 className='border items-center flex justify-center p-3 rounded-full border-[#666666]'>Hiểu về dinh dưỡng</h3>
+                <div className='grid grid-cols-3 gap-3'>
+                    {skills.map((skill, index) => (
+                        <h3 className='border items-center flex justify-center p-3 rounded-full border-[#666666] text-[12px]' key={index}>
+                            {skill}
+                        </h3>
+                    ))}
                 </div>
                 <h2 className='text-[18px] my-3 font-semibold'>Thông tin về nơi ở</h2>
                 <p className={styles.p}>Sống trong một ngôi nhà</p>

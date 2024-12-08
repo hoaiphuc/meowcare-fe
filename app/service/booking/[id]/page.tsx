@@ -6,7 +6,7 @@ import styles from './booking.module.css'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faClock } from '@fortawesome/free-regular-svg-icons'
 // import Link from 'next/link'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import axiosClient from '@/app/lib/axiosClient'
 import { CatSitter, PetProfile, Service, UserType } from '@/app/constants/types/homeType'
 import Image from 'next/image'
@@ -22,9 +22,9 @@ interface BookingDetail {
 
 const Page = () => {
     const params = useParams();
+    const router = useRouter()
     const [selectedService, setSelectedService] = useState<string>('');
     const [selectedPet, setSelectedPet] = useState<string[]>([]);
-    const [isSelected, setIsSelected] = useState(false);
     const [isRequireFood, setIsRequireFood] = useState(false);
     const [pets, setPets] = useState<PetProfile[]>([]);
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
@@ -221,8 +221,14 @@ const Page = () => {
             }
         } else {
             axiosClient.post(`booking-orders/with-details`, data)
-                .then()
-                .catch()
+                .then(() => {
+                    router.push("/payment-result?resultCode=0")
+                    toast.success("Đã đặt lịch thành công, hãy chờ người chăm sóc chấp nhận")
+                })
+                .catch(() => {
+                    router.push("/payment-result?resultCode=1")
+                    toast.error("Có lỗi xảy ra, vui lòng thử lại sau")
+                })
         }
     }
 
@@ -296,10 +302,6 @@ const Page = () => {
                                 {service.name}
                             </h1>
                         ))}
-                        <Checkbox isSelected={isSelected} onValueChange={setIsSelected} radius='none'>
-                            Dịch vụ đưa đón mèo (1-10km)
-                        </Checkbox>
-                        <Input placeholder='Nhập địa chỉ đưa đoán mèo' isDisabled={!isSelected} variant="bordered" className='input' />
 
                         <h2 className={styles.h2}>Chọn ngày</h2>
                         <DateRangePicker
@@ -373,7 +375,7 @@ const Page = () => {
                         <Checkbox isSelected={isRequireFood} onValueChange={setIsRequireFood} radius='none'>
                             Thức ăn theo yêu cầu
                         </Checkbox>
-                        <Input placeholder='Nhập loại thức ăn cụ thể' isDisabled={!isSelected} variant="bordered" className='input' />
+                        <Input placeholder='Nhập loại thức ăn cụ thể' isDisabled={!isRequireFood} variant="bordered" className='input' />
 
                         <h2 className={styles.h2}>Thông tin cá nhân</h2>
                         <Input placeholder='Họ và tên' variant='bordered' value={name} onChange={(e) => setName(e.target.value)} />

@@ -27,7 +27,6 @@ const HouseSitting = () => {
     const [selectedPet, setSelectedPet] = useState<string[]>([]);
     const [pets, setPets] = useState<PetProfile[]>([]);
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
-    const [bookingId, setBookingId] = useState();
     const [services, setServices] = useState<Service[]>([])
     const [name, setName] = useState('');
     const [phoneNumber, setPhoneNumber] = useState('');
@@ -40,7 +39,7 @@ const HouseSitting = () => {
     });
     const [sitter, setSitter] = useState<CatSitter>()
     const [paymentMethod, setPaymentMethod] = useState("")
-    // const [selectedServiceName, setSelectedServiceName] = useState("")
+    // const [selectedServiceName, setSelectedServiceName] = useState([])
     const [userData, setUserData] = useState<UserType>()
     const catFoods = [
         { id: '1', foodName: 'Cá' },
@@ -134,9 +133,26 @@ const HouseSitting = () => {
         }
     }, [userId])
 
-    const handleBooking = () => {
-        console.log(selectedServices);
+    const handleOpenBooking = async () => {
+        if (!dateRange.startDate || !dateRange.endDate) {
+            toast.error("Vui lòng chọn ngày bắt đầu và ngày kết thúc");
+            return;
+        }
 
+        const missingName = selectedServices.some(service => !service.name);
+        if (missingName) {
+            toast.error("Vui lòng chọn dịch vụ");
+            return;
+        }
+
+        if (selectedPet.length < 1) {
+            toast.error("Vui lòng chọn ít nhất 1 bé mèo");
+            return;
+        }
+        onOpen();
+    }
+
+    const handleBooking = () => {
         const bookingDetails: BookingDetail[] = [];
 
 
@@ -174,8 +190,13 @@ const HouseSitting = () => {
         try {
             axiosClient.post(`booking-orders/with-details`, data)
                 .then((res) => {
-                    setBookingId(res.data.id)
-                    onOpen();
+                    axiosClient.post(`booking-orders/payment-url?id=${res.data.id}&requestType=${paymentMethod}&redirectUrl=${process.env.NEXT_PUBLIC_BASE_URL}/payment-result`)
+                        .then((res) => {
+                            window.open(res.data.payUrl, '_self');
+                        })
+                        .catch(() => {
+                            toast.error("Thanh toán thất bại, vui lòng thử lại sau")
+                        })
                 })
                 .catch((e) => {
                     console.log(e);
@@ -185,19 +206,19 @@ const HouseSitting = () => {
         }
     }
 
-    const handlePay = () => {
-        try {
-            axiosClient.post(`booking-orders/payment-url?id=${bookingId}&requestType=${paymentMethod}&redirectUrl=${process.env.NEXT_PUBLIC_BASE_URL}/payment-result`)
-                .then((res) => {
-                    window.open(res.data.payUrl, '_self');
-                })
-                .catch(() => {
-                    toast.error("Thanh toán thất bại, vui lòng thử lại sau")
-                })
-        } catch (error) {
-            console.log(error);
-        }
-    }
+    // const handlePay = () => {
+    //     try {
+    //         axiosClient.post(`booking-orders/payment-url?id=${bookingId}&requestType=${paymentMethod}&redirectUrl=${process.env.NEXT_PUBLIC_BASE_URL}/payment-result`)
+    //             .then((res) => {
+    //                 window.open(res.data.payUrl, '_self');
+    //             })
+    //             .catch(() => {
+    //                 toast.error("Thanh toán thất bại, vui lòng thử lại sau")
+    //             })
+    //     } catch (error) {
+    //         console.log(error);
+    //     }
+    // }
 
     // Function to convert DateValue to Date
     const convertDateValueToDate = (dateValue: DateValue): Date => {
@@ -231,6 +252,7 @@ const HouseSitting = () => {
         selectedServices.map((service: Service) => {
             totalPerNight += service.price;
         })
+        console.log(selectedServices);
 
         return totalPerNight * bookingDetails.numberOfNights * selectedPet.length;
     }, [bookingDetails.numberOfNights, selectedPet.length, selectedServices]);
@@ -322,13 +344,26 @@ const HouseSitting = () => {
                                         variant="bordered"
                                         name='service'
                                         onChange={(e) => {
-                                            const chosenService = services.find(service => service.id === e.target.value);
-                                            if (chosenService) {
-                                                // Update the selected service in `selectedServices` with the chosen duration from `services`
+                                            const value = e.target.value;
+                                            // If user selected empty value, reset the service fields
+                                            if (!value) {
                                                 setSelectedServices((prev) =>
                                                     prev.map((item) =>
                                                         item.id === selectedService.id
-                                                            ? { ...item, serviceId: chosenService.id, duration: chosenService.duration }
+                                                            ? { ...item, serviceId: "", duration: 0, name: "", price: 0 }
+                                                            : item
+                                                    )
+                                                );
+                                                return;
+                                            }
+
+                                            const choseService = services.find(service => service.id === e.target.value);
+
+                                            if (choseService) {
+                                                setSelectedServices((prev) =>
+                                                    prev.map((item) =>
+                                                        item.id === selectedService.id
+                                                            ? { ...item, serviceId: choseService.id, duration: choseService.duration, name: choseService.name, price: choseService.price }
                                                             : item
                                                     )
                                                 );
@@ -451,7 +486,7 @@ const HouseSitting = () => {
                             <div className='flex justify-between' key={service.id}>
                                 <h3>{service.name}</h3>
                                 <div className='flex flex-col left-0'>
-                                    <h3 className='text-[#2B764F]'>{service.price.toLocaleString()}đ</h3>
+                                    <h3 className='text-[#2B764F]'>{service.price.toLocaleString("de")}đ</h3>
                                     <h4>giá mỗi đêm</h4>
                                 </div>
                             </div>
@@ -461,7 +496,10 @@ const HouseSitting = () => {
                     {/* Final price */}
                     <div className='border flex flex-col p-3 rounded-lg gap-3'>
                         <h2 className={styles.h2}>Thông tin đặt lịch </h2>
-                        {/* <h3>Dịch vụ: {selectedServiceName}</h3> */}
+                        Dịch vụ đã chọn
+                        {selectedServices && selectedServices.map((service) => (
+                            <h3 key={service.id} className='font-semibold'> {service.name}</h3>
+                        ))}
                         <div className='flex flex-cols-3 justify-between'>
                             <div>
                                 <h3>Ngày nhận</h3>
@@ -481,14 +519,14 @@ const HouseSitting = () => {
                         <hr className='text-[#66696]' />
                         <div className='flex justify-between'>
                             <h3>Tổng giá:</h3>
-                            <h3 className='text-[#2B764F]'>{totalPrice.toLocaleString()}</h3>
+                            <h3 className='text-[#2B764F]'>{totalPrice.toLocaleString("de")}</h3>
                         </div>
                     </div>
                 </div>
             </div>
 
             <div className='mt-10'>
-                <Button onPress={handleBooking} className='bg-[#2E67D1] text-white text-[16px] font-semibold rounded-full w-[483px]'>Đặt lịch và thanh toán</Button>
+                <Button onPress={handleOpenBooking} className='bg-[#2E67D1] text-white text-[16px] font-semibold rounded-full w-[483px]'>Đặt lịch và thanh toán</Button>
             </div>
 
             {/* Modal payment */}
@@ -586,7 +624,7 @@ const HouseSitting = () => {
                                 </div>
                             </ModalBody>
                             <ModalFooter className='w-full flex justify-center'>
-                                <Button className='bg-btnbg text-white w-[206px] rounded-full h-[42px]' onPress={() => handlePay()}>
+                                <Button className='bg-btnbg text-white w-[206px] rounded-full h-[42px]' onPress={() => handleBooking()}>
                                     Thanh toán
                                 </Button>
                             </ModalFooter>
