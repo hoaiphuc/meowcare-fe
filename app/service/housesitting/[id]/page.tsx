@@ -1,17 +1,15 @@
 'use client'
 
-import { Avatar, Button, Chip, DateRangePicker, DateValue, Input, Modal, ModalBody, ModalContent, ModalFooter, Radio, RadioGroup, Select, SelectItem, Textarea, TimeInput, TimeInputValue, useDisclosure } from '@nextui-org/react'
+import { Avatar, Button, Chip, DatePicker, DateValue, Input, Modal, ModalBody, ModalContent, ModalFooter, Radio, RadioGroup, Select, SelectItem, Textarea, TimeInput, TimeInputValue, useDisclosure } from '@nextui-org/react'
 import React, { useEffect, useMemo, useState } from 'react'
 import styles from './housesitting.module.css'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faClock } from '@fortawesome/free-regular-svg-icons'
 import { useParams } from 'next/navigation'
 import axiosClient from '@/app/lib/axiosClient'
 import { CatSitter, PetProfile, Service, UserType } from '@/app/constants/types/homeType'
 import Image from 'next/image'
 import { toast } from 'react-toastify'
 import { today, getLocalTimeZone, Time } from '@internationalized/date';
-import { format } from 'date-fns'
 import { faPlus, faTrash } from '@fortawesome/free-solid-svg-icons'
 import { v4 as uuidv4 } from 'uuid';
 
@@ -33,10 +31,7 @@ const HouseSitting = () => {
     const [address, setAddress] = useState('')
     const [note, setNote] = useState('')
     const todayDate = today(getLocalTimeZone());
-    const [dateRange, setDateRange] = useState<{ startDate: DateValue | null; endDate: DateValue | null }>({
-        startDate: null,
-        endDate: null,
-    });
+    const [selectedDate, setSelectedDate] = useState<DateValue | null>(null);
     const [sitter, setSitter] = useState<CatSitter>()
     const [paymentMethod, setPaymentMethod] = useState("")
     // const [selectedServiceName, setSelectedServiceName] = useState([])
@@ -134,14 +129,20 @@ const HouseSitting = () => {
     }, [userId])
 
     const handleOpenBooking = async () => {
-        if (!dateRange.startDate || !dateRange.endDate) {
-            toast.error("Vui lòng chọn ngày bắt đầu và ngày kết thúc");
+        if (!selectedDate) {
+            toast.error("Vui lòng chọn ngày dịch vụ diễn ra");
             return;
         }
+        console.log(convertDateValueToDate(selectedDate).toISOString());
 
         const missingName = selectedServices.some(service => !service.name);
         if (missingName) {
             toast.error("Vui lòng chọn dịch vụ");
+            return;
+        }
+
+        if (selectedServices.length < 1) {
+            toast.error("Vui lòng chọn dịch vụ ít nhất 1 dịch vụ");
             return;
         }
 
@@ -166,15 +167,12 @@ const HouseSitting = () => {
             })
         });
 
-        //add date
-        if (!dateRange.startDate || !dateRange.endDate) {
-            toast.error("Vui lòng chọn ngày bắt đầu và ngày kết thúc.");
+        if (!selectedDate) {
+            toast.error("Vui lòng chọn ngày dịch vụ diễn ra");
             return;
         }
-
         // Convert DateValue to Date
-        const startDate = convertDateValueToDate(dateRange.startDate).toISOString();
-        const endDate = convertDateValueToDate(dateRange.endDate).toISOString();
+        const startDate = convertDateValueToDate(selectedDate).toISOString();
 
         const data = {
             bookingDetails: bookingDetails,
@@ -184,7 +182,6 @@ const HouseSitting = () => {
             address: address,
             note: note,
             startDate,
-            endDate
         }
 
         try {
@@ -206,43 +203,11 @@ const HouseSitting = () => {
         }
     }
 
-    // const handlePay = () => {
-    //     try {
-    //         axiosClient.post(`booking-orders/payment-url?id=${bookingId}&requestType=${paymentMethod}&redirectUrl=${process.env.NEXT_PUBLIC_BASE_URL}/payment-result`)
-    //             .then((res) => {
-    //                 window.open(res.data.payUrl, '_self');
-    //             })
-    //             .catch(() => {
-    //                 toast.error("Thanh toán thất bại, vui lòng thử lại sau")
-    //             })
-    //     } catch (error) {
-    //         console.log(error);
-    //     }
-    // }
-
     // Function to convert DateValue to Date
     const convertDateValueToDate = (dateValue: DateValue): Date => {
         return new Date(dateValue.year, dateValue.month - 1, dateValue.day);
     };
 
-    const bookingDetails = useMemo(() => {
-        let numberOfNights = 1;
-        let formattedStartDate = 'Chưa chọn';
-        let formattedEndDate = 'Chưa chọn';
-
-        if (dateRange.startDate && dateRange.endDate) {
-            const start = convertDateValueToDate(dateRange.startDate);
-            const end = convertDateValueToDate(dateRange.endDate);
-            const diffTime = end.getTime() - start.getTime();
-            numberOfNights = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
-            if (numberOfNights <= 0) numberOfNights = 1;
-
-            formattedStartDate = start.toLocaleDateString();
-            formattedEndDate = end.toLocaleDateString();
-        }
-
-        return { numberOfNights, formattedStartDate, formattedEndDate };
-    }, [dateRange]);
 
     //calculate price
     const totalPrice = useMemo(() => {
@@ -254,16 +219,11 @@ const HouseSitting = () => {
         })
         console.log(selectedServices);
 
-        return totalPerNight * bookingDetails.numberOfNights * selectedPet.length;
-    }, [bookingDetails.numberOfNights, selectedPet.length, selectedServices]);
-
-    useEffect(() => {
-
-    }, [dateRange])
+        return totalPerNight * selectedPet.length;
+    }, [selectedPet.length, selectedServices]);
 
     //select service
     const handleInputServiceChange = (id: string, field: string, value: TimeInputValue | string, duration: number) => {
-
         if (field === "startTime") {
             // Check if `value` is of type `TimeInputValue`
             if (typeof value === "object" && "hour" in value && "minute" in value) {
@@ -403,11 +363,17 @@ const HouseSitting = () => {
                             </Button>
                         </div>
                         <h2 className={styles.h2}>Chọn ngày</h2>
-                        <DateRangePicker
+                        {/* <DateRangePicker
                             label="Ngày đặt lịch"
                             minValue={todayDate}
                             visibleMonths={2}
                             onChange={(range) => setDateRange({ startDate: range.start, endDate: range.end })}
+                        /> */}
+                        <DatePicker
+                            label="Ngày bắt đầu"
+                            minValue={todayDate}
+                            visibleMonths={2}
+                            onChange={(e) => setSelectedDate(e)}
                         />
 
                         <h2 className={styles.h2}>Thêm thú cưng của bạn</h2>
@@ -502,16 +468,8 @@ const HouseSitting = () => {
                         ))}
                         <div className='flex flex-cols-3 justify-between'>
                             <div>
-                                <h3>Ngày nhận</h3>
-                                <h3>{bookingDetails.formattedStartDate}</h3>
-                            </div>
-                            <div className='flex flex-col items-center'>
-                                <h3 className='text-[#902C6C]'>{bookingDetails.numberOfNights}</h3>
-                                <FontAwesomeIcon icon={faClock} className='text-[#A65587]' />
-                            </div>
-                            <div>
-                                <h3>Ngày trả</h3>
-                                <h3>{bookingDetails.formattedEndDate}</h3>
+                                <h3>Ngày diễn ra</h3>
+                                <h3>{selectedDate?.toString()}</h3>
                             </div>
                         </div>
                         <h3>Số lượng mèo: 1</h3>
@@ -556,8 +514,7 @@ const HouseSitting = () => {
                                             <div className='grid grid-cols-2 w-80'>
                                                 <h3 className={styles.h3}>Mã đặt hàng</h3> <h3>123</h3>
                                                 {/* <h3 className={styles.h3}>Dịch vụ</h3> <h3>{selectedServiceName}</h3> */}
-                                                <h3 className={styles.h3}>Ngày gửi</h3> <h3>{format(new Date(bookingDetails.formattedStartDate), 'dd/MM/yyyy')}</h3>
-                                                <h3 className={styles.h3}>Ngày Nhận</h3> <h3>{format(new Date(bookingDetails.formattedEndDate), 'dd/MM/yyyy')}</h3>
+                                                {/* <h3 className={styles.h3}>Ngày diễn ra</h3> <h3>{format(new Date(selectedDate?.toString()), 'dd/MM/yyyy')}</h3> */}
                                                 <h3 className={styles.h3}>Người chăm sóc</h3> <h3>{sitter?.fullName}</h3>
                                                 <h3 className={styles.h3}>Số lượng thú cưng</h3> <h3>1</h3>
                                             </div>
@@ -607,7 +564,18 @@ const HouseSitting = () => {
                                                     </Radio>
                                                 </div>
                                                 <div className='border border-black p-3'>
-                                                    <Radio value="cash" className='px-5' aria-label='j'>
+                                                    <Radio value="wallet" className='px-5' aria-label='wallet' onClick={() => setPaymentMethod("WALLET")}>
+                                                        <div className='flex items-center'>
+                                                            <Image src='/ewallet.png' alt='' width={51} height={44} className='mx-3 w-[71px] h-[54px]' />
+                                                            <div>
+                                                                <h1 className={styles.paymentHeading1}>Thanh toán bằng ví</h1>
+                                                                <h2 className={styles.paymentHeading2}>Thanh toán bằng ví của bạn</h2>
+                                                            </div>
+                                                        </div>
+                                                    </Radio>
+                                                </div>
+                                                <div className='border border-black p-3'>
+                                                    <Radio value="cash" className='px-5' aria-label='cash' onClick={() => setPaymentMethod("CASH")}>
                                                         <div className='flex items-center'>
                                                             <Image src='/cash.png' alt='' width={51} height={44} className='mx-3 w-[71px] h-[54px]' />
                                                             <div>
