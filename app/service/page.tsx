@@ -269,7 +269,7 @@ const Service = () => {
                                             </div>
                                             <div className='ml-auto flex flex-col text-right'>
                                                 <p className='text-xs font-semibold text-right'>
-                                                    Giá mỗi đêm
+                                                    Giá mỗi ngày
                                                 </p>
                                                 <p className='text-[20px] font-semibold text-[#2B764F]'>
                                                     {/* {catSitter.price} */}

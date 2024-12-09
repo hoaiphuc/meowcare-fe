@@ -1,6 +1,6 @@
 'use client'
 
-import { faCircle, faStar } from '@fortawesome/free-solid-svg-icons';
+import { faCat, faCircle, faShieldCat, faStar } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Avatar, Button, Calendar, DateValue } from '@nextui-org/react';
 // import Image from 'next/image';
@@ -14,6 +14,7 @@ import axiosClient from '@/app/lib/axiosClient';
 import { useParams } from 'next/navigation';
 import { CatSitter, Service } from '@/app/constants/types/homeType';
 import Loading from '@/app/components/Loading';
+import Image from 'next/image';
 
 
 
@@ -24,6 +25,7 @@ const Page = () => {
     const [isUser, setIsUser] = useState<boolean>();
     const [isLoading, setIsLoading] = useState(true);
     const [services, setServices] = useState<Service[]>([])
+    const [additionServices, setAdditionServices] = useState<Service[]>([])
     const [childService, setChildService] = useState<Service[]>([])
     const [skills, setSkills] = useState([])
     // check user
@@ -57,10 +59,11 @@ const Page = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [sitterProfileRes, servicesRes, childServiceRes] = await Promise.allSettled([
+                const [sitterProfileRes, servicesRes, childServiceRes, additionServiceRes] = await Promise.allSettled([
                     axiosClient(`sitter-profiles/sitter/${params.id}`),
                     axiosClient(`services/sitter/${params.id}/type?serviceType=MAIN_SERVICE&status=ACTIVE`),
                     axiosClient(`services/sitter/${params.id}/type?serviceType=CHILD_SERVICE&status=ACTIVE`),
+                    axiosClient(`services/sitter/${params.id}/type?serviceType=ADDITION_SERVICE&status=ACTIVE`),
                 ]);
 
                 // Handle sitter profile response
@@ -81,6 +84,12 @@ const Page = () => {
                     setChildService(childServiceRes.value.data);
                 } else {
                     console.error("Failed to fetch services:", childServiceRes.reason);
+                }
+
+                if (additionServiceRes.status === "fulfilled") {
+                    setAdditionServices(additionServiceRes.value.data);
+                } else {
+                    console.error("Failed to fetch services:", additionServiceRes.reason);
                 }
 
             } catch (error) {
@@ -148,7 +157,7 @@ const Page = () => {
                                     <div className='text-secondary font-semibold'>
                                         <h1 className='text-text text-xl font-semibold'>Gửi thú cưng</h1>
                                         <p className={styles.p}>Gửi thú cưng đến nhà người chăm sóc</p>
-                                        <p className={styles.p}>Giá <span className='text-[#2B764F]'>{ser.price.toLocaleString("de")}đ</span> <span className='font-semibold'>mỗi đêm</span></p>
+                                        <p className={styles.p}>Giá <span className='text-[#2B764F]'>{ser.price.toLocaleString("de")}đ</span> <span className='font-semibold'>/ ngày</span></p>
                                     </div>
                                 </div>
                                 <Button as={Link} href={isUser ? `/service/booking/${sitterProfile?.sitterId}` : `/login`} className={styles.button}>Đặt lịch</Button>
@@ -200,14 +209,48 @@ const Page = () => {
                 </div>
                 <hr className={styles.hr} />
 
-                <h1 className={styles.h1}>Lịch trình chăm sóc dự kiến</h1>
-                {childService && childService.map((ser) => (
-                    <div key={ser.id} className='flex text-xl items-center gap-3'>
-                        <FontAwesomeIcon icon={faCircle} className="text-xs" size='2xs' />
-                        <div className={styles.time}>{ser.startTime} giờ - {ser.endTime} giờ: </div>
-                        <p className={styles.childService}>{ser.name}</p>
+                <div className='flex items-start justify-start gap-5'>
+                    <div className='flex flex-col items-center justify-center'>
+                        <h1 className={styles.h1}>Gửi thú cưng</h1>
+                        <Image src='/service/boarding.png' alt='' width={144} height={144} />
                     </div>
-                ))}
+                    <div className='flex flex-col items-start justify-start'>
+                        <h1 className={styles.h1}>Lịch trình chăm sóc dự kiến</h1>
+                        {childService && childService.map((ser) => (
+                            <div key={ser.id} className='flex text-xl items-center gap-3'>
+                                <FontAwesomeIcon icon={faCat} className="text-xs" size='2xs' />
+                                <div className={styles.time}>{ser.startTime.split(":").slice(0, 2).join(":")} giờ - {ser.endTime.split(":").slice(0, 2).join(":")} giờ: </div>
+                                <p className={styles.childService}>{ser.name}</p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+                <hr className={styles.hr} />
+
+                <div className='flex items-start justify-start gap-5'>
+                    <div className='flex flex-col items-center justify-center'>
+                        <h1 className={styles.h1}>Dịch vụ khác</h1>
+                        <Image src='/service/other.png' alt='' width={144} height={144} />
+                    </div>
+                    <div className='flex flex-col items-start justify-start gap-3'>
+                        <h1 className={styles.h1}>Thông tin dịch vụ</h1>
+                        <div className='flex'>
+                            <p className={styles.tableBlockTitle}>Tên dịch vụ</p>
+                            <p className={styles.tableBlockTitle}>Thời gian</p>
+                            <p className={styles.tableBlockTitle}>Giá tiền</p>
+                        </div>
+                        {additionServices && additionServices.map((ser) => (
+                            <div key={ser.id} className='flex text-xl items-center justify-start'>
+                                <p className={styles.tableBlock}>
+                                    <FontAwesomeIcon icon={faShieldCat} size='2xs' className='mr-2' />
+                                    {ser.name}
+                                </p>
+                                <p className={styles.tableBlock}>{ser.duration} phút</p>
+                                <p className={styles.tableBlock}>{ser.price.toLocaleString("de")}</p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
 
                 <hr className={styles.hr} />
 
@@ -235,8 +278,6 @@ const Page = () => {
                         </h3>
                     ))}
                 </div>
-                {/* <h2 className='text-[18px] my-3 font-semibold'>Thông tin về nơi ở</h2>
-                <p className={styles.p}>Sống trong một ngôi nhà</p> */}
 
                 <h1 className='mt-10 text-xl font-semibold'>An toàn, tin cậy & môi trường</h1>
                 <p className={styles.p}>{sitterProfile?.environment}</p>
