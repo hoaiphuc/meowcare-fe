@@ -5,7 +5,7 @@ import styles from './info.module.css'
 import { Autocomplete, AutocompleteItem, Avatar, Button, Chip, Input, Textarea } from '@nextui-org/react'
 import CatSitterSkill from '@/app/lib/CatSitterSkill.json'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faCheck, faXmark } from '@fortawesome/free-solid-svg-icons'
+import { faCamera, faCheck, faXmark } from '@fortawesome/free-solid-svg-icons'
 import axiosClient from '@/app/lib/axiosClient'
 import { CatSitter, UserLocal } from '@/app/constants/types/homeType'
 import { useRouter } from 'next/navigation'
@@ -219,6 +219,35 @@ const Info = () => {
 
                         </div>
 
+                    </div>
+                </div>
+
+                <div className='mt-5 flex flex-col gap-2'>
+                    <h2 className={styles.h2}>Môi trường và chuồng cho mèo</h2>
+                    <Textarea placeholder="Hãy cho mọi người biết về môi trường sống và chuồng nuôi" value={sitterData?.environment} name='environment' onChange={handleInputChange} />
+                    <Input placeholder="Số lượng mèo có thể chăm sóc" value={sitterData?.maximumQuantity.toString()} name='maximumQuantity' onChange={handleInputChange} />
+                    <h3>Hình ảnh mỗi trường và chuồng, lồng</h3>
+                    <div className='flex overflow-x-auto gap-2'>
+                        <button
+                            className="flex flex-col justify-center items-center p-3 bg-pink-100 border border-pink-300 rounded-md text-center w-36 h-36"
+                        // onClick={handleImageClick}
+
+                        >
+                            <FontAwesomeIcon icon={faCamera} className='text-maincolor' size='2xl' />
+                            <p>Thêm hình ảnh</p>
+                            {/* <p>{`${selectTaskEvidence.filter((e) => e.evidenceType === 'PHOTO').length}/3`}</p> */}
+                        </button>
+                        {sitterData?.profilePictures.map((photo, index) => (
+                            <div key={index} className="relative w-36 h-36">
+                                <Avatar className="w-full h-full" radius="sm" src={photo.imageUrl} />
+                                <button
+                                    // onClick={() => handleRemovePhoto(index)}
+                                    className="absolute top-0 right-0 p-1 rounded-full w-8 h-8 bg-black bg-opacity-50 text-white"
+                                >
+                                    ✕
+                                </button>
+                            </div>
+                        ))}
                     </div>
                 </div>
 

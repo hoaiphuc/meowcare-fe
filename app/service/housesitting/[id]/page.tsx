@@ -93,7 +93,7 @@ const HouseSitting = () => {
         setSelectedPet(petIds.split(','));
     }
 
-    //get basic service
+    //get addition service
     useEffect(() => {
         try {
             axiosClient(`services/sitter/${params.id}/type?serviceType=ADDITION_SERVICE&status=ACTIVE`)
@@ -485,7 +485,7 @@ const HouseSitting = () => {
                                 <h3>{service.name}</h3>
                                 <div className='flex flex-col left-0'>
                                     <h3 className='text-[#2B764F]'>{service.price.toLocaleString("de")}đ</h3>
-                                    <h4>giá mỗi đêm</h4>
+                                    <h4>giá lần</h4>
                                 </div>
                             </div>
                         ))}
@@ -505,7 +505,6 @@ const HouseSitting = () => {
                             </div>
                         </div>
                         <h3>Số lượng mèo: 1</h3>
-                        <h3>Số ngày lễ: 0</h3>
                         <hr className='text-[#66696]' />
                         <div className='flex justify-between'>
                             <h3>Tổng giá:</h3>
@@ -544,9 +543,6 @@ const HouseSitting = () => {
                                         <div className='flex items-start justify-start flex-col w-full'>
                                             <h2 className={styles.h2}>Thông tin đặt lịch của bạn</h2>
                                             <div className='grid grid-cols-2 w-80'>
-                                                <h3 className={styles.h3}>Mã đặt hàng</h3> <h3>123</h3>
-                                                {/* <h3 className={styles.h3}>Dịch vụ</h3> <h3>{selectedServiceName}</h3> */}
-                                                {/* <h3 className={styles.h3}>Ngày diễn ra</h3> <h3>{format(new Date(selectedDate?.toString()), 'dd/MM/yyyy')}</h3> */}
                                                 <h3 className={styles.h3}>Người chăm sóc</h3> <h3>{sitter?.fullName}</h3>
                                                 <h3 className={styles.h3}>Số lượng thú cưng</h3> <h3>1</h3>
                                             </div>
@@ -554,15 +550,22 @@ const HouseSitting = () => {
 
                                         <div className='flex flex-col items-start justify-start w-full'>
                                             <h2 className={styles.h2}>Tổng giá dịch vụ</h2>
-                                            <div className='grid grid-cols-5 w-full'>
-                                                <div className={styles.money}>123</div>
-                                                <div className={`${styles.money} col-span-2`}>Đức Tấn</div>
-                                                <div className={styles.money}>150.000</div>
-                                                <div className={styles.money}>VND</div>
-
-                                                <div className={`${styles.money} col-span-3`}>Tổng cộng</div>
-                                                <div className={styles.money}>{totalPrice.toLocaleString("de")}</div>
-                                                <div className={styles.money}>VND</div>
+                                            <div>
+                                                {selectedServices.map((service, index) => (
+                                                    <div key={service.id} className='grid grid-cols-5 w-full'>
+                                                        <div className={styles.money}>{index + 1}</div>
+                                                        <div className={`${styles.money} col-span-2 w-60`}>{service.name}</div>
+                                                        <div className={styles.money}>{service.price.toLocaleString("de")}</div>
+                                                        <div className={styles.money}>VND</div>
+                                                    </div>
+                                                ))}
+                                                <div>
+                                                    <div className='grid grid-cols-5 w-full'>
+                                                        <div className={`${styles.money} col-span-3 font-semibold`}>Tổng cộng</div>
+                                                        <div className={styles.money}>{totalPrice.toLocaleString("de")}</div>
+                                                        <div className={styles.money}>VND</div>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
 

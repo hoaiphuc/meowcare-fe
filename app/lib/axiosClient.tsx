@@ -72,9 +72,6 @@ axiosClient.interceptors.response.use(
             }
 
             try {
-                if (typeof window !== "undefined") {
-                    localStorage.removeItem('auth-token');
-                }
                 delete axiosClient.defaults.headers.common['Authorization'];
                 delete originalRequest.headers['Authorization'];
 

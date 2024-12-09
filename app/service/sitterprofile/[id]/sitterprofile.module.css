@@ -33,3 +33,14 @@
 .childService {
   @apply ml-3;
 }
+
+.tableIcon {
+  @apply w-12;
+}
+.tableBlockTitle {
+  @apply w-40 text-xl font-semibold;
+}
+
+.tableBlock {
+  @apply w-40;
+}

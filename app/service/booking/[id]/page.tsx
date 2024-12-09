@@ -409,7 +409,6 @@ const Page = () => {
                             </div>
                         </div>
                         <h3>Số lượng mèo: 1</h3>
-                        <h3>Số ngày lễ: 0</h3>
                         <hr className='text-[#66696]' />
                         <div className='flex justify-between'>
                             <h3>Tổng giá:</h3>
