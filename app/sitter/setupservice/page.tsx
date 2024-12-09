@@ -214,7 +214,7 @@ const Page = () => {
                                 :
                                 <FontAwesomeIcon icon={faXmark} className="text-red-500" size="2x" />
                             }
-                            <Link href={"/sitter/setupservice/info"} className={styles.h3}>Thông tin cơ bản</Link>
+                            <Link href={sitterProfile ? "/sitter/setupservice/info" : "/sitter/setupservice/createinfo"} className={styles.h3}>Thông tin cơ bản</Link>
                         </div>
                         <div className="flex items-center gap-3">
                             <FontAwesomeIcon icon={faXmark} className="text-red-500" size="2x" />

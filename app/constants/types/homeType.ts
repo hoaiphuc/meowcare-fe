@@ -388,16 +388,12 @@ export type RequestWithdrawal = {
 
 export type Certificate = {
   id: string;
-  sitterProfileId: string;
+  userId: string;
   certificateType: string;
   certificateName: string;
   institutionName: string;
-  issueDate: Date;
-  expiryDate: Date;
   certificateUrl: string;
   description: string;
-  createdAt: Date;
-  updatedAt: Date;
 };
 
 export type Slot = {

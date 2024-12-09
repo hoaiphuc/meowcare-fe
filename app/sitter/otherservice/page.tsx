@@ -304,13 +304,14 @@ const OtherService = () => {
         toast.success("Cập nhật slot thành công");
     }
 
-    const parseTimeString = (timeString: string | undefined) => {
-        if (!timeString || !timeString.includes(':')) {
-            return new Time(0, 0); // Default to 00:00 if invalid
+    const parseTimeString = (isoString: string | undefined) => {
+        if (!isoString) {
+            return new Time(0, 0); // Default to 00:00 if undefined
         }
-        const [hour, minute] = timeString.split(':').map(Number);
-        return new Time(hour || 0, minute || 0);
+        const date = new Date(isoString);
+        return new Time(date.getUTCHours(), date.getUTCMinutes()); // Extract hours and minutes
     };
+
 
 
 

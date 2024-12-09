@@ -1,15 +1,15 @@
 'use client'
 
-import { Avatar, Button, Chip, DatePicker, DateValue, Input, Modal, ModalBody, ModalContent, ModalFooter, Radio, RadioGroup, Select, SelectItem, Textarea, TimeInput, TimeInputValue, useDisclosure } from '@nextui-org/react'
+import { Avatar, Button, Chip, DatePicker, DateValue, Input, Modal, ModalBody, ModalContent, ModalFooter, Radio, RadioGroup, Select, SelectItem, Textarea, useDisclosure } from '@nextui-org/react'
 import React, { useEffect, useMemo, useState } from 'react'
 import styles from './housesitting.module.css'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useParams, useRouter } from 'next/navigation'
 import axiosClient from '@/app/lib/axiosClient'
-import { CatSitter, PetProfile, Service, UserType } from '@/app/constants/types/homeType'
+import { CatSitter, PetProfile, Service, Slot, UserType } from '@/app/constants/types/homeType'
 import Image from 'next/image'
 import { toast } from 'react-toastify'
-import { today, getLocalTimeZone, Time } from '@internationalized/date';
+import { today, getLocalTimeZone } from '@internationalized/date';
 import { faPlus, faTrash } from '@fortawesome/free-solid-svg-icons'
 import { v4 as uuidv4 } from 'uuid';
 
@@ -42,7 +42,7 @@ const HouseSitting = () => {
         { id: '1', foodName: 'Cá' },
         { id: '2', foodName: 'Thịt' },
     ];
-
+    const [slots, setSlots] = useState<Slot[]>([])
 
     const [userId, setUserId] = useState<string | null>(null);
 
@@ -50,6 +50,12 @@ const HouseSitting = () => {
         axiosClient(`sitter-profiles/sitter/${params.id}`)
             .then((res) => {
                 setSitter(res.data)
+            })
+            .catch(() => { })
+
+        axiosClient(`booking-slots?userId=${params.id}`)
+            .then((res) => {
+                setSlots(res.data)
             })
             .catch(() => { })
     }, [params.id])
@@ -252,36 +258,36 @@ const HouseSitting = () => {
     }, [selectedPet.length, selectedServices]);
 
     //select service
-    const handleInputServiceChange = (id: string, field: string, value: TimeInputValue | string, duration: number) => {
-        if (field === "startTime") {
-            // Check if `value` is of type `TimeInputValue`
-            if (typeof value === "object" && "hour" in value && "minute" in value) {
-                const startHour = value.hour;
-                const startMinute = value.minute;
-                const startTimeInMinutes = startHour * 60 + startMinute;
+    // const handleInputServiceChange = (id: string, field: string, value: TimeInputValue | string, duration: number) => {
+    //     if (field === "startTime") {
+    //         // Check if `value` is of type `TimeInputValue`
+    //         if (typeof value === "object" && "hour" in value && "minute" in value) {
+    //             const startHour = value.hour;
+    //             const startMinute = value.minute;
+    //             const startTimeInMinutes = startHour * 60 + startMinute;
 
-                const endTimeInMinutes = duration ? startTimeInMinutes + duration : startTimeInMinutes;
+    //             const endTimeInMinutes = duration ? startTimeInMinutes + duration : startTimeInMinutes;
 
-                // Convert minutes back to hours and minutes
-                const endHour = Math.floor(endTimeInMinutes / 60) % 24;
-                const endMinute = endTimeInMinutes % 60;
+    //             // Convert minutes back to hours and minutes
+    //             const endHour = Math.floor(endTimeInMinutes / 60) % 24;
+    //             const endMinute = endTimeInMinutes % 60;
 
-                const formattedTime = `${startHour.toString().padStart(2, "0")}:${startMinute.toString().padStart(2, "0")}`;
-                const formattedEndTime = `${endHour.toString().padStart(2, "0")}:${endMinute.toString().padStart(2, "0")}`;
-                setSelectedServices((prev) =>
-                    prev.map((service) =>
-                        service.id === id
-                            ? { ...service, startTime: formattedTime, endTime: formattedEndTime }
-                            : service
-                    )
-                );
-                return;
-            } else {
-                toast.error("Invalid time value");
-                return;
-            }
-        }
-    };
+    //             const formattedTime = `${startHour.toString().padStart(2, "0")}:${startMinute.toString().padStart(2, "0")}`;
+    //             const formattedEndTime = `${endHour.toString().padStart(2, "0")}:${endMinute.toString().padStart(2, "0")}`;
+    //             setSelectedServices((prev) =>
+    //                 prev.map((service) =>
+    //                     service.id === id
+    //                         ? { ...service, startTime: formattedTime, endTime: formattedEndTime }
+    //                         : service
+    //                 )
+    //             );
+    //             return;
+    //         } else {
+    //             toast.error("Invalid time value");
+    //             return;
+    //         }
+    //     }
+    // };
 
     const removeService = (id: string) => {
         setSelectedServices((prev) => prev.filter((service) => service.id != id))
@@ -308,10 +314,10 @@ const HouseSitting = () => {
         setSelectedServices((prevState) => [...prevState, newService]);
     };
 
-    const parseTimeString = (timeString: string) => {
-        const [hour, minute] = timeString.split(':').map(Number);
-        return { hour, minute };
-    };
+    // const parseTimeString = (timeString: string) => {
+    //     const [hour, minute] = timeString.split(':').map(Number);
+    //     return { hour, minute };
+    // };
 
     return (
         <div className='flex flex-col items-center justify-start my-12'>
@@ -369,7 +375,7 @@ const HouseSitting = () => {
                                         ))}
                                     </Select>
                                     <div className='flex justify-center items-center gap-3'>
-                                        <TimeInput
+                                        {/* <TimeInput
                                             className='w-28'
                                             label="Giờ bắt đầu"
                                             hourCycle={24}
@@ -385,7 +391,17 @@ const HouseSitting = () => {
                                             hourCycle={24}
                                             granularity="minute"
                                             value={new Time(parseTimeString(selectedService.endTime).hour, parseTimeString(selectedService.endTime).minute)}
-                                        />
+                                        /> */}
+
+                                        <Select
+                                            className="max-w-xs"
+                                            placeholder="Chọn giờ cho dịch vụ này"
+                                        >
+                                            {slots.map((slot) => (
+                                                <SelectItem key={slot.id}>{slot.name}</SelectItem>
+                                            ))}
+                                        </Select>
+
                                     </div>
                                     <FontAwesomeIcon icon={faTrash} onClick={() => removeService(selectedService.id)} className='cursor-pointer' />
                                 </div>
