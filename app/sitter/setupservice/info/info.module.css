@@ -1,9 +1,9 @@
 .h3 {
-  @apply text-[16px];
+  @apply text-[18px];
 }
 
 .h2 {
-  @apply text-xl font-semibold;
+  @apply text-[23px] font-semibold;
 }
 
 .location {
@@ -16,12 +16,12 @@
 /* Styles for the input field to make it look like a typical search bar */
 .searchInput {
   width: 100%;
-  padding: 10px;
-  border: 1px solid #ccc;
+  height: 30px;
   border-radius: 8px;
   font-size: 16px;
   box-sizing: border-box;
   outline: none;
+  background-color: transparent;
 }
 
 .searchInput:focus {

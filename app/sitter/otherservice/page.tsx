@@ -1,8 +1,8 @@
 'use client'
 
-import { Service, UserLocal } from '@/app/constants/types/homeType';
+import { Service, Slot, UserLocal } from '@/app/constants/types/homeType';
 import axiosClient from '@/app/lib/axiosClient';
-import { Button, Input, Select, SelectItem, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, TimeInputValue } from '@nextui-org/react';
+import { Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Select, SelectItem, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, TimeInput, TimeInputValue, useDisclosure } from '@nextui-org/react';
 import { useParams } from 'next/navigation'
 import React, { useCallback, useEffect, useState } from 'react'
 import styles from "./otherservice.module.css"
@@ -11,6 +11,7 @@ import { faCircleInfo, faPencil, faPlus, faTrash } from '@fortawesome/free-solid
 import Loading from '@/app/components/Loading';
 import { toast } from 'react-toastify';
 import { v4 as uuidv4 } from 'uuid';
+import { Time } from '@internationalized/date';
 
 const OtherService = () => {
     // const router = useRouter();
@@ -32,7 +33,8 @@ const OtherService = () => {
         isDeleted: false,
         serviceId: ''
     }]);
-
+    const [slots, setSlots] = useState<Slot[]>([])
+    const { isOpen, onOpen, onOpenChange } = useDisclosure();
     //check valid
     // const [isPriceValid, setIsPriceValid] = useState(false);
     const types = [
@@ -67,6 +69,23 @@ const OtherService = () => {
     useEffect(() => {
         fetchChildeService()
     }, [fetchChildeService])
+
+    const fetchSlot = useCallback(() => {
+        try {
+            axiosClient(`booking-slots?userId=${userId}`)
+                .then((res) => {
+                    setSlots(res.data)
+                })
+                .catch((e) => {
+                    console.log(e);
+                })
+        } catch (error) {
+
+        }
+    }, [userId])
+    useEffect(() => {
+        fetchSlot()
+    }, [fetchSlot])
 
     useEffect(() => {
         setIsLoading(true)
@@ -185,9 +204,119 @@ const OtherService = () => {
         );
     };
 
+
+    //slot manage
+    const addNewSlot = () => {
+        const newSlot: Slot = {
+            id: uuidv4(),
+            name: "",
+            startTime: "",
+            endTime: "",
+            duration: 0,
+            isNew: true,
+            isDeleted: false,
+        };
+
+        setSlots((prevState) => [...prevState, newSlot]);
+    };
+
+    const markAsDeletedSlot = (id: string) => {
+        setAdditionServices((prev) =>
+            prev.map((service) =>
+                service.id === id
+                    ? { ...service, isDeleted: true }
+                    : service
+            )
+        );
+    };
+    const handleInputSlotChange = (id: string, field: string, value: TimeInputValue | string) => {
+        const today = new Date(); // Get today's date
+        const currentDate = today.toISOString().split('T')[0];
+        if (field === "startTime" || field === "endTime") {
+            if (typeof value === "object" && "hour" in value && "minute" in value) {
+                const formattedTime = `${value.hour.toString().padStart(2, '0')}:${value.minute.toString().padStart(2, '0')}`;
+                const isoTime = `${currentDate}T${formattedTime}:00.000Z`;
+                setSlots((prev) =>
+                    prev.map((slot) => {
+                        if (slot.id === id) {
+                            const updatedSlot = { ...slot, [field]: isoTime };
+
+                            if (field === "endTime" && updatedSlot.startTime) {
+                                // Calculate duration if both startTime and endTime are set
+                                const start = new Date(updatedSlot.startTime);
+                                const end = new Date(isoTime);
+                                const duration = Math.round((end.getTime() - start.getTime()) / 60000); // Convert milliseconds to minutes
+
+                                if (duration >= 0) {
+                                    updatedSlot.duration = duration;
+                                } else {
+                                    toast.error("Giờ kết thúc phải sau giờ bắt đầu");
+                                }
+                            }
+                            return updatedSlot;
+                        }
+                        return slot;
+                    })
+                );
+                return;
+            } else {
+                toast.error("Invalid time value");
+                return;
+            }
+        }
+
+        setSlots((prev) =>
+            prev.map((slot) =>
+                slot.id === id
+                    ? { ...slot, [field]: value, isNew: slot.isNew ?? false }
+                    : slot
+            )
+        );
+    }
+
+    const handleUpdateSlot = async () => {
+        onOpenChange()
+        // Separate child services by their state
+        const toAdd = slots.filter((slot) => slot.isNew);
+        const toUpdate = slots.filter((slot) => !slot.isNew && !slot.isDeleted);
+        const toDelete = slots.filter((slot) => slot.isDeleted);
+
+        // Perform API calls
+        const addPromises = toAdd.map((slot) =>
+            axiosClient.post("booking-slots", {
+                ...slot,
+                id: undefined, // Remove ID for new services
+            })
+        );
+        const updatePromises = toUpdate.map((slot) =>
+            axiosClient.put(`booking-slots/${slot.id}`, slot)
+        );
+        const deletePromises = toDelete.map((slot) =>
+            axiosClient.delete(`booking-slots/${slot.id}`)
+        );
+
+        // Execute all operations concurrently
+        await Promise.all([...addPromises, ...updatePromises, ...deletePromises]);
+
+        // Refetch the updated list from the server
+        fetchChildeService();
+
+        toast.success("Cập nhật slot thành công");
+    }
+
+    const parseTimeString = (timeString: string | undefined) => {
+        if (!timeString || !timeString.includes(':')) {
+            return new Time(0, 0); // Default to 00:00 if invalid
+        }
+        const [hour, minute] = timeString.split(':').map(Number);
+        return new Time(hour || 0, minute || 0);
+    };
+
+
+
     return (
         <div className='flex flex-col justify-center items-center my-10 text-black'>
-            <div className='w-[800px] flex flex-col gap-5'>
+            <div className='w-[1000px] flex flex-col gap-5'>
                 <h1 className={styles.title}>Trông tại nhà</h1>
                 <h2>Hãy thêm dịch vụ cho trông tại nhà</h2>
                 <div className='flex bg-[#F3F5F7] p-5 rounded-2xl gap-2'>
@@ -197,41 +326,12 @@ const OtherService = () => {
 
                 <div>
                     <h1 className={styles.title}>Dịch vụ hiện có</h1>
-                    {/* <div className="flex flex-col gap-6 p-6 bg-gradient-to-r from-blue-50 via-white to-blue-50 rounded-md shadow-md my-3">
-                        {additionServices.filter((childService) => !childService.isDeleted).map((childService: Service) => (
-                            <div
-                                className="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-md shadow-sm gap-5"
-                                key={childService.id}
-                            >
-                                <Input
-                                    label="Tên dịch vụ"
-                                    value={childService.name}
-                                    onChange={(e) =>
-                                        handleInputChildChange(childService.id, 'name', e.target.value)
-                                    }
-                                />
-                                <Input
-                                    label="Tên dịch vụ"
-                                    value={childService.name}
-                                />
-                                <Select className="min-h-full max-w-20">
-                                    {types.map((animal) => (
-                                        <SelectItem key={animal.key}>{animal.label}</SelectItem>
-                                    ))}
-                                </Select>
-                                <FontAwesomeIcon icon={faTrash} onClick={() => markAsDeleted(childService.id)} className='cursor-pointer' />
-                            </div>
-                        ))}
-                        <Button className="flex items-center justify-center p-4 bg-white border border-gray-200 rounded-md shadow-sm gap-2" onClick={addNewChildService}>
-                            <FontAwesomeIcon icon={faPlus} /> Tạo thêm khung giờ
-                        </Button>
-                    </div> */}
-
+                    <h2>Nếu bạn chưa có slot, <span onClick={onOpen} className='underline cursor-pointer'>thêm tại đây</span></h2>
                     <Table aria-label="Example static collection table"
                         className='mt-3'
                         bottomContent={
                             <Button className="flex items-center justify-center p-4 bg-white border border-gray-200 rounded-md shadow-sm gap-2" onClick={addNewChildService}>
-                                <FontAwesomeIcon icon={faPlus} /> Tạo thêm khung giờ
+                                <FontAwesomeIcon icon={faPlus} /> Tạo thêm dịch vụ
                             </Button>
                         }>
                         <TableHeader>
@@ -239,6 +339,7 @@ const OtherService = () => {
                             <TableColumn>Giá</TableColumn>
                             <TableColumn>Thời gian/ lần</TableColumn>
                             <TableColumn>Loại</TableColumn>
+                            <TableColumn>Slot</TableColumn>
                             <TableColumn> </TableColumn>
                         </TableHeader>
                         <TableBody className='mt-3'>
@@ -256,9 +357,13 @@ const OtherService = () => {
                                         <Input
                                             type='number'
                                             className='no-spinner'
+
                                             value={additionService.price.toString()}
                                             onChange={(e) =>
                                                 handleInputChildChange(additionService.id, 'price', e.target.value)
+                                            }
+                                            endContent={
+                                                <p>đ</p>
                                             }
                                         />
                                     </TableCell>
@@ -283,6 +388,13 @@ const OtherService = () => {
                                         </Select>
                                     </TableCell>
                                     <TableCell className=''>
+                                        <Select className="min-h-full max-w-20">
+                                            {slots.map((slot: Slot) => (
+                                                <SelectItem key={slot.id}>{slot.name}</SelectItem>
+                                            ))}
+                                        </Select>
+                                    </TableCell>
+                                    <TableCell className=''>
                                         <FontAwesomeIcon icon={faTrash} onClick={() => markAsDeleted(additionService.id)} className='cursor-pointer' />
                                     </TableCell>
                                 </TableRow>
@@ -300,6 +412,76 @@ const OtherService = () => {
                     </Button>
                 </div>
             </div>
+
+            <Modal isOpen={isOpen} onOpenChange={onOpenChange} isDismissable={false} size='3xl'>
+                <ModalContent>
+                    {(onClose) => (
+                        <>
+                            <ModalHeader className="flex flex-col gap-1">Danh sách slot hiện tại</ModalHeader>
+                            <ModalBody>
+                                <Table aria-label="Example static collection table"
+                                    className='mt-3'
+                                    bottomContent={
+                                        <Button className="flex items-center justify-center p-4 bg-white border border-gray-200 rounded-md shadow-sm gap-2" onClick={addNewSlot}>
+                                            <FontAwesomeIcon icon={faPlus} /> Tạo thêm slot
+                                        </Button>
+                                    }>
+                                    <TableHeader>
+                                        <TableColumn aria-label='he'>Tên slot</TableColumn>
+                                        <TableColumn>Thời gian slot bắt đầu</TableColumn>
+                                        <TableColumn>Thời gian slot kết thúc</TableColumn>
+                                        <TableColumn> </TableColumn>
+                                    </TableHeader>
+                                    <TableBody className='mt-3'>
+                                        {slots.map((slot: Slot) => (
+                                            <TableRow key={slot.id} >
+                                                <TableCell className='pl-0'>
+                                                    <Input
+                                                        aria-label='name'
+                                                        value={slot.name}
+                                                        onChange={(e) =>
+                                                            handleInputSlotChange(slot.id, 'name', e.target.value)
+                                                        }
+                                                    />
+                                                </TableCell>
+                                                <TableCell className='w-28'>
+                                                    <TimeInput
+                                                        aria-label='starttime'
+                                                        hourCycle={24}
+                                                        value={parseTimeString(slot.startTime)}
+                                                        onChange={(e) => handleInputSlotChange(slot.id, 'startTime', e)}
+                                                    />
+                                                </TableCell>
+                                                <TableCell className='w-28'>
+                                                    <TimeInput
+                                                        aria-label='endtime'
+                                                        hourCycle={24}
+                                                        value={parseTimeString(slot.endTime)}
+                                                        onChange={(e) => handleInputSlotChange(slot.id, 'endTime', e)}
+                                                    />
+                                                </TableCell>
+                                                <TableCell className=''>
+                                                    <FontAwesomeIcon icon={faTrash} className='cursor-pointer' onClick={() => markAsDeletedSlot(slot.id)} />
+                                                </TableCell>
+                                            </TableRow>
+
+                                        ))}
+
+                                    </TableBody>
+                                </Table>
+                            </ModalBody>
+                            <ModalFooter>
+                                <Button color="danger" variant="light" onPress={onClose}>
+                                    Đóng
+                                </Button>
+                                <Button color="primary" onPress={handleUpdateSlot}>
+                                    Cập nhật
+                                </Button>
+                            </ModalFooter>
+                        </>
+                    )}
+                </ModalContent>
+            </Modal>
         </div>
     )
 }

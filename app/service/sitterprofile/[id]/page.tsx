@@ -1,8 +1,8 @@
 'use client'
 
-import { faCat, faCircle, faShieldCat, faStar } from '@fortawesome/free-solid-svg-icons';
+import { faCat, faCircle, faFilePdf, faShieldCat, faStar } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Avatar, Button, Calendar, DateValue } from '@nextui-org/react';
+import { Avatar, Button, Calendar, DateValue, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, useDisclosure } from '@nextui-org/react';
 // import Image from 'next/image';
 import React, { useEffect, useState } from 'react'
 import { Icon } from '@iconify/react';
@@ -12,7 +12,7 @@ import 'yet-another-react-lightbox/styles.css';
 import PhotoGallery from '@/app/components/PhotoGallery';
 import axiosClient from '@/app/lib/axiosClient';
 import { useParams } from 'next/navigation';
-import { CatSitter, Service } from '@/app/constants/types/homeType';
+import { CatSitter, Certificate, Service } from '@/app/constants/types/homeType';
 import Loading from '@/app/components/Loading';
 import Image from 'next/image';
 
@@ -28,6 +28,10 @@ const Page = () => {
     const [additionServices, setAdditionServices] = useState<Service[]>([])
     const [childService, setChildService] = useState<Service[]>([])
     const [skills, setSkills] = useState([])
+    const [certificates, setCertificates] = useState<Certificate[]>([])
+    const [selectedPdf, setSelectedPdf] = useState<string>();
+    const { isOpen, onOpen, onOpenChange } = useDisclosure();
+
     // check user
     useEffect(() => {
         if (typeof window !== 'undefined') {
@@ -59,11 +63,12 @@ const Page = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [sitterProfileRes, servicesRes, childServiceRes, additionServiceRes] = await Promise.allSettled([
+                const [sitterProfileRes, servicesRes, childServiceRes, additionServiceRes, certificateRes] = await Promise.allSettled([
                     axiosClient(`sitter-profiles/sitter/${params.id}`),
                     axiosClient(`services/sitter/${params.id}/type?serviceType=MAIN_SERVICE&status=ACTIVE`),
                     axiosClient(`services/sitter/${params.id}/type?serviceType=CHILD_SERVICE&status=ACTIVE`),
                     axiosClient(`services/sitter/${params.id}/type?serviceType=ADDITION_SERVICE&status=ACTIVE`),
+                    axiosClient(`certificates/user/${params.id}`),
                 ]);
 
                 // Handle sitter profile response
@@ -90,6 +95,12 @@ const Page = () => {
                     setAdditionServices(additionServiceRes.value.data);
                 } else {
                     console.error("Failed to fetch services:", additionServiceRes.reason);
+                }
+
+                if (certificateRes.status === "fulfilled") {
+                    setCertificates(certificateRes.value.data);
+                } else {
+                    console.error("Failed to fetch services:", certificateRes.reason);
                 }
 
             } catch (error) {
@@ -172,7 +183,6 @@ const Page = () => {
                             <div className='text-secondary font-semibold'>
                                 <h1 className='text-text text-xl font-semibold'>Đặt dịch vụ</h1>
                                 <p className={styles.p}>Dịch vụ chăm sóc mèo tại nhà của bạn</p>
-                                {/* <p className={styles.p}>Giá <span className='text-[#2B764F]'>100.000đ</span> <span className='font-semibold'>mỗi đêm</span></p> */}
                             </div>
                         </div>
                         <Button as={Link} href={isUser ? `/service/housesitting/${sitterProfile?.sitterId}` : `/login`} className={styles.button}>Đặt lịch</Button>
@@ -219,7 +229,7 @@ const Page = () => {
                         {childService && childService.map((ser) => (
                             <div key={ser.id} className='flex text-xl items-center gap-3'>
                                 <FontAwesomeIcon icon={faCat} className="text-xs" size='2xs' />
-                                <div className={styles.time}>{ser.startTime.split(":").slice(0, 2).join(":")} giờ - {ser.endTime.split(":").slice(0, 2).join(":")} giờ: </div>
+                                <div className={styles.time}>{ser.startTime.split(":").slice(0, 2).join(":")} - {ser.endTime.split(":").slice(0, 2).join(":")} : </div>
                                 <p className={styles.childService}>{ser.name}</p>
                             </div>
                         ))}
@@ -281,7 +291,61 @@ const Page = () => {
 
                 <h1 className='mt-10 text-xl font-semibold'>An toàn, tin cậy & môi trường</h1>
                 <p className={styles.p}>{sitterProfile?.environment}</p>
+                <div className='flex overflow-x-auto gap-2'>
+                    {sitterProfile?.profilePictures.map((photo, index) => (
+                        <div key={index} className="relative w-36 h-36">
+                            <Avatar className="w-full h-full" radius="sm" src={photo.imageUrl} />
+                        </div>
+                    ))}
+                </div>
+                <h1 className='mt-10 text-xl font-semibold'>Chứng chỉ</h1>
+                <div className='flex overflow-x-auto gap-2'>
+                    {certificates.map((certificate, index) => (
+                        <div key={index} className="relative w-36 h-36">
+                            {certificate.certificateType === "IMAGE" ? (
+                                <Avatar
+                                    src={certificate.certificateUrl}
+                                    alt={`Certificate ${index + 1}`}
+                                    className="w-full h-full object-cover rounded-md"
+                                />
+                            ) : (
+                                <div
+                                    onClick={() => {
+                                        setSelectedPdf(certificate.certificateUrl!);
+                                        onOpen()
+
+                                    }}
+                                    className="flex flex-col items-center justify-center w-full h-full bg-gray-200 rounded-md"
+                                >
+                                    <FontAwesomeIcon icon={faFilePdf} size="2xl" />
+                                    <p className="text-center text-xs mt-2">{certificate.certificateName}</p>
+                                </div>
+                            )}
+                        </div>
+                    ))}
+                </div>
             </div>
+            <Modal isOpen={isOpen} onOpenChange={onOpenChange} size='5xl' className='z-[50] h-[800px] w-[1500px]'>
+                <ModalContent>
+                    {(onClose) => (
+                        <>
+                            <ModalHeader className="flex flex-col gap-1">Chứng chỉ</ModalHeader>
+                            <ModalBody>
+                                <iframe
+                                    src={selectedPdf}
+                                    title="PDF Viewer"
+                                    className="h-full"
+                                ></iframe>
+                            </ModalBody>
+                            <ModalFooter>
+                                <Button color="danger" variant="light" onPress={onClose}>
+                                    Đóng
+                                </Button>
+                            </ModalFooter>
+                        </>
+                    )}
+                </ModalContent>
+            </Modal>
         </div>
     )
 }

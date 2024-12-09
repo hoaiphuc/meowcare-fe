@@ -385,3 +385,27 @@ export type RequestWithdrawal = {
   processStatus: string;
   createAt: string;
 };
+
+export type Certificate = {
+  id: string;
+  sitterProfileId: string;
+  certificateType: string;
+  certificateName: string;
+  institutionName: string;
+  issueDate: Date;
+  expiryDate: Date;
+  certificateUrl: string;
+  description: string;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export type Slot = {
+  id: string;
+  name: string;
+  duration: number;
+  startTime: string;
+  endTime: string;
+  isNew: boolean;
+  isDeleted: boolean;
+};
