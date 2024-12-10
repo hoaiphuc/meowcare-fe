@@ -169,9 +169,28 @@ const OtherService = () => {
             const toAdd = additionServices.filter((service) => service.isNew && !service.isDeleted);
             const toUpdate = additionServices.filter((service) => !service.isNew && !service.isDeleted);
             const toDelete = additionServices.filter((service) => !service.isNew && service.isDeleted);
+            // Handle new services
+            const createdServices = await Promise.all(
+                toAdd.map(async (service) => {
+                    const response = await axiosClient.post("services", {
+                        ...service,
+                        id: undefined, // Remove ID for new services
+                    });
+                    return { ...service, id: response.data.id }; // Update the service with the returned ID
+                })
+            );
+
+            // Update the state with newly created services (to include their new IDs)
+            setAdditionServices((prevServices) =>
+                prevServices.map((service) => {
+                    const createdService = createdServices.find((created) => created.name === service.name);
+                    return createdService ? { ...service, id: createdService.id } : service;
+                })
+            );
 
             // Handle slot updates
-            const slotPromises = additionServices.map((service) => {
+            const allServices = [...toUpdate, ...createdServices];
+            const slotPromises = allServices.map((service) => {
                 if (service.slots) {
                     // Check if any slot has changed
                     const assignSlots = service.slots.filter(
@@ -198,12 +217,6 @@ const OtherService = () => {
             });
 
             // Perform API calls
-            const addPromises = toAdd.map((service) =>
-                axiosClient.post("services", {
-                    ...service,
-                    id: undefined, // Remove ID for new services
-                })
-            );
             const updatePromises = toUpdate.map((service) =>
                 axiosClient.put(`services/${service.id}`, service)
             );
@@ -213,7 +226,6 @@ const OtherService = () => {
 
             // Execute all operations concurrently
             await Promise.all([
-                ...addPromises,
                 ...updatePromises,
                 ...deletePromises,
                 ...slotPromises.filter(Boolean), // Remove null entries
@@ -277,7 +289,8 @@ const OtherService = () => {
             isBasicService: false,
             isNew: true,
             isDeleted: false,
-            serviceId: ''
+            serviceId: '',
+            slots: slots,
         };
 
         setAdditionServices((prevState) => [...prevState, newService]);
@@ -455,10 +468,10 @@ const OtherService = () => {
                         aria-label="Services Accordion"
                         selectionMode="multiple"
                     >
-                        {additionServices.map((additionService: Service) => (
+                        {additionServices.filter((service) => !service.isDeleted).map((additionService: Service) => (
                             <AccordionItem
                                 key={additionService.id}
-                                title={additionService.name || "Unnamed Service"}
+                                title={additionService.name || "Chưa có tên"}
                                 subtitle={`${additionService.price.toLocaleString("de")}đ`}
                                 startContent={
                                     <Avatar

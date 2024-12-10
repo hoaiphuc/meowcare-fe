@@ -23,14 +23,10 @@ const Contact: React.FC = () => {
       >
         <div style={{ textAlign: "center", marginBottom: "20px" }}>
           <Image
-            src="/meow.png" // Thay đường dẫn này bằng đường dẫn tới logo của bạn
+            src="/meow.png"
             alt="Logo"
-            style={{
-              maxWidth: "150px",
-              height: "auto",
-              display: "block", // Căn giữa theo chiều ngang
-              margin: "0 auto", // Căn giữa theo chiều ngang khi dùng display: block
-            }}
+            width={150}
+            height={150}
           />
         </div>
         <h1

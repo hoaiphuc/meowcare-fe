@@ -361,7 +361,7 @@ const ServiceDetail = () => {
                                     />
                                 </div>
                                 <Input
-                                    label="Tên hoạt động"
+                                    label="Tên công việc"
                                     value={childService.name}
                                     onChange={(e) =>
                                         handleInputChildChange(childService.id, 'name', e.target.value)
