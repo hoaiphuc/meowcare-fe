@@ -7,7 +7,7 @@ import CatSitterSkill from '@/app/lib/CatSitterSkill.json'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCamera, faCheck, faFilePdf, faXmark } from '@fortawesome/free-solid-svg-icons'
 import axiosClient from '@/app/lib/axiosClient'
-import { CatSitter, Certificate, UserLocal } from '@/app/constants/types/homeType'
+import { CatSitter, Certificate, ProfilePicture, UserLocal } from '@/app/constants/types/homeType'
 import { useRouter } from 'next/navigation'
 import "leaflet/dist/leaflet.css";
 import useGeoapify from '@/app/hooks/useGeoapify';
@@ -42,12 +42,24 @@ const Info = () => {
     const geoSuggestions = useGeoapify(query);
     const [showSuggestions, setShowSuggestions] = useState<boolean>(false);
     const hiddenFileInput = useRef<HTMLInputElement>(null);
+    const hiddenImageInput = useRef<HTMLInputElement>(null);
+    const hiddenCargoInput = useRef<HTMLInputElement>(null);
     const [certificates, setCertificates] = useState<Certificate[]>([])
     const [selectedPdf, setSelectedPdf] = useState<string>();
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
     //for update certificates
     const [removeList, setRemoveList] = useState<Certificate[]>([]);
     const [addList, setAddList] = useState<Certificate[]>([]);
+    const [selectPicture, setSelectPicture] = useState<ProfilePicture[]>([
+        //     {
+        //     id: uuidv4(),
+        //     imageName: "",
+        //     imageUrl: "",
+        //     isCargoProfilePicture: true,
+        //     isNew: true,
+        //     isDeleted: false,
+        // }
+    ])
 
     const getUserFromStorage = () => {
         if (typeof window !== "undefined") {
@@ -85,6 +97,9 @@ const Info = () => {
             axiosClient(`sitter-profiles/sitter/${userId}`)
                 .then((res) => {
                     setSitterData(res.data)
+                    if (res.data.profilePictures) {
+                        setSelectPicture(res.data.profilePictures)
+                    }
                     if (res.data.location) {
                         setAddress(res.data.location);
                     }
@@ -245,10 +260,28 @@ const Info = () => {
                 setAddList([]);
             }
 
+            //profile picture
+            const toAdd = selectPicture.filter((picture) => picture.isNew && !picture.isDeleted);
+            const toDelete = selectPicture.filter((picture) => !picture.isNew && picture.isDeleted);
+
             const updatedSitterData = {
                 ...sitterData,
                 location: address, // Include address as location
             };
+
+            const addPromises = toAdd.map((photo) =>
+                axiosClient.put(`sitter-profiles/${photo.id}/profile-picture/`)
+            );
+
+            const deletePromises = toDelete.map((photo) =>
+                axiosClient.delete(`sitter-profiles/${photo.id}/profile-picture`)
+            );
+
+            // Execute all operations concurrently
+            await Promise.all([
+                ...addPromises,
+                ...deletePromises,
+            ]);
 
             axiosClient.put(`sitter-profiles/${sitterData?.id}`, updatedSitterData)
                 .then(() => {
@@ -324,6 +357,52 @@ const Info = () => {
         }
     };
 
+
+    //======================================= picture profile update ==================================
+    //image upload
+    const handleImageClick = () => {
+        if (hiddenImageInput.current) {
+            hiddenImageInput.current.click();
+        }
+    };
+
+    const handleCargoClick = () => {
+        if (hiddenCargoInput.current) {
+            hiddenCargoInput.current.click();
+        }
+    };
+
+    const handlePictureChange = (event: React.ChangeEvent<HTMLInputElement>, isCargo: boolean) => {
+        if (event.target.files) {
+            console.log(event.target);
+
+            const filesArray = Array.from(event.target.files);
+            const newPictures = filesArray.map((file) => ({
+                id: uuidv4(),
+                imageUrl: URL.createObjectURL(file),
+                isCargoProfilePicture: isCargo,
+                isNew: true,
+                isDeleted: false
+            }));
+            setSelectPicture((prevImages) => [...prevImages, ...newPictures]);
+        }
+    };
+
+    const markAsDeleted = (id?: string) => {
+        if (!id) {
+            console.error("ID is undefined");
+            return; // Exit if the ID is undefined
+        }
+
+        setSelectPicture((prev) =>
+            prev.map((pic) =>
+                pic.id === id
+                    ? { ...pic, isDeleted: true }
+                    : pic
+            )
+        );
+    };
+
     return (
         <div className='flex items-center justify-center my-10'>
             <div className='flex flex-col gap-5 w-[754px]'>
@@ -336,12 +415,28 @@ const Info = () => {
 
                 <div className='mt-5'>
                     <h2 className={styles.h2}>Thêm ảnh cho hồ sơ của bạn</h2>
-                    <div className='flex overflow-x-auto'>
-                        {sitterData?.profilePictures.map((photo, index) => (
-                            <div key={index} className="relative w-36 h-36">
+                    <div className='flex overflow-x-auto gap-2'>
+                        <button
+                            className="flex flex-col justify-center items-center p-3 bg-pink-100 border border-pink-300 rounded-md text-center w-36 h-36"
+                            onClick={handleImageClick}
+                        >
+                            <FontAwesomeIcon icon={faCamera} className='text-maincolor' size='2xl' />
+                            <p>Thêm hình ảnh</p>
+                            <p>{`${selectPicture.filter((e) => e.isCargoProfilePicture === false && !e.isDeleted).length}/5`}</p>
+                        </button>
+                        <input
+                            type="file"
+                            accept='image/*'
+                            ref={hiddenImageInput}
+                            onChange={(e) => handlePictureChange(e, false)}
+                            style={{ display: 'none' }}
+                            multiple
+                        />
+                        {selectPicture && selectPicture.filter((picture) => picture.isCargoProfilePicture === false && !picture.isDeleted).map((photo) => (
+                            <div key={photo.id} className="relative w-36 h-36">
                                 <Avatar className="w-full h-full" radius="sm" src={photo.imageUrl} />
                                 <button
-                                    // onClick={() => handleRemovePhoto(index)}
+                                    onClick={() => markAsDeleted(photo.id)}
                                     className="absolute top-0 right-0 p-1 rounded-full w-8 h-8 bg-black bg-opacity-50 text-white"
                                 >
                                     ✕
@@ -410,28 +505,36 @@ const Info = () => {
                     </div>
                 </div>
 
+                {/* Cargo  */}
                 <div className='mt-5 flex flex-col gap-2'>
                     <h2 className={styles.h2}>Môi trường và chuồng cho mèo</h2>
                     <h3 className={styles.h3}>Mô tả</h3>
                     <Textarea placeholder="Hãy cho mọi người biết về môi trường sống và chuồng nuôi" value={sitterData?.environment} name='environment' onChange={handleInputChange} />
                     <h3 className={styles.h3}>Số lượng mèo bạn có thể chăm sóc</h3>
                     <Input placeholder="Số lượng mèo có thể chăm sóc" value={sitterData?.maximumQuantity.toString()} name='maximumQuantity' onChange={handleInputChange} />
-                    <h3 className={styles.h3}>Hình ảnh mỗi trường và chuồng, lồng</h3>
+                    <h3 className={styles.h3}>Hình ảnh môi trường và chuồng, lồng</h3>
                     <div className='flex overflow-x-auto gap-2'>
                         <button
                             className="flex flex-col justify-center items-center p-3 bg-pink-100 border border-pink-300 rounded-md text-center w-36 h-36"
-                        // onClick={handleImageClick}
-
+                            onClick={handleCargoClick}
                         >
                             <FontAwesomeIcon icon={faCamera} className='text-maincolor' size='2xl' />
                             <p>Thêm hình ảnh</p>
-                            {/* <p>{`${selectTaskEvidence.filter((e) => e.evidenceType === 'PHOTO').length}/3`}</p> */}
+                            <p>{`${selectPicture.filter((e) => e.isCargoProfilePicture && !e.isDeleted).length}/5`}</p>
                         </button>
-                        {sitterData?.profilePictures.map((photo, index) => (
-                            <div key={index} className="relative w-36 h-36">
+                        <input
+                            type="file"
+                            accept='image/*'
+                            ref={hiddenCargoInput}
+                            onChange={(e) => handlePictureChange(e, true)}
+                            style={{ display: 'none' }}
+                            multiple
+                        />
+                        {selectPicture.filter((picture) => picture.isCargoProfilePicture && !picture.isDeleted).map((photo) => (
+                            <div key={photo.id} className="relative w-36 h-36">
                                 <Avatar className="w-full h-full" radius="sm" src={photo.imageUrl} />
                                 <button
-                                    // onClick={() => handleRemovePhoto(index)}
+                                    onClick={() => markAsDeleted(photo.id)}
                                     className="absolute top-0 right-0 p-1 rounded-full w-8 h-8 bg-black bg-opacity-50 text-white"
                                 >
                                     ✕
