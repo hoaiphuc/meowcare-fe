@@ -3,6 +3,7 @@
 import { faFacebookF, faInstagram, faTwitter } from '@fortawesome/free-brands-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Image from 'next/image';
+import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import React from 'react'
 
@@ -22,26 +23,28 @@ const Footer = () => {
 
     const shouldHideFirstFooter = noFooter.some((path) => pathname.startsWith(path));
     return (
-        <div className={shouldHideFirstFooter ? `` : `mt-20`}>
-            <div className={shouldHideFirstFooter ? `hidden` : `grid grid-cols-3 px-20 py-10`}>
+        <div className={shouldHideFirstFooter ? `` : ``}>
+            <div className={shouldHideFirstFooter ? `hidden` : `grid grid-cols-4 px-20 py-10`}>
                 <div>
-                    <h1 className="text-3xl font-semibold">Sơ lược về MeowCare</h1>
-                    <div className="text-2xl font-semibold text-[#666089] gap-2 mt-5 flex flex-col">
+                    <h1 className="text-2xl font-semibold">Sơ lược về MeowCare</h1>
+                    <div className="text-xl font-semibold text-[#666089] gap-2 mt-5 flex flex-col ">
                         <p>Về chúng tôi</p>
-                        <p>Q&A và cộng đồng</p>
+                        <Link href="/termsofservice" className='hover:underline'>Điều khoản</Link>
                         <p>Cửa hàng MeowCare</p>
                         <p>Báo cáo lỗi hệ thống</p>
                     </div>
                 </div>
                 <div>
-                    <h1 className="text-3xl font-semibold">Thông tin liên hệ</h1>
-                    <div className="text-2xl font-semibold text-[#666089] gap-2 mt-5 flex flex-col">
+                    <h1 className="text-2xl font-semibold">Thông tin liên hệ</h1>
+                    <div className="text-xl font-semibold text-[#666089] gap-2 mt-5 flex flex-col">
                         <p>SĐT: (+84) 905038520</p>
                         <p>Email: MeowCare@gmail.com</p>
                     </div>
                 </div>
                 <div>
                     <Image src="/meow.png" alt="" width={240} height={110} />
+                </div>
+                <div>
                     <div className="flex gap-10 mt-10">
                         <FontAwesomeIcon icon={faFacebookF} className="size-10 bg-white rounded-full" />
                         <FontAwesomeIcon icon={faInstagram} className="size-10 text-[#FF5B2D]" />

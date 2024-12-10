@@ -1,7 +1,7 @@
 'use client'
 
 import { Avatar, Button, Chip, DatePicker, DateValue, Input, Modal, ModalBody, ModalContent, ModalFooter, Radio, RadioGroup, Select, SelectItem, Textarea, useDisclosure } from '@nextui-org/react'
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import styles from './housesitting.module.css'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useParams, useRouter } from 'next/navigation'
@@ -10,15 +10,14 @@ import { CatSitter, PetProfile, Service, Slot, UserType } from '@/app/constants/
 import Image from 'next/image'
 import { toast } from 'react-toastify'
 import { today, getLocalTimeZone } from '@internationalized/date';
-import { faPlus, faTrash } from '@fortawesome/free-solid-svg-icons'
+import { faMinus, faPlus, faTrash } from '@fortawesome/free-solid-svg-icons'
 import { v4 as uuidv4 } from 'uuid';
 
 interface BookingDetail {
     quantity: number;
     petProfileId: string;
     serviceId: string;
-    startTime: Date;
-    endTime: Date;
+    bookingSlotId: string;
 }
 
 const HouseSitting = () => {
@@ -38,26 +37,51 @@ const HouseSitting = () => {
     const [sitter, setSitter] = useState<CatSitter>()
     const [paymentMethod, setPaymentMethod] = useState("")
     const [userData, setUserData] = useState<UserType>()
-    const catFoods = [
-        { id: '1', foodName: 'Cá' },
-        { id: '2', foodName: 'Thịt' },
-    ];
-    const [slots, setSlots] = useState<Slot[]>([])
 
     const [userId, setUserId] = useState<string | null>(null);
 
-    useEffect(() => {
-        axiosClient(`sitter-profiles/sitter/${params.id}`)
-            .then((res) => {
-                setSitter(res.data)
-            })
-            .catch(() => { })
+    const fetchData = useCallback(async () => {
+        try {
+            // 1. Fetch all addition services
+            const serviceRes = await axiosClient(`services/sitter/${params.id}/type?serviceType=ADDITION_SERVICE&status=ACTIVE`)
+            const services: Service[] = serviceRes.data;
 
-        axiosClient(`booking-slots?userId=${params.id}`)
-            .then((res) => {
-                setSlots(res.data)
-            })
-            .catch(() => { })
+            const updatedServices = await Promise.all(
+                services.map(async (service) => {
+                    const slotRes = await axiosClient(`/booking-slots/sitter-booking-slots-by-service?sitterId=${params.id}&serviceId=${service.id}&date=${selectedDate}&status=AVAILABLE`);
+                    const slots: Slot[] = slotRes.data;
+
+                    return {
+                        ...service,
+                        slots: slots, // Store slots in the service object
+                    };
+                })
+            )
+            console.log(updatedServices);
+
+            setServices(updatedServices);
+
+        } catch (error) {
+
+        }
+    }, [params.id, selectedDate])
+
+    useEffect(() => {
+        fetchData()
+    }, [fetchData])
+
+    useEffect(() => {
+        try {
+            axiosClient(`sitter-profiles/sitter/${params.id}`)
+                .then((res) => {
+                    setSitter(res.data)
+                })
+                .catch((e) => {
+                    console.log(e);
+                })
+        } catch (error) {
+
+        }
     }, [params.id])
 
     useEffect(() => {
@@ -100,19 +124,19 @@ const HouseSitting = () => {
     }
 
     //get addition service
-    useEffect(() => {
-        try {
-            axiosClient(`services/sitter/${params.id}/type?serviceType=ADDITION_SERVICE&status=ACTIVE`)
-                .then((res) => {
-                    setServices(res.data);
-                })
-                .catch((e) => {
-                    console.log(e);
-                })
-        } catch (error) {
-            console.log(error);
-        }
-    }, [params.id])
+    // useEffect(() => {
+    //     try {
+    //         axiosClient(`services/sitter/${params.id}/type?serviceType=ADDITION_SERVICE&status=ACTIVE`)
+    //             .then((res) => {
+    //                 setServices(res.data);
+    //             })
+    //             .catch((e) => {
+    //                 console.log(e);
+    //             })
+    //     } catch (error) {
+    //         console.log(error);
+    //     }
+    // }, [params.id])
 
     //get pets
     useEffect(() => {
@@ -155,7 +179,7 @@ const HouseSitting = () => {
         }
 
         if (selectedPet.length < 1) {
-            toast.error("Vui lòng chọn ít nhất 1 bé mèo");
+            toast.error("Vui lòng chọn 1 bé mèo");
             return;
         }
         onOpen();
@@ -169,25 +193,17 @@ const HouseSitting = () => {
             return;
         }
 
-        const baseDate = convertDateValueToDate(selectedDate);
-        const year = baseDate.getFullYear();
-        const month = baseDate.getMonth(); // zero-based
-        const day = baseDate.getDate();
-
         selectedPet.map((petId) => {
             selectedServices.forEach((service) => {
-                const [startHour, startMinute] = service.startTime.split(':').map(Number);
-                const [endHour, endMinute] = service.endTime.split(':').map(Number);
-
-                const startDateTime = new Date(year, month, day, startHour, startMinute);
-                const endDateTime = new Date(year, month, day, endHour, endMinute);
-
+                if (!service.selectedSlot) {
+                    toast.error(`Vui lòng chọn slot cho dịch vụ ${service.name}`);
+                    return; // Skip this service if `selectedSlot` is undefined
+                }
                 bookingDetails.push({
                     quantity: 1,
                     petProfileId: petId,
                     serviceId: service.serviceId,
-                    startTime: startDateTime,
-                    endTime: endDateTime,
+                    bookingSlotId: service.selectedSlot
                 });
             })
         });
@@ -294,7 +310,7 @@ const HouseSitting = () => {
     };
 
 
-    const addNewChildService = () => {
+    const addNewAdditionService = () => {
         const newService: Service = {
             id: uuidv4(),
             name: "",
@@ -309,15 +325,12 @@ const HouseSitting = () => {
             isBasicService: false,
             isNew: true,
             isDeleted: false,
+            slots: [],
+            selectedSlot: "",
         };
 
         setSelectedServices((prevState) => [...prevState, newService]);
     };
-
-    // const parseTimeString = (timeString: string) => {
-    //     const [hour, minute] = timeString.split(':').map(Number);
-    //     return { hour, minute };
-    // };
 
     return (
         <div className='flex flex-col items-center justify-start my-12'>
@@ -326,6 +339,14 @@ const HouseSitting = () => {
                 {/* 1 */}
                 <div className='flex flex-col gap-3 w-[586px]'>
                     <div className='flex flex-col gap-3'>
+                        <h2 className={styles.h2}>Chọn ngày</h2>
+                        <DatePicker
+                            label="Ngày bắt đầu"
+                            minValue={todayDate}
+                            visibleMonths={2}
+                            onChange={(e) => setSelectedDate(e)}
+                        />
+
                         <h2 className={styles.h2}>Chọn dịch vụ</h2>
                         <div className="flex flex-col gap-6 p-6 bg-gradient-to-r from-blue-50 via-white to-blue-50 rounded-md shadow-md my-3">
                             {selectedServices.map((selectedService: Service) => (
@@ -347,7 +368,7 @@ const HouseSitting = () => {
                                                 setSelectedServices((prev) =>
                                                     prev.map((item) =>
                                                         item.id === selectedService.id
-                                                            ? { ...item, serviceId: "", duration: 0, name: "", price: 0 }
+                                                            ? { ...item, serviceId: "", name: "", price: 0 }
                                                             : item
                                                     )
                                                 );
@@ -355,74 +376,91 @@ const HouseSitting = () => {
                                             }
 
                                             const choseService = services.find(service => service.id === e.target.value);
-                                            console.log(choseService);
 
                                             if (choseService) {
                                                 setSelectedServices((prev) =>
                                                     prev.map((item) =>
                                                         item.id === selectedService.id
-                                                            ? { ...item, serviceId: choseService.id, duration: choseService.duration, name: choseService.name, price: choseService.price }
+                                                            ? { ...item, serviceId: choseService.id, name: choseService.name, price: choseService.price, slots: choseService.slots }
                                                             : item
                                                     )
                                                 );
                                             }
                                         }}
                                     >
-                                        {services.map((service) => (
+                                        {services.map((service: Service) => (
                                             <SelectItem key={service.id} value={service.id}>
                                                 {service.name}
                                             </SelectItem>
                                         ))}
                                     </Select>
+
                                     <div className='flex justify-center items-center gap-3'>
-                                        {/* <TimeInput
-                                            className='w-28'
-                                            label="Giờ bắt đầu"
-                                            hourCycle={24}
-                                            granularity="minute"
-                                            value={new Time(parseTimeString(selectedService.startTime).hour, parseTimeString(selectedService.startTime).minute)}
-                                            onChange={(e) => handleInputServiceChange(selectedService.id, 'startTime', e, selectedService.duration)}
-                                        />
-                                        -
-                                        <TimeInput
-                                            className='w-28'
-                                            isDisabled
-                                            label="Giờ kết thúc"
-                                            hourCycle={24}
-                                            granularity="minute"
-                                            value={new Time(parseTimeString(selectedService.endTime).hour, parseTimeString(selectedService.endTime).minute)}
-                                        /> */}
-
                                         <Select
-                                            className="max-w-xs"
-                                            placeholder="Chọn giờ cho dịch vụ này"
-                                        >
-                                            {slots.map((slot) => (
-                                                <SelectItem key={slot.id}>{slot.name}</SelectItem>
-                                            ))}
-                                        </Select>
+                                            aria-label='slot'
+                                            className="w-40"
+                                            variant="bordered"
+                                            placeholder="Giờ diễn ra"
+                                            value={selectedService.selectedSlot}
+                                            onChange={(e) => {
+                                                const selectedSlotId = e.target.value;
+                                                console.log("Selected Slot ID:", selectedSlotId);
 
+                                                setSelectedServices((prevServices) =>
+                                                    prevServices.map((service) =>
+                                                        service.id === selectedService.id
+                                                            ? {
+                                                                ...service,
+                                                                // Store only the ID instead of the entire slot object
+                                                                selectedSlot: selectedSlotId,
+                                                            }
+                                                            : service
+                                                    )
+                                                );
+                                            }}
+                                        >
+                                            {selectedService.slots && selectedService.slots.length > 0 ? (
+                                                selectedService.slots.map((slot) => (
+                                                    <SelectItem
+                                                        key={slot.id}
+                                                        value={slot.id}
+                                                        textValue={`${new Date(slot.startTime).toLocaleTimeString([], {
+                                                            hour: "2-digit",
+                                                            minute: "2-digit",
+                                                            hour12: false,
+                                                        })} - ${new Date(slot.endTime).toLocaleTimeString([], {
+                                                            hour: "2-digit",
+                                                            minute: "2-digit",
+                                                            hour12: false,
+                                                        })}`}
+                                                    >
+                                                        <h1 className="gap-2 flex justify-center items-center">
+                                                            {new Date(slot.startTime).toLocaleTimeString([], {
+                                                                hour: "2-digit",
+                                                                minute: "2-digit",
+                                                                hour12: false,
+                                                            })}
+                                                            <FontAwesomeIcon icon={faMinus} />
+                                                            {new Date(slot.endTime).toLocaleTimeString([], {
+                                                                hour: "2-digit",
+                                                                minute: "2-digit",
+                                                                hour12: false,
+                                                            })}
+                                                        </h1>
+                                                    </SelectItem>
+                                                ))
+                                            ) : (
+                                                <SelectItem isReadOnly>Hiện tại không có slot</SelectItem>
+                                            )}
+                                        </Select>
                                     </div>
                                     <FontAwesomeIcon icon={faTrash} onClick={() => removeService(selectedService.id)} className='cursor-pointer' />
                                 </div>
                             ))}
-                            <Button className="flex items-center justify-center p-4 bg-white border border-gray-200 rounded-md shadow-sm gap-2" onClick={addNewChildService}>
+                            <Button className="flex items-center justify-center p-4 bg-white border border-gray-200 rounded-md shadow-sm gap-2" onClick={addNewAdditionService}>
                                 <FontAwesomeIcon icon={faPlus} />Chọn thêm dịch vụ
                             </Button>
                         </div>
-                        <h2 className={styles.h2}>Chọn ngày</h2>
-                        {/* <DateRangePicker
-                            label="Ngày đặt lịch"
-                            minValue={todayDate}
-                            visibleMonths={2}
-                            onChange={(range) => setDateRange({ startDate: range.start, endDate: range.end })}
-                        /> */}
-                        <DatePicker
-                            label="Ngày bắt đầu"
-                            minValue={todayDate}
-                            visibleMonths={2}
-                            onChange={(e) => setSelectedDate(e)}
-                        />
 
                         <h2 className={styles.h2}>Thêm thú cưng của bạn</h2>
                         <Select
@@ -468,7 +506,7 @@ const HouseSitting = () => {
                             )}
 
                         </Select>
-
+                        {/* 
                         <h2 className={styles.h2}>Chọn thức ăn cho mèo</h2>
                         <Select
                             labelPlacement='outside'
@@ -481,7 +519,7 @@ const HouseSitting = () => {
                                     {food.foodName}
                                 </SelectItem>
                             ))}
-                        </Select>
+                        </Select> */}
 
                         <h2 className={styles.h2}>Thông tin cá nhân</h2>
                         <Input placeholder='Họ và tên' variant='bordered' value={name} onChange={(e) => setName(e.target.value)} />

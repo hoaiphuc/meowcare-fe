@@ -114,6 +114,7 @@ export type Service = {
   isNew: boolean;
   isDeleted: boolean;
   slots?: Slot[];
+  selectedSlot?: string;
 };
 
 export type ConfigService = {

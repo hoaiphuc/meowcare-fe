@@ -5,7 +5,6 @@ import { Button } from "@nextui-org/react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCheck, faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
 import { faPhone } from "@fortawesome/free-solid-svg-icons/faPhone";
-import { faApple } from "@fortawesome/free-brands-svg-icons"
 import Link from "next/link";
 
 export default function Home() {
@@ -82,13 +81,6 @@ export default function Home() {
         <div className="items-center flex flex-col justify-center gap-10 ml-[-100px]">
           <h1 className="text-4xl font-semibold text-center">Kết nối mọi nơi với ứng dụng MeowCare</h1>
           <div className="flex items-center justify-center gap-5 w-[663px] ">
-            <Button className="bg-black text-white w-56 h-20 ">
-              <FontAwesomeIcon icon={faApple} className="size-8" />
-              <div className="flex flex-col text-left text-[18px]">
-                Tải về từ
-                <p className="font-semibold">Apple Store</p>
-              </div>
-            </Button>
             <Button className="bg-black text-white w-56 h-20 px-10">
               <Image src="/phoneIMG/chplaylogo.png" alt="" width={50} height={50} />
               <div className="flex flex-col text-left text-sm">
