@@ -80,7 +80,7 @@ axiosClient.interceptors.response.use(
                     `${process.env.NEXT_PUBLIC_BASE_API}auth/refresh`,
                     {
                         token: getToken(),
-                        refreshToken,
+                        refreshToken: getRefreshToken(),
                         deviceId: "web",
                     }
                 );
@@ -104,6 +104,13 @@ axiosClient.interceptors.response.use(
                 return axiosClient(originalRequest);
             } catch (refreshError) {
                 console.error("Token refresh failed:", refreshError);
+
+                // Redirect to login page if token refresh fails
+                if (typeof window !== 'undefined') {
+                    localStorage.clear(); // Clear any stored tokens
+                    window.location.href = '/login';
+                }
+
                 return Promise.reject(refreshError);
             }
         }

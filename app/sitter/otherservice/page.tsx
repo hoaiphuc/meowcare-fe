@@ -1,18 +1,18 @@
 'use client'
 
+import Loading from '@/app/components/Loading';
 import { Service, Slot, UserLocal } from '@/app/constants/types/homeType';
 import axiosClient from '@/app/lib/axiosClient';
-import { Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Select, SelectItem, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, TimeInput, TimeInputValue, useDisclosure } from '@nextui-org/react';
-import { useParams } from 'next/navigation'
-import React, { useCallback, useEffect, useState } from 'react'
-import styles from "./otherservice.module.css"
+import { faCircleInfo, faMinus, faPencil, faPlus, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCircleInfo, faPencil, faPlus, faTrash } from '@fortawesome/free-solid-svg-icons';
-import Loading from '@/app/components/Loading';
+import { Time } from '@internationalized/date';
+import { Accordion, AccordionItem, Avatar, Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, TimeInput, TimeInputValue, useDisclosure } from '@nextui-org/react';
+import { Key } from '@react-types/shared';
+import { useParams } from 'next/navigation';
+import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import { v4 as uuidv4 } from 'uuid';
-import { Time } from '@internationalized/date';
-
+import styles from "./otherservice.module.css";
 const OtherService = () => {
     // const router = useRouter();
     const params = useParams();
@@ -35,12 +35,13 @@ const OtherService = () => {
     }]);
     const [slots, setSlots] = useState<Slot[]>([])
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
-    //check valid
+    const [expandedKeys, setExpandedKeys] = useState<Set<Key>>(new Set());
+    // const [serviceSlots, setServiceSlot] = useState<Slot[]>([])
     // const [isPriceValid, setIsPriceValid] = useState(false);
-    const types = [
-        { key: "time", label: "giờ" },
-        { key: "turn", label: "lần" },
-    ];
+    // const types = [
+    //     { key: "time", label: "giờ" },
+    //     { key: "turn", label: "lần" },
+    // ];
 
     const getUserFromStorage = () => {
         if (typeof window !== "undefined") {
@@ -52,29 +53,34 @@ const OtherService = () => {
     const user: UserLocal | null = getUserFromStorage();
     const userId = user?.id;
 
-    const fetchChildeService = useCallback(() => {
-        try {
-            axiosClient(`/services/sitter/${userId}/type?serviceType=ADDITION_SERVICE&status=ACTIVE`)
-                .then((res) => {
-                    setAdditionServices(res.data);
-                })
-                .catch((e) => {
-                    console.log(e);
-                })
-        } catch (error) {
+    // const fetchChildeService = useCallback(() => {
+    //     try {
+    //         axiosClient(`/services/sitter/${userId}/type?serviceType=ADDITION_SERVICE&status=ACTIVE`)
+    //             .then((res) => {
+    //                 setAdditionServices(res.data);
+    //             })
+    //             .catch((e) => {
+    //                 console.log(e);
+    //             })
+    //     } catch (error) {
 
-        }
-    }, [userId])
+    //     }
+    // }, [userId])
 
-    useEffect(() => {
-        fetchChildeService()
-    }, [fetchChildeService])
+    // useEffect(() => {
+    //     fetchChildeService()
+    // }, [fetchChildeService])
 
     const fetchSlot = useCallback(() => {
         try {
             axiosClient(`booking-slots?userId=${userId}`)
                 .then((res) => {
-                    setSlots(res.data)
+                    const updatedSlots = res.data.map((slot: Slot) => ({
+                        ...slot,
+                        startTime: slot.startTime ? new Date(slot.startTime) : new Date(),
+                        endTime: slot.endTime ? new Date(slot.endTime) : new Date()
+                    }));
+                    setSlots(updatedSlots)
                 })
                 .catch((e) => {
                     console.log(e);
@@ -86,6 +92,57 @@ const OtherService = () => {
     useEffect(() => {
         fetchSlot()
     }, [fetchSlot])
+
+    //get slot by each service
+    const fetchData = useCallback(async () => {
+        try {
+            if (!userId) return;
+
+            // 1. Fetch all addition services
+            const serviceRes = await axiosClient(`/services/sitter/${userId}/type?serviceType=ADDITION_SERVICE&status=ACTIVE`);
+            const services: Service[] = serviceRes.data;
+
+            // 2. Fetch all slots once
+            const slotRes = await axiosClient(`booking-slots?userId=${userId}`);
+            const allSlots: Slot[] = slotRes.data;
+
+            // 3. For each service, fetch the slots that belong to it
+            const servicesWithSlots = await Promise.all(
+                services.map(async (service: Service) => {
+                    // Fetch slots related to this particular service (adjust the endpoint as needed)
+                    const serviceSlotRes = await axiosClient(`booking-slots/by-service-id?serviceId=${service.id}`);
+                    const serviceSlotIds: string[] = serviceSlotRes.data.map((slotItem: Slot) => slotItem.id);
+
+                    // 4. Compare and mark slots
+                    // Add a new field `selected` to indicate if the slot belongs to the service
+                    const updatedSlots = allSlots.map((slot: Slot) => {
+                        return {
+                            ...slot,
+                            selected: serviceSlotIds.includes(slot.id),
+                            wasSelected: serviceSlotIds.includes(slot.id),
+                        }
+                    });
+
+                    return {
+                        ...service,
+                        slots: updatedSlots
+                    };
+                })
+            );
+
+            // Set the combined data to state
+            setAdditionServices(servicesWithSlots);
+            console.log(servicesWithSlots);
+
+        } catch (error) {
+            console.error(error);
+        }
+    }, [userId]);
+
+    useEffect(() => {
+        fetchData();
+    }, [fetchData]);
+
 
     useEffect(() => {
         setIsLoading(true)
@@ -109,9 +166,36 @@ const OtherService = () => {
         setIsLoading(true); // Show a loading indicator
         try {
             // Separate child services by their state
-            const toAdd = additionServices.filter((service) => service.isNew);
+            const toAdd = additionServices.filter((service) => service.isNew && !service.isDeleted);
             const toUpdate = additionServices.filter((service) => !service.isNew && !service.isDeleted);
-            const toDelete = additionServices.filter((service) => service.isDeleted);
+            const toDelete = additionServices.filter((service) => !service.isNew && service.isDeleted);
+
+            // Handle slot updates
+            const slotPromises = additionServices.map((service) => {
+                if (service.slots) {
+                    // Check if any slot has changed
+                    const assignSlots = service.slots.filter(
+                        (slot) => slot.selected && !slot.wasSelected
+                    );
+                    const unassignSlots = service.slots.filter(
+                        (slot) => !slot.selected && slot.wasSelected
+                    );
+                    // API calls for assigning and unassigning slots
+                    const assignPromises = assignSlots.map((slot) =>
+                        axiosClient.post(
+                            `booking-slots/assign-service?bookingSlotTemplateId=${slot.id}&serviceId=${service.id}`
+                        )
+                    );
+
+                    const unassignPromises = unassignSlots.map((slot) =>
+                        axiosClient.post(
+                            `booking-slots/unassign-service?bookingSlotTemplateId=${slot.id}&serviceId=${service.id}`
+                        )
+                    );
+                    return [...assignPromises, ...unassignPromises];
+                }
+                return null;
+            });
 
             // Perform API calls
             const addPromises = toAdd.map((service) =>
@@ -128,10 +212,15 @@ const OtherService = () => {
             );
 
             // Execute all operations concurrently
-            await Promise.all([...addPromises, ...updatePromises, ...deletePromises]);
+            await Promise.all([
+                ...addPromises,
+                ...updatePromises,
+                ...deletePromises,
+                ...slotPromises.filter(Boolean), // Remove null entries
+            ]);
 
             // Refetch the updated list from the server
-            fetchChildeService();
+            // fetchChildeService();
 
             toast.success("Cập nhật thành công!");
         } catch (error) {
@@ -173,10 +262,11 @@ const OtherService = () => {
         );
     };
 
-    const addNewChildService = () => {
+    const addNewAdditionService = () => {
+        const newId = uuidv4();
         const newService: Service = {
-            id: uuidv4(),
-            name: "",
+            id: newId,
+            name: `New Service ${additionServices.length + 1}`,
             serviceType: "ADDITION_SERVICE",
             actionDescription: "",
             startTime: "",
@@ -191,9 +281,10 @@ const OtherService = () => {
         };
 
         setAdditionServices((prevState) => [...prevState, newService]);
+        setExpandedKeys(prev => new Set(prev).add(newId));
     };
 
-    //delete child Service
+    //delete addition Service
     const markAsDeleted = (id: string) => {
         setAdditionServices((prev) =>
             prev.map((service) =>
@@ -204,17 +295,40 @@ const OtherService = () => {
         );
     };
 
+    //assign or unassign slot for service
+    const handleServiceSlotChange = (serviceId: string, slotId: string) => {
+        setAdditionServices((prevServices) =>
+            prevServices.map((service) => {
+                if (service.id === serviceId) {
+                    return {
+                        ...service,
+                        slots: service.slots
+                            ? service.slots.map((slot) =>
+                                slot.id === slotId
+                                    ? { ...slot, selected: !slot.selected }
+                                    : slot
+                            )
+                            : [], // Default to an empty array if slots is undefined
+                    };
+                }
+                return service;
+            })
+        );
+    };
+
+
 
     //slot manage
     const addNewSlot = () => {
         const newSlot: Slot = {
             id: uuidv4(),
             name: "",
-            startTime: "",
-            endTime: "",
+            startTime: new Date(),
+            endTime: new Date(),
             duration: 0,
             isNew: true,
             isDeleted: false,
+            selected: false
         };
 
         setSlots((prevState) => [...prevState, newSlot]);
@@ -230,21 +344,22 @@ const OtherService = () => {
         );
     };
     const handleInputSlotChange = (id: string, field: string, value: TimeInputValue | string) => {
-        const today = new Date(); // Get today's date
-        const currentDate = today.toISOString().split('T')[0];
+        // const currentDate = today.toISOString().split('T')[0];
         if (field === "startTime" || field === "endTime") {
             if (typeof value === "object" && "hour" in value && "minute" in value) {
-                const formattedTime = `${value.hour.toString().padStart(2, '0')}:${value.minute.toString().padStart(2, '0')}`;
-                const isoTime = `${currentDate}T${formattedTime}:00.000Z`;
+                const updatedDate = new Date();
+                updatedDate.setHours(value.hour);
+                updatedDate.setMinutes(value.minute);
+                updatedDate.setSeconds(0);
                 setSlots((prev) =>
                     prev.map((slot) => {
                         if (slot.id === id) {
-                            const updatedSlot = { ...slot, [field]: isoTime };
+                            const updatedSlot = { ...slot, [field]: updatedDate };
 
                             if (field === "endTime" && updatedSlot.startTime) {
                                 // Calculate duration if both startTime and endTime are set
                                 const start = new Date(updatedSlot.startTime);
-                                const end = new Date(isoTime);
+                                const end = new Date(updatedDate);
                                 const duration = Math.round((end.getTime() - start.getTime()) / 60000); // Convert milliseconds to minutes
 
                                 if (duration >= 0) {
@@ -285,11 +400,17 @@ const OtherService = () => {
         const addPromises = toAdd.map((slot) =>
             axiosClient.post("booking-slots", {
                 ...slot,
-                id: undefined, // Remove ID for new services
+                startTime: (slot.startTime as Date).toISOString(),
+                endTime: (slot.endTime as Date).toISOString(),
+                id: undefined,
             })
         );
         const updatePromises = toUpdate.map((slot) =>
-            axiosClient.put(`booking-slots/${slot.id}`, slot)
+            axiosClient.put(`booking-slots/${slot.id}`, {
+                ...slot,
+                startTime: (slot.startTime as Date).toISOString(),
+                endTime: (slot.endTime as Date).toISOString(),
+            })
         );
         const deletePromises = toDelete.map((slot) =>
             axiosClient.delete(`booking-slots/${slot.id}`)
@@ -299,17 +420,17 @@ const OtherService = () => {
         await Promise.all([...addPromises, ...updatePromises, ...deletePromises]);
 
         // Refetch the updated list from the server
-        fetchChildeService();
+        // fetchChildeService();
 
         toast.success("Cập nhật slot thành công");
     }
 
-    const parseTimeString = (isoString: string | undefined) => {
-        if (!isoString) {
+    const parseTimeString = (dateValue: Date | undefined) => {
+        if (!dateValue) {
             return new Time(0, 0); // Default to 00:00 if undefined
         }
-        const date = new Date(isoString);
-        return new Time(date.getUTCHours(), date.getUTCMinutes()); // Extract hours and minutes
+        const date = new Date(dateValue);
+        return new Time(date.getHours(), date.getMinutes()); // Extract hours and minutes
     };
 
 
@@ -328,82 +449,101 @@ const OtherService = () => {
                 <div>
                     <h1 className={styles.title}>Dịch vụ hiện có</h1>
                     <h2>Nếu bạn chưa có slot, <span onClick={onOpen} className='underline cursor-pointer'>thêm tại đây</span></h2>
-                    <Table aria-label="Example static collection table"
-                        className='mt-3'
-                        bottomContent={
-                            <Button className="flex items-center justify-center p-4 bg-white border border-gray-200 rounded-md shadow-sm gap-2" onClick={addNewChildService}>
-                                <FontAwesomeIcon icon={faPlus} /> Tạo thêm dịch vụ
-                            </Button>
-                        }>
-                        <TableHeader>
-                            <TableColumn>Tên dịch vụ</TableColumn>
-                            <TableColumn>Giá</TableColumn>
-                            <TableColumn>Thời gian/ lần</TableColumn>
-                            <TableColumn>Loại</TableColumn>
-                            <TableColumn>Slot</TableColumn>
-                            <TableColumn> </TableColumn>
-                        </TableHeader>
-                        <TableBody className='mt-3'>
-                            {additionServices.map((additionService: Service) => (
-                                <TableRow key={additionService.id} >
-                                    <TableCell className='pl-0'>
-                                        <Input
-                                            value={additionService.name}
-                                            onChange={(e) =>
-                                                handleInputChildChange(additionService.id, 'name', e.target.value)
-                                            }
-                                        />
-                                    </TableCell>
-                                    <TableCell className='w-32'>
-                                        <Input
-                                            type='number'
-                                            className='no-spinner'
+                    <Accordion
+                        selectedKeys={expandedKeys}
+                        onSelectionChange={(keys) => setExpandedKeys(new Set(keys))}
+                        aria-label="Services Accordion"
+                        selectionMode="multiple"
+                    >
+                        {additionServices.map((additionService: Service) => (
+                            <AccordionItem
+                                key={additionService.id}
+                                title={additionService.name || "Unnamed Service"}
+                                subtitle={`${additionService.price.toLocaleString("de")}đ`}
+                                startContent={
+                                    <Avatar
+                                        isBordered
+                                        radius="lg"
+                                        size='lg'
+                                        src="/service/other.png"
+                                    />
+                                }
+                            >
+                                <div className='flex flex-col gap-3 border p-5 rounded-lg'>
+                                    <Input
+                                        label='Tên dịch vụ'
+                                        variant='bordered'
+                                        value={additionService.name}
+                                        onChange={(e) =>
+                                            handleInputChildChange(additionService.id, 'name', e.target.value)
+                                        }
+                                    />
+                                    <Input
+                                        label='Tiền cho dịch vụ này'
+                                        variant='bordered'
+                                        type='number'
+                                        className='no-spinner'
+                                        value={additionService.price.toString()}
+                                        onChange={(e) =>
+                                            handleInputChildChange(additionService.id, 'price', e.target.value)
+                                        }
+                                        endContent={
+                                            <p>đ</p>
+                                        }
+                                    />
+                                    <Input
+                                        label='Thời gian cần để hoàn thành'
+                                        variant='bordered'
+                                        type='number'
+                                        className='no-spinner'
+                                        value={additionService.duration.toString()}
+                                        onChange={(e) =>
+                                            handleInputChildChange(additionService.id, 'duration', e.target.value)
+                                        }
+                                        endContent={
+                                            <p>phút</p>
+                                        }
+                                    />
+                                    <h1 className='font-semibold text-xl text-maincolor'>Vui lòng chọn slot hoạt động</h1>
+                                    <div className="flex w-full gap-3">
+                                        <div
+                                            onClick={onOpen}
+                                            className='border rounded-lg h-10 w-32 flex items-center justify-center cursor-pointer gap-3 bg-maincolor text-white'
+                                        >
+                                            <FontAwesomeIcon icon={faPlus} />
+                                            <p>Thêm slot</p>
+                                        </div>
+                                        {additionService.slots ? additionService.slots.map((slot: Slot) => (
+                                            <div
+                                                key={slot.id}
+                                                className={`border rounded-lg h-10 w-32 flex items-center justify-center cursor-pointer${slot.selected ? "border border-green-500" : ''}`}
+                                                onClick={() => handleServiceSlotChange(additionService.id, slot.id)}
+                                            >
+                                                <h1 className='gap-2 flex justify-center items-center'>
+                                                    {new Date(slot.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}
+                                                    <FontAwesomeIcon icon={faMinus} />
+                                                    {new Date(slot.endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}
+                                                </h1>
+                                            </div>
+                                        )) :
 
-                                            value={additionService.price.toString()}
-                                            onChange={(e) =>
-                                                handleInputChildChange(additionService.id, 'price', e.target.value)
-                                            }
-                                            endContent={
-                                                <p>đ</p>
-                                            }
-                                        />
-                                    </TableCell>
-                                    <TableCell className='w-28'>
-                                        <Input
-                                            type='number'
-                                            className='no-spinner'
-                                            value={additionService.duration.toString()}
-                                            onChange={(e) =>
-                                                handleInputChildChange(additionService.id, 'duration', e.target.value)
-                                            }
-                                            endContent={
-                                                <p>phút</p>
-                                            }
-                                        />
-                                    </TableCell>
-                                    <TableCell className=''>
-                                        <Select className="min-h-full max-w-20">
-                                            {types.map((animal) => (
-                                                <SelectItem key={animal.key}>{animal.label}</SelectItem>
-                                            ))}
-                                        </Select>
-                                    </TableCell>
-                                    <TableCell className=''>
-                                        <Select className="min-h-full max-w-20">
-                                            {slots.map((slot: Slot) => (
-                                                <SelectItem key={slot.id}>{slot.name}</SelectItem>
-                                            ))}
-                                        </Select>
-                                    </TableCell>
-                                    <TableCell className=''>
-                                        <FontAwesomeIcon icon={faTrash} onClick={() => markAsDeleted(additionService.id)} className='cursor-pointer' />
-                                    </TableCell>
-                                </TableRow>
+                                            <div></div>
+                                        }
+                                    </div>
 
-                            ))}
+                                    <Button onClick={() => markAsDeleted(additionService.id)} className='flex cursor-pointer self-end justify-center items-center gap-2 mt-5' color='danger'>
+                                        <FontAwesomeIcon icon={faTrash} />
+                                        <p>Xóa dịch vụ này</p>
+                                    </Button>
+                                </div>
 
-                        </TableBody>
-                    </Table>
+                            </AccordionItem>
+                        ))}
+                    </Accordion>
+
+                    <Button className="flex items-center justify-center p-4 bg-white border border-gray-200 rounded-md shadow-sm gap-2 w-full mt-10" onClick={addNewAdditionService}>
+                        <FontAwesomeIcon icon={faPlus} /> Tạo thêm dịch vụ
+                    </Button>
                 </div>
 
                 <div>
@@ -412,77 +552,77 @@ const OtherService = () => {
                         <FontAwesomeIcon icon={faPencil} />Cập nhật
                     </Button>
                 </div>
+
+                <Modal isOpen={isOpen} onOpenChange={onOpenChange} isDismissable={false} size='3xl'>
+                    <ModalContent>
+                        {(onClose) => (
+                            <>
+                                <ModalHeader className="flex flex-col gap-1">Danh sách slot hiện tại</ModalHeader>
+                                <ModalBody>
+                                    <Table aria-label="Example static collection table"
+                                        className='mt-3'
+                                        bottomContent={
+                                            <Button className="flex items-center justify-center p-4 bg-white border border-gray-200 rounded-md shadow-sm gap-2" onClick={addNewSlot}>
+                                                <FontAwesomeIcon icon={faPlus} /> Tạo thêm slot
+                                            </Button>
+                                        }>
+                                        <TableHeader>
+                                            <TableColumn aria-label='he'>Tên slot</TableColumn>
+                                            <TableColumn>Thời gian slot bắt đầu</TableColumn>
+                                            <TableColumn>Thời gian slot kết thúc</TableColumn>
+                                            <TableColumn> </TableColumn>
+                                        </TableHeader>
+                                        <TableBody className='mt-3'>
+                                            {slots.map((slot: Slot) => (
+                                                <TableRow key={slot.id} >
+                                                    <TableCell className='pl-0'>
+                                                        <Input
+                                                            aria-label='name'
+                                                            value={slot.name}
+                                                            onChange={(e) =>
+                                                                handleInputSlotChange(slot.id, 'name', e.target.value)
+                                                            }
+                                                        />
+                                                    </TableCell>
+                                                    <TableCell className='w-28'>
+                                                        <TimeInput
+                                                            aria-label='starttime'
+                                                            hourCycle={24}
+                                                            value={parseTimeString(slot.startTime as Date)}
+                                                            onChange={(e) => handleInputSlotChange(slot.id, 'startTime', e)}
+                                                        />
+                                                    </TableCell>
+                                                    <TableCell className='w-28'>
+                                                        <TimeInput
+                                                            aria-label='endtime'
+                                                            hourCycle={24}
+                                                            value={parseTimeString(slot.endTime as Date)}
+                                                            onChange={(e) => handleInputSlotChange(slot.id, 'endTime', e)}
+                                                        />
+                                                    </TableCell>
+                                                    <TableCell className=''>
+                                                        <FontAwesomeIcon icon={faTrash} className='cursor-pointer' onClick={() => markAsDeletedSlot(slot.id)} />
+                                                    </TableCell>
+                                                </TableRow>
+
+                                            ))}
+
+                                        </TableBody>
+                                    </Table>
+                                </ModalBody>
+                                <ModalFooter>
+                                    <Button color="danger" variant="light" onPress={onClose}>
+                                        Đóng
+                                    </Button>
+                                    <Button color="primary" onPress={handleUpdateSlot}>
+                                        Cập nhật
+                                    </Button>
+                                </ModalFooter>
+                            </>
+                        )}
+                    </ModalContent>
+                </Modal>
             </div>
-
-            <Modal isOpen={isOpen} onOpenChange={onOpenChange} isDismissable={false} size='3xl'>
-                <ModalContent>
-                    {(onClose) => (
-                        <>
-                            <ModalHeader className="flex flex-col gap-1">Danh sách slot hiện tại</ModalHeader>
-                            <ModalBody>
-                                <Table aria-label="Example static collection table"
-                                    className='mt-3'
-                                    bottomContent={
-                                        <Button className="flex items-center justify-center p-4 bg-white border border-gray-200 rounded-md shadow-sm gap-2" onClick={addNewSlot}>
-                                            <FontAwesomeIcon icon={faPlus} /> Tạo thêm slot
-                                        </Button>
-                                    }>
-                                    <TableHeader>
-                                        <TableColumn aria-label='he'>Tên slot</TableColumn>
-                                        <TableColumn>Thời gian slot bắt đầu</TableColumn>
-                                        <TableColumn>Thời gian slot kết thúc</TableColumn>
-                                        <TableColumn> </TableColumn>
-                                    </TableHeader>
-                                    <TableBody className='mt-3'>
-                                        {slots.map((slot: Slot) => (
-                                            <TableRow key={slot.id} >
-                                                <TableCell className='pl-0'>
-                                                    <Input
-                                                        aria-label='name'
-                                                        value={slot.name}
-                                                        onChange={(e) =>
-                                                            handleInputSlotChange(slot.id, 'name', e.target.value)
-                                                        }
-                                                    />
-                                                </TableCell>
-                                                <TableCell className='w-28'>
-                                                    <TimeInput
-                                                        aria-label='starttime'
-                                                        hourCycle={24}
-                                                        value={parseTimeString(slot.startTime)}
-                                                        onChange={(e) => handleInputSlotChange(slot.id, 'startTime', e)}
-                                                    />
-                                                </TableCell>
-                                                <TableCell className='w-28'>
-                                                    <TimeInput
-                                                        aria-label='endtime'
-                                                        hourCycle={24}
-                                                        value={parseTimeString(slot.endTime)}
-                                                        onChange={(e) => handleInputSlotChange(slot.id, 'endTime', e)}
-                                                    />
-                                                </TableCell>
-                                                <TableCell className=''>
-                                                    <FontAwesomeIcon icon={faTrash} className='cursor-pointer' onClick={() => markAsDeletedSlot(slot.id)} />
-                                                </TableCell>
-                                            </TableRow>
-
-                                        ))}
-
-                                    </TableBody>
-                                </Table>
-                            </ModalBody>
-                            <ModalFooter>
-                                <Button color="danger" variant="light" onPress={onClose}>
-                                    Đóng
-                                </Button>
-                                <Button color="primary" onPress={handleUpdateSlot}>
-                                    Cập nhật
-                                </Button>
-                            </ModalFooter>
-                        </>
-                    )}
-                </ModalContent>
-            </Modal>
         </div>
     )
 }

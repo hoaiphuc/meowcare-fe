@@ -113,6 +113,7 @@ export type Service = {
   isBasicService: boolean;
   isNew: boolean;
   isDeleted: boolean;
+  slots?: Slot[];
 };
 
 export type ConfigService = {
@@ -400,8 +401,10 @@ export type Slot = {
   id: string;
   name: string;
   duration: number;
-  startTime: string;
-  endTime: string;
+  startTime: Date;
+  endTime: Date;
   isNew: boolean;
   isDeleted: boolean;
+  selected: boolean;
+  wasSelected?: boolean;
 };
