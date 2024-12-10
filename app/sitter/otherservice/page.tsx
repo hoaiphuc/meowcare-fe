@@ -3,7 +3,7 @@
 import Loading from '@/app/components/Loading';
 import { Service, Slot, UserLocal } from '@/app/constants/types/homeType';
 import axiosClient from '@/app/lib/axiosClient';
-import { faCircleInfo, faMinus, faPencil, faPlus, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { faCircleInfo, faMinus, faPencil, faPlus, faShieldCat, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Time } from '@internationalized/date';
 import { Accordion, AccordionItem, Avatar, Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, TimeInput, TimeInputValue, useDisclosure } from '@nextui-org/react';
@@ -504,7 +504,7 @@ const OtherService = () => {
                                             <p>đ</p>
                                         }
                                     />
-                                    <Input
+                                    {/* <Input
                                         label='Thời gian cần để hoàn thành'
                                         variant='bordered'
                                         type='number'
@@ -516,7 +516,7 @@ const OtherService = () => {
                                         endContent={
                                             <p>phút</p>
                                         }
-                                    />
+                                    /> */}
                                     <h1 className='font-semibold text-xl text-maincolor'>Vui lòng chọn slot hoạt động</h1>
                                     <div className="flex w-full gap-3">
                                         <div
@@ -532,7 +532,14 @@ const OtherService = () => {
                                                 className={`border rounded-lg h-10 w-32 flex items-center justify-center cursor-pointer${slot.selected ? "border border-green-500" : ''}`}
                                                 onClick={() => handleServiceSlotChange(additionService.id, slot.id)}
                                             >
-                                                <h1 className='gap-2 flex justify-center items-center'>
+                                                <h1 className='gap-2 relative flex justify-center items-center h-full w-full'>
+                                                    {
+                                                        slot.selected &&
+                                                        <FontAwesomeIcon
+                                                            icon={faShieldCat}
+                                                            className='absolute text-green-700 z-10 top-0 right-0 mt-[-3px] mr-[-4px]'
+                                                        />
+                                                    }
                                                     {new Date(slot.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}
                                                     <FontAwesomeIcon icon={faMinus} />
                                                     {new Date(slot.endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}

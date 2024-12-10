@@ -182,7 +182,7 @@ const Page = () => {
                             <Icon icon="mdi:home-find-outline" className='text-black w-12 h-11' />
                             <div className='text-secondary font-semibold'>
                                 <h1 className='text-text text-xl font-semibold'>Đặt dịch vụ</h1>
-                                <p className={styles.p}>Dịch vụ chăm sóc mèo tại nhà của bạn</p>
+                                <p className={styles.p}>Dịch vụ chăm sóc mèo</p>
                             </div>
                         </div>
                         <Button as={Link} href={isUser ? `/service/housesitting/${sitterProfile?.sitterId}` : `/login`} className={styles.button}>Đặt lịch</Button>

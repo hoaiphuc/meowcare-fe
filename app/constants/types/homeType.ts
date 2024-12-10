@@ -86,9 +86,12 @@ export type CatSitter = {
 };
 
 export type ProfilePicture = {
-  id: string;
-  imageName: string;
+  id?: string;
+  imageName?: string;
   imageUrl: string;
+  isCargoProfilePicture: boolean;
+  isNew?: boolean;
+  isDeleted?: boolean;
 };
 
 export type SideNavItem = {
