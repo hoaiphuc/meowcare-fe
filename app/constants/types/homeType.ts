@@ -113,6 +113,7 @@ export type Service = {
   isBasicService: boolean;
   isNew: boolean;
   isDeleted: boolean;
+  slots?: Slot[];
 };
 
 export type ConfigService = {
@@ -388,24 +389,22 @@ export type RequestWithdrawal = {
 
 export type Certificate = {
   id: string;
-  sitterProfileId: string;
+  userId: string;
   certificateType: string;
   certificateName: string;
   institutionName: string;
-  issueDate: Date;
-  expiryDate: Date;
   certificateUrl: string;
   description: string;
-  createdAt: Date;
-  updatedAt: Date;
 };
 
 export type Slot = {
   id: string;
   name: string;
   duration: number;
-  startTime: string;
-  endTime: string;
+  startTime: Date;
+  endTime: Date;
   isNew: boolean;
   isDeleted: boolean;
+  selected: boolean;
+  wasSelected?: boolean;
 };

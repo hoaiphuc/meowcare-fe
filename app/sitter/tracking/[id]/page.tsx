@@ -364,8 +364,6 @@ const Tracking = () => {
     const handleUpdate = async () => {
         console.log(removeList);
         console.log(addList);
-
-
         try {
             // Handle removal asynchronously using Promise.all
             if (removeList && removeList.length > 0) {

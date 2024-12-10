@@ -42,9 +42,12 @@ const Info = () => {
     const geoSuggestions = useGeoapify(query);
     const [showSuggestions, setShowSuggestions] = useState<boolean>(false);
     const hiddenFileInput = useRef<HTMLInputElement>(null);
-    const [certificates, setCertificates] = useState<Partial<Certificate>[]>([])
+    const [certificates, setCertificates] = useState<Certificate[]>([])
     const [selectedPdf, setSelectedPdf] = useState<string>();
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
+    //for update certificates
+    const [removeList, setRemoveList] = useState<Certificate[]>([]);
+    const [addList, setAddList] = useState<Certificate[]>([]);
 
     const getUserFromStorage = () => {
         if (typeof window !== "undefined") {
@@ -87,6 +90,14 @@ const Info = () => {
                     }
                 })
                 .catch(() => { })
+
+            axiosClient(`certificates/user/${userId}`)
+                .then((res) => {
+                    setCertificates(res.data)
+                })
+                .catch((e) => {
+                    console.log(e);
+                })
         } catch (error) {
 
         }
@@ -94,6 +105,37 @@ const Info = () => {
 
     //create profile
     // const handleCreate = () => {
+    // const updatedCertificates = await Promise.all(
+    //     certificates.map(async (certificate) => {
+    //         const fileName = `${uuidv4()}_${certificate.certificateName}`;
+    //         const storageRef = ref(storage, `certificates/${fileName}`);
+
+    //         // Check if the certificate has a file URL
+    //         if (certificate.certificateUrl?.startsWith("blob:")) {
+    //             // Convert local URL to Blob and upload to Firebase
+    //             const response = await fetch(certificate.certificateUrl);
+    //             const blob = await response.blob();
+
+    //             await uploadBytes(storageRef, blob);
+
+    //             // Get the download URL
+    //             const downloadUrl = await getDownloadURL(storageRef);
+
+    //             return {
+    //                 ...certificate,
+    //                 certificateUrl: downloadUrl,
+    //             };
+    //         }
+    //         return certificate; // Return as-is if already a valid URL
+    //     })
+    // );
+
+    // // Store certificates in the database
+    // await Promise.all(
+    //     updatedCertificates.map((certificate) =>
+    //         axiosClient.post("certificates", certificate)
+    //     )
+    // );
     //     try {
     //         axiosClient.post("sitter-profiles", sitterData)
     //             .then(() => {
@@ -153,37 +195,55 @@ const Info = () => {
     // Update profile
     const handleUpdate = async () => {
         try {
-            const updatedCertificates = await Promise.all(
-                certificates.map(async (certificate) => {
-                    const fileName = `${uuidv4()}_${certificate.certificateName}`;
-                    const storageRef = ref(storage, `certificates/${fileName}`);
+            if (removeList && removeList.length > 0) {
+                await Promise.all(
+                    removeList.map(async (item) => {
+                        try {
+                            if (item.id) {
+                                await axiosClient.delete(`certificates/${item.id}`);
+                            } else {
+                                return;
+                            }
+                        } catch (error) {
+                            toast.error("Lỗi khi gỡ chứng chỉ");
+                        }
+                    })
+                );
+                setRemoveList([]);
+            }
 
-                    // Check if the certificate has a file URL
-                    if (certificate.certificateUrl?.startsWith("blob:")) {
-                        // Convert local URL to Blob and upload to Firebase
-                        const response = await fetch(certificate.certificateUrl);
-                        const blob = await response.blob();
+            if (addList && addList.length > 0) {
+                for (const item of addList) {
+                    if (item.certificateUrl.startsWith("blob:")) {
+                        try {
+                            // Convert the local URL (blob) to a Blob object
+                            const response = await fetch(item.certificateUrl);
+                            const blob = await response.blob();
 
-                        await uploadBytes(storageRef, blob);
+                            const fileName = `${uuidv4()}_${item.certificateName}`;
+                            const storageRef = ref(storage, `certificates/${fileName}`);
 
-                        // Get the download URL
-                        const downloadUrl = await getDownloadURL(storageRef);
+                            // Upload the Blob
+                            await uploadBytes(storageRef, blob);
 
-                        return {
-                            ...certificate,
-                            certificateUrl: downloadUrl,
-                        };
+                            // Get the download URL
+                            const downloadUrl = await getDownloadURL(storageRef);
+
+                            // Prepare item data with the download URL
+                            const newCertificate = {
+                                ...item,
+                                certificateUrl: downloadUrl,
+                            };
+
+                            // Save the certificate data to the database
+                            await axiosClient.post("certificates", newCertificate);
+                        } catch (error) {
+                            toast.error("Lỗi khi thêm chứng chỉ");
+                        }
                     }
-                    return certificate; // Return as-is if already a valid URL
-                })
-            );
-
-            // Store certificates in the database
-            await Promise.all(
-                updatedCertificates.map((certificate) =>
-                    axiosClient.post("certificates", certificate)
-                )
-            );
+                }
+                setAddList([]);
+            }
 
             const updatedSitterData = {
                 ...sitterData,
@@ -203,6 +263,10 @@ const Info = () => {
         }
     };
 
+    // const handleRemoveEvidence = (index: number) => {
+    //     setSelectedTaskEvidence((prevEvidence) => prevEvidence.filter((_, i) => i !== index));
+    // };
+
     //certificate upload
     const handleCertificateClick = () => {
         if (hiddenFileInput.current) {
@@ -210,27 +274,54 @@ const Info = () => {
         }
     };
 
-    const handleCertificateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    // const handleCertificateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    //     if (event.target.files) {
+    //         const filesArray = Array.from(event.target.files);
+
+    //         const newCertificates = filesArray.map((file) => ({
+    //             id: "",
+    //             userId: sitterData?.sitterId || "",
+    //             certificateType: file.type.includes("pdf") ? "PDF" : "IMAGE",
+    //             certificateName: file.name,
+    //             institutionName: "",
+    //             certificateUrl: URL.createObjectURL(file),
+    //             description: ""
+    //         }));
+
+    //         // Update the certificates state
+    //         setCertificates((prevCertificates) => [...prevCertificates, ...newCertificates]);
+    //     }
+    // };
+    const handleImageUpdateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.files) {
             const filesArray = Array.from(event.target.files);
-
             const newCertificates = filesArray.map((file) => ({
-                certificateUrl: URL.createObjectURL(file),
                 id: "",
-                userId: sitterData?.sitterId,
+                userId: userId || "",
+                certificateType: file.type.includes("pdf") ? "PDF" : "IMAGE",
                 certificateName: file.name,
                 institutionName: "",
+                certificateUrl: URL.createObjectURL(file),
+                description: ""
             }));
 
-            // Update the certificates state
-            setCertificates((prevCertificates) => [...prevCertificates, ...newCertificates]);
+            // Update the selectedTaskEvidence to display the new images
+            setCertificates((prevImages) => [...prevImages, ...newCertificates]);
+
+            // Add the new images to the addList for tracking
+            setAddList((prevList) => [...prevList, ...newCertificates]);
         }
     };
 
-    const handleRemoveCertificate = (index: number) => {
-        setCertificates((prevCertificates) =>
-            prevCertificates.filter((_, i) => i !== index)
-        );
+    const handleRemoveUpdateCertificate = (certificate: Certificate) => {
+        setCertificates((prev) => prev.filter((item) => item !== certificate));
+        if (certificate.id) {
+            // Existing item fetched from the server, add to removeList
+            setRemoveList((prev) => [...prev, certificate]);
+        } else {
+            // Newly added item, remove from addList
+            setAddList((prev) => prev.filter((item) => item !== certificate));
+        }
     };
 
     return (
@@ -357,14 +448,14 @@ const Info = () => {
                             className="flex flex-col justify-center items-center p-3 bg-pink-100 border border-pink-300 rounded-md text-center w-36 h-36"
                             onClick={handleCertificateClick}
                         >
-                            <FontAwesomeIcon icon={faCamera} className="text-maincolor" size="2xl" />
+                            <FontAwesomeIcon icon={faFilePdf} className="text-maincolor" size="2xl" />
                             <p>Thêm chứng chỉ</p>
                         </button>
                         <input
                             type="file"
                             accept="image/*,application/pdf"
                             ref={hiddenFileInput}
-                            onChange={handleCertificateChange}
+                            onChange={handleImageUpdateChange}
                             style={{ display: 'none' }}
                             multiple
                         />
@@ -392,7 +483,7 @@ const Info = () => {
                                     </div>
                                 )}
                                 <button
-                                    onClick={() => handleRemoveCertificate(index)}
+                                    onClick={() => handleRemoveUpdateCertificate(certificate)}
                                     className="absolute top-0 right-0 p-1 rounded-full w-8 h-8 bg-black bg-opacity-50 text-white"
                                 >
                                     ✕
