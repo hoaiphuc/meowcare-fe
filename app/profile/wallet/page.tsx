@@ -14,6 +14,8 @@ interface Wallet {
 
 const Wallet = () => {
     const [wallet, setWallet] = useState<Wallet>()
+    const [topUpMoney, setTopUpMoney] = useState("")
+
     const [requestData, setRequestData] = useState<RequestWithdrawal>({
         id: "",
         userId: "",
@@ -85,6 +87,20 @@ const Wallet = () => {
         }
     }
 
+    const handleTopUp = () => {
+        try {
+            axiosClient.post(`wallets/top-up/momo?userId=${userId}&amount=${topUpMoney}&redirectUrl=${process.env.NEXT_PUBLIC_BASE_URL}&requestType=CAPTURE_WALLET`)
+                .then(() => {
+
+                })
+                .catch(() => {
+                    toast.error("Có lỗi xảy ra, vui lòng thử lại sau")
+                })
+        } catch (error) {
+
+        }
+    }
+
     return (
         <div className='w-[891px] h-full bg-white rounded-2xl shadow-2xl flex flex-col text-black'>
             <div className=' m-5 flex flex-col gap-4'>
@@ -94,7 +110,7 @@ const Wallet = () => {
                 <div className=' bg-[#FFE3D5] p-5 rounded-md'>
                     <Accordion>
                         <AccordionItem key="1" aria-label="Accordion 1" title="Rút tiền" className='flex flex-col'>
-                            Bạn có thể yêu cầu rút tiền vào ngày 25 mỗi tháng
+                            Rút ít nhất 20.000đ
                             <div className='flex gap-3'>
                                 <Input errorMessage={`Số tiền phải ít nhất 20000 và không được nhiều hơn ${wallet?.balance}`} type='number' className='w-52 no-spinner' min={20000} max={wallet?.balance} placeholder="Số tiền muốn rút" />
                                 <Button onClick={onOpen}>Yêu cầu rút tiền</Button>
@@ -103,8 +119,8 @@ const Wallet = () => {
                         <AccordionItem key="2" aria-label="Accordion 2" title="Nạp tiền">
                             Nạp tiền ít nhất 10.000
                             <div className='flex gap-3'>
-                                <Input errorMessage={`Số tiền phải ít nhất 10000`} type='number' className='w-52 no-spinner' min={10000} placeholder="Số tiền muốn nạp" />
-                                <Button>Nạp tiền</Button>
+                                <Input errorMessage={`Số tiền phải ít nhất 10000`} type='number' className='w-52 no-spinner' min={10000} placeholder="Số tiền muốn nạp" onChange={e => setTopUpMoney(e.target.value)} />
+                                <Button onClick={() => handleTopUp()}>Nạp tiền</Button>
                             </div>
                         </AccordionItem>
                     </Accordion>

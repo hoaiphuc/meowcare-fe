@@ -87,6 +87,7 @@ export type CatSitter = {
 
 export type ProfilePicture = {
   id?: string;
+  requestId?: string;
   imageName?: string;
   imageUrl: string;
   isCargoProfilePicture: boolean;
