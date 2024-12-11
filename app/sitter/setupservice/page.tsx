@@ -208,14 +208,18 @@ const Page = () => {
                 <div className="my-10">
                     <h1 className={styles.h1}>Cài đặt hồ sơ</h1>
                     <div className="flex flex-col gap-3">
-                        <div className="flex gap-3 items-center">
+                        <Button className="flex gap-3 text-white bg-maincolor" as={Link} href={sitterProfile ? "/sitter/setupservice/info" : "/sitter/setupservice/createinfo"}>
                             {sitterProfile ?
                                 <FontAwesomeIcon icon={faCheck} className="text-green-500" size="2x" />
                                 :
                                 <FontAwesomeIcon icon={faXmark} className="text-red-500" size="2x" />
                             }
-                            <Link href={sitterProfile ? "/sitter/setupservice/info" : "/sitter/setupservice/createinfo"} className={styles.h3}>Thông tin cơ bản</Link>
-                        </div>
+                            <h3>Thông tin cơ bản</h3>
+                        </Button>
+                        <Button className="flex items-center gap-3" as={Link} href="/sitter/setupservice/calendar">
+                            <FontAwesomeIcon icon={faXmark} className="text-red-500" size="2x" />
+                            <h3 className={styles.h3}>Lịch làm việc</h3>
+                        </Button>
                         <div className="flex items-center gap-3">
                             <FontAwesomeIcon icon={faXmark} className="text-red-500" size="2x" />
                             <h3 className={styles.h3}>Thông tin liên lạc khẩn cấp</h3>

@@ -52,9 +52,12 @@ const PhotoGallery = ({ photos }: { photos?: ProfilePicture[] }) => {
                             className="object-cover rounded-lg h-[150px]"
                         />
                         {/* Overlay with 'View All Photos' text */}
-                        <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-lg w-[350px]">
-                            <span className="text-white text-xl">+{photos.length - 3} more</span>
-                        </div>
+                        {photos.length > 4 && (
+
+                            <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-lg w-[350px]">
+                                <span className="text-white text-xl">+{photos.length - 4} more</span>
+                            </div>
+                        )}
                     </div>
                 )}
             </div>

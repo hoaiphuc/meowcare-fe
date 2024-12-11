@@ -24,8 +24,9 @@ const Profile = () => {
     const toggleVisibilityRepeat = () => setIsVisibleRepeat(!isVisibleRepeat);
 
     const [isEditing, setIsEditing] = useState(false);
-    const [fullName, setFullName] = useState(userProfile?.fullName || '');
-    const [phoneNumber, setPhoneNumber] = useState(userProfile?.phoneNumber || '');
+    const [fullName, setFullName] = useState('');
+    const [phoneNumber, setPhoneNumber] = useState('');
+    const [address, setAddress] = useState('');
     const [newPassword, setNewPassword] = useState("");
     const [repeatPassword, setRepeatPassword] = useState("");
 
@@ -35,8 +36,9 @@ const Profile = () => {
 
     useEffect(() => {
         if (userProfile) {
-            setFullName(userProfile.username || '');
+            setFullName(userProfile.fullName || '');
             setPhoneNumber(userProfile.phoneNumber || '');
+            setAddress(userProfile.address || '');
         }
     }, [userProfile]);
 
@@ -44,6 +46,7 @@ const Profile = () => {
         const updatedData = {
             fullName,
             phoneNumber,
+            address
         };
         dispatch(updateUserProfile(updatedData));
         setIsEditing(false);
@@ -84,22 +87,31 @@ const Profile = () => {
                                 disabled={!isEditing}
                                 type="text"
                                 variant="bordered"
-                                defaultValue={userProfile?.fullName}
+                                value={fullName}
                                 onChange={(e) => setFullName(e.target.value)}
                             />
+
                             <h2>Số điện thoại</h2>
-                            {/* <div className="flex justify-center items-center mb-4"> */}
                             <Input
                                 className='mb-4'
                                 type="number"
                                 disabled={!isEditing}
                                 variant="bordered"
-                                defaultValue={userProfile?.phoneNumber?.toString() ?? 0}
+                                value={phoneNumber}
                                 onChange={(e) => setPhoneNumber(e.target.value)}
                             />
-                            {/* </div> */}
+
+                            <h2>Địa chỉ</h2>
+                            <Input
+                                className='mb-4'
+                                type="text"
+                                disabled={!isEditing}
+                                variant="bordered"
+                                value={address}
+                                onChange={(e) => setAddress(e.target.value)}
+                            />
+
                             <h2>Email</h2>
-                            {/* <div className="flex justify-center items-center mb-4"> */}
                             <Input
                                 className='mb-4'
                                 type="text"
@@ -107,7 +119,6 @@ const Profile = () => {
                                 variant="faded"
                                 defaultValue={userProfile?.email}
                             />
-                            {/* </div> */}
                         </div>
                     ) : (
                         <div>Vui lòng đăng nhập</div>

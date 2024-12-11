@@ -35,7 +35,7 @@ const Page = () => {
 
     return (
         <div className='flex flex-col justify-start w-full mx-10 gap-5 my-3'>
-            <h1 className='font-semibold text-3xl'>Quản lí bài kiểm tra</h1>
+            <h1 className='font-semibold text-3xl'>Quản lý bài kiểm tra</h1>
             <Table
                 aria-label="Example table with client side pagination"
                 bottomContent={

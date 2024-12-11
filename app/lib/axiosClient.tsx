@@ -24,6 +24,16 @@ const getRefreshToken = () => {
 
 };
 
+const getDeviceId = () => {
+    if (typeof window === 'undefined') return null;
+    const deviceId = localStorage.getItem('deviceId');
+    if (deviceId === null) {
+        return null;
+    }
+    return JSON.parse(deviceId);
+
+};
+
 const axiosClient = axios.create({
     baseURL: process.env.NEXT_PUBLIC_BASE_API,
 });
@@ -81,7 +91,7 @@ axiosClient.interceptors.response.use(
                     {
                         token: getToken(),
                         refreshToken: getRefreshToken(),
-                        deviceId: "web",
+                        deviceId: getDeviceId(),
                     }
                 );
 

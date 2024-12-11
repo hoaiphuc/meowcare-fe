@@ -10,6 +10,7 @@ import { useEffect, useState } from 'react'
 import { toast } from 'react-toastify'
 import { Role } from '../constants/types/homeType'
 import axiosClient from '../lib/axiosClient'
+import { v4 as uuidv4 } from 'uuid';
 
 const Login = () => {
     const router = useRouter();
@@ -17,18 +18,29 @@ const Login = () => {
     const toggleVisibility = () => setIsVisible(!isVisible);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const dataLogin = {
-        email: email,
-        password: password,
-        deviceId: "web",
-        deviceName: "web"
-    };
+    const [deviceId, setDeviceId] = useState('');
 
     useEffect(() => {
         if (typeof window !== 'undefined') {
+            // Clear previous data
             localStorage.clear();
+
+            // Check if there's an existing deviceId in localStorage
+            let storedDeviceId = localStorage.getItem('deviceId');
+            if (!storedDeviceId) {
+                storedDeviceId = uuidv4(); // Generate a new deviceId
+                localStorage.setItem('deviceId', storedDeviceId);
+            }
+            setDeviceId(storedDeviceId);
         }
     }, []);
+
+    const dataLogin = {
+        email: email,
+        password: password,
+        deviceId: deviceId,
+        deviceName: "web"
+    };
 
     const handleSubmit = async () => {
         try {

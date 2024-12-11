@@ -15,15 +15,15 @@ const Page = () => {
                         height={150}
                         className="rounded-full mb-4"
                     />
-                    <h1 className="text-3xl font-bold text-blue-600 mb-2">MeowCare - Quản lí dịch vụ của bạn</h1>
+                    <h1 className="text-3xl font-bold text-blue-600 mb-2">MeowCare - Quản lý dịch vụ của bạn</h1>
                     <p className="text-gray-600 text-center">Hãy chọn các hành động để quản lý dịch vụ của bạn một cách dễ dàng và tiện lợi hơn.</p>
                 </div>
                 <div className="flex flex-col gap-5 w-full">
                     <Link href="/sitter/setupservice">
-                        <p className="text-lg font-semibold text-center text-white bg-blue-500 py-3 rounded-lg shadow-md hover:bg-blue-600 transition-all duration-300 ease-in-out">Quản lí hồ sơ</p>
+                        <p className="text-lg font-semibold text-center text-white bg-blue-500 py-3 rounded-lg shadow-md hover:bg-blue-600 transition-all duration-300 ease-in-out">Quản lý hồ sơ</p>
                     </Link>
                     <Link href="/sitter/managebooking">
-                        <p className="text-lg font-semibold text-center text-white bg-green-500 py-3 rounded-lg shadow-md hover:bg-green-600 transition-all duration-300 ease-in-out">Quản lí đặt lịch</p>
+                        <p className="text-lg font-semibold text-center text-white bg-green-500 py-3 rounded-lg shadow-md hover:bg-green-600 transition-all duration-300 ease-in-out">Quản lý đặt lịch</p>
                     </Link>
                 </div>
             </div>

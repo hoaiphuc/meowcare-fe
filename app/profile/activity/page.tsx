@@ -43,7 +43,7 @@ const Page = () => {
 
     useEffect(() => {
         setIsLoading(true)
-        axiosClient(`booking-orders/user/pagination?id=${userId}&page=${page}&size=5&sort=createdAt&direction=DESC`)
+        axiosClient(`booking-orders/user/pagination?id=${userId}&page=${page}&size=5&sort=createdAt&direction=ASC`)
             .then((res) => {
                 setData(res.data)
                 setPages(res.data.totalPages)

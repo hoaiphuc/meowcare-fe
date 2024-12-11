@@ -1,22 +1,20 @@
 'use client'
 
-import React, { useEffect, useRef, useState } from 'react'
-import styles from './info.module.css'
-import { Autocomplete, AutocompleteItem, Avatar, Button, Chip, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Textarea, useDisclosure } from '@nextui-org/react'
-import CatSitterSkill from '@/app/lib/CatSitterSkill.json'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faCamera, faCheck, faFilePdf, faXmark } from '@fortawesome/free-solid-svg-icons'
-import axiosClient from '@/app/lib/axiosClient'
-import { CatSitter, Certificate, ProfilePicture, UserLocal } from '@/app/constants/types/homeType'
-import { useRouter } from 'next/navigation'
-import "leaflet/dist/leaflet.css";
-import useGeoapify from '@/app/hooks/useGeoapify';
+import React, { useRef, useState } from 'react'
+import styles from './createinfo.module.css'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
-import { toast } from 'react-toastify'
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { storage } from '@/app/utils/firebase';
+import { CatSitter, Certificate, ProfilePicture, UserLocal } from '@/app/constants/types/homeType';
+import { faCamera, faCheck, faFilePdf, faXmark } from '@fortawesome/free-solid-svg-icons';
 import { v4 as uuidv4 } from 'uuid';
-
+import { Autocomplete, AutocompleteItem, Avatar, Button, Chip, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Textarea, useDisclosure } from '@nextui-org/react';
+import { storage } from '@/app/utils/firebase';
+import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
+import CatSitterSkill from '@/app/lib/CatSitterSkill.json'
+import axiosClient from '@/app/lib/axiosClient';
+import useGeoapify from '@/app/hooks/useGeoapify';
+import { toast } from 'react-toastify';
 
 const MapComponent = dynamic(() => import('@/app/components/MapPick'), {
     ssr: false,
@@ -33,7 +31,7 @@ interface Address {
     formatted: string
 }
 
-const Info = () => {
+const CreateInfo = () => {
     const router = useRouter()
     const [selectedItems, setSelectedItems] = useState<Skill[]>([]);
     const [sitterData, setSitterData] = useState<CatSitter>();
@@ -41,25 +39,13 @@ const Info = () => {
     const [query, setQuery] = useState<string>('')
     const geoSuggestions = useGeoapify(query);
     const [showSuggestions, setShowSuggestions] = useState<boolean>(false);
+    const { isOpen, onOpen, onOpenChange } = useDisclosure();
     const hiddenFileInput = useRef<HTMLInputElement>(null);
     const hiddenImageInput = useRef<HTMLInputElement>(null);
     const hiddenCargoInput = useRef<HTMLInputElement>(null);
     const [certificates, setCertificates] = useState<Certificate[]>([])
     const [selectedPdf, setSelectedPdf] = useState<string>();
-    const { isOpen, onOpen, onOpenChange } = useDisclosure();
-    //for update certificates
-    const [removeList, setRemoveList] = useState<Certificate[]>([]);
-    const [addList, setAddList] = useState<Certificate[]>([]);
-    const [selectPicture, setSelectPicture] = useState<ProfilePicture[]>([
-        //     {
-        //     id: uuidv4(),
-        //     imageName: "",
-        //     imageUrl: "",
-        //     isCargoProfilePicture: true,
-        //     isNew: true,
-        //     isDeleted: false,
-        // }
-    ])
+    const [selectPicture, setSelectPicture] = useState<ProfilePicture[]>([])
 
     const getUserFromStorage = () => {
         if (typeof window !== "undefined") {
@@ -91,46 +77,6 @@ const Info = () => {
         }) as CatSitter); // Type assertion to satisfy TypeScript
     };
 
-    //get info
-    useEffect(() => {
-        try {
-            axiosClient(`sitter-profiles/sitter/${userId}`)
-                .then((res) => {
-                    setSitterData(res.data)
-                    if (res.data.profilePictures) {
-                        setSelectPicture(res.data.profilePictures)
-                    }
-                    if (res.data.location) {
-                        setAddress(res.data.location);
-                    }
-                })
-                .catch(() => { })
-
-            axiosClient(`certificates/user/${userId}`)
-                .then((res) => {
-                    setCertificates(res.data)
-                })
-                .catch((e) => {
-                    console.log(e);
-                })
-        } catch (error) {
-
-        }
-    }, [userId])
-
-
-
-    const handleLocationChange = (lat: number, lng: number) => {
-        console.log(lat);
-        console.log(lng);
-
-        setSitterData((prevData) => ({
-            ...prevData,
-            latitude: lat,
-            longitude: lng,
-        }) as CatSitter);
-    };
-
     const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newAddress = e.target.value;
         setAddress(newAddress);
@@ -138,7 +84,15 @@ const Info = () => {
         setShowSuggestions(true)
     };
 
-    // Handle suggestion click
+    const handleLocationChange = (lat: number, lng: number) => {
+        setSitterData((prevData) => ({
+            ...prevData,
+            latitude: lat,
+            longitude: lng,
+        }) as CatSitter);
+    };
+
+
     const handleSuggestionClick = async (suggestion: Address) => {
         setAddress(suggestion.formatted);
         setQuery('');
@@ -148,136 +102,71 @@ const Info = () => {
         setSitterData((prev) => ({
             ...prev,
             latitude: suggestion.lat,
-            longitude: suggestion.lon
+            longitude: suggestion.lon,
         }) as CatSitter);
-
-        // const selectedSuggestion = geoSuggestions.find(s => s.properties.formatted === suggestion);
-        // if (selectedSuggestion) {
-        //     const { lat, lon } = selectedSuggestion.properties;
-        //     handleLocationChange(lat, lon);
-        //     // Update the sitterData location field:
-        //     setSitterData((prev) => ({
-        //         ...prev,
-        //         location: formattedAddress
-        //     }));
-        // }
     };
 
-    // Update profile
-    const handleUpdate = async () => {
+    //create profile
+    const handleCreate = async () => {
         try {
-            if (removeList && removeList.length > 0) {
-                await Promise.all(
-                    removeList.map(async (item) => {
-                        try {
-                            if (item.id) {
-                                await axiosClient.delete(`certificates/${item.id}`);
-                            } else {
-                                return;
-                            }
-                        } catch (error) {
-                            toast.error("Lỗi khi gỡ chứng chỉ");
-                        }
-                    })
-                );
-                setRemoveList([]);
-            }
 
-            if (addList && addList.length > 0) {
-                for (const item of addList) {
+            const uploadedPictures = await Promise.all(
+                selectPicture.map(async (picture) => {
+                    const response = await fetch(picture.imageUrl); // Convert blob URL to Blob
+                    const blob = await response.blob();
+                    const fileName = `${uuidv4()}_profile_picture`;
+                    const storageRef = ref(storage, `sitterprofilepictures/${fileName}`);
+                    await uploadBytes(storageRef, blob);
+                    const downloadUrl = await getDownloadURL(storageRef);
+                    return {
+                        ...picture,
+                        imageUrl: downloadUrl, // Replace the local URL with Firebase URL
+                    };
+                })
+            );
+
+            const completeSitterData = {
+                ...sitterData, // Include existing data
+                location: address,
+                profilePictures: uploadedPictures, // Add uploaded pictures
+            } as CatSitter;
+
+            const profileResponse = await axiosClient.post("sitter-profiles", completeSitterData)
+
+            if (profileResponse.status === 201 && certificates && certificates.length > 0) {
+                for (const item of certificates) {
                     if (item.certificateUrl.startsWith("blob:")) {
                         try {
-                            // Convert the local URL (blob) to a Blob object
-                            const response = await fetch(item.certificateUrl);
+                            const response = await fetch(item.certificateUrl); // Convert local URL to Blob
                             const blob = await response.blob();
-
                             const fileName = `${uuidv4()}_${item.certificateName}`;
                             const storageRef = ref(storage, `certificates/${fileName}`);
-
-                            // Upload the Blob
                             await uploadBytes(storageRef, blob);
-
-                            // Get the download URL
                             const downloadUrl = await getDownloadURL(storageRef);
 
-                            // Prepare item data with the download URL
+                            // Prepare certificate data
                             const newCertificate = {
                                 ...item,
                                 certificateUrl: downloadUrl,
                             };
 
-                            // Save the certificate data to the database
+                            // Post certificate data to the API
                             await axiosClient.post("certificates", newCertificate);
                         } catch (error) {
                             toast.error("Lỗi khi thêm chứng chỉ");
+                            console.error("Certificate upload error:", error);
                         }
                     }
                 }
-                setAddList([]);
+                setCertificates([]); // Clear certificates after processing
             }
 
-            //profile picture
-            // const toAdd = selectPicture.filter((picture) => picture.isNew && !picture.isDeleted);
-            // const toDelete = selectPicture.filter((picture) => !picture.isNew && picture.isDeleted);
-
-            const uploadedPictures = await Promise.all(
-                selectPicture.map(async (picture) => {
-                    if (picture.isNew) {
-                        const response = await fetch(picture.imageUrl);
-                        const blob = await response.blob();
-                        const fileName = `${uuidv4()}_profile_picture`;
-                        const storageRef = ref(storage, `sitterprofilepictures/${fileName}`);
-                        await uploadBytes(storageRef, blob);
-                        const downloadUrl = await getDownloadURL(storageRef);
-
-                        return {
-                            ...picture,
-                            imageUrl: downloadUrl,
-                            isNew: false, // Mark as no longer new
-                        };
-                    }
-                    return picture; // For existing pictures, return as is
-                })
-            );
-
-            // await axiosClient.put(`sitter-profiles/${sitterData?.id}/profile-pictures`, uploadedPictures);
-
-
-
-            // // Delete profile pictures
-            // if (toDelete.length > 0) {
-            //     try {
-            //         await axiosClient.delete(`sitter-profiles/${sitterData?.id}/profile-pictures`, {
-            //             data: toDelete, // Pass the array in the `data` field
-            //         });
-            //     } catch (error) {
-            //         console.error("Error deleting profile pictures:", error);
-            //         toast.error("Lỗi khi xóa hình ảnh hồ sơ.");
-            //     }
-            // }
-
-            const updatedSitterData = {
-                ...sitterData,
-                location: address, // Include address as location
-                profilePictures: uploadedPictures
-            };
-
-            axiosClient.put(`sitter-profiles/${sitterData?.id}`, updatedSitterData)
-                .then(() => {
-                    toast.success("Cập nhật hồ sơ thành công");
-                    router.push("/sitter/setupservice");
-                })
-                .catch((error) => {
-                    console.error("Error updating profile:", error);
-                });
+            toast.success("Hồ sơ đã được tạo thành công!");
+            router.push("/sitter/setupservice");
         } catch (error) {
-            console.error("Error in handleUpdate:", error);
-        }
-    };
 
-    // const handleRemoveEvidence = (index: number) => {
-    //     setSelectedTaskEvidence((prevEvidence) => prevEvidence.filter((_, i) => i !== index));
-    // };
+        }
+    }
 
     //certificate upload
     const handleCertificateClick = () => {
@@ -285,26 +174,7 @@ const Info = () => {
             hiddenFileInput.current.click();
         }
     };
-
-    // const handleCertificateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    //     if (event.target.files) {
-    //         const filesArray = Array.from(event.target.files);
-
-    //         const newCertificates = filesArray.map((file) => ({
-    //             id: "",
-    //             userId: sitterData?.sitterId || "",
-    //             certificateType: file.type.includes("pdf") ? "PDF" : "IMAGE",
-    //             certificateName: file.name,
-    //             institutionName: "",
-    //             certificateUrl: URL.createObjectURL(file),
-    //             description: ""
-    //         }));
-
-    //         // Update the certificates state
-    //         setCertificates((prevCertificates) => [...prevCertificates, ...newCertificates]);
-    //     }
-    // };
-    const handleImageUpdateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.files) {
             const filesArray = Array.from(event.target.files);
             const newCertificates = filesArray.map((file) => ({
@@ -319,23 +189,12 @@ const Info = () => {
 
             // Update the selectedTaskEvidence to display the new images
             setCertificates((prevImages) => [...prevImages, ...newCertificates]);
-
-            // Add the new images to the addList for tracking
-            setAddList((prevList) => [...prevList, ...newCertificates]);
         }
     };
 
     const handleRemoveUpdateCertificate = (certificate: Certificate) => {
         setCertificates((prev) => prev.filter((item) => item !== certificate));
-        if (certificate.id) {
-            // Existing item fetched from the server, add to removeList
-            setRemoveList((prev) => [...prev, certificate]);
-        } else {
-            // Newly added item, remove from addList
-            setAddList((prev) => prev.filter((item) => item !== certificate));
-        }
     };
-
 
     //======================================= picture profile update ==================================
     //image upload
@@ -357,13 +216,12 @@ const Info = () => {
 
             const filesArray = Array.from(event.target.files);
             const newPictures = filesArray.map((file) => ({
-                id: uuidv4(),
+                requestId: uuidv4(),
                 name: "",
                 imageUrl: URL.createObjectURL(file),
                 isCargoProfilePicture: isCargo,
                 description: "",
                 isNew: true,
-                isDeleted: false
             }));
             setSelectPicture((prevImages) => [...prevImages, ...newPictures]);
         }
@@ -375,8 +233,7 @@ const Info = () => {
             return; // Exit if the ID is undefined
         }
 
-        // Update the list to exclude the item with the matching ID
-        setSelectPicture((prevPictures) => prevPictures.filter((picture) => picture.id !== id));
+        setSelectPicture((prevPictures) => prevPictures.filter((picture) => picture.requestId !== id));
     };
 
     return (
@@ -409,10 +266,10 @@ const Info = () => {
                             multiple
                         />
                         {selectPicture && selectPicture.filter((picture) => picture.isCargoProfilePicture === false && !picture.isDeleted).map((photo) => (
-                            <div key={photo.id} className="relative w-36 h-36">
+                            <div key={photo.requestId} className="relative w-36 h-36">
                                 <Avatar className="w-full h-full" radius="sm" src={photo.imageUrl} />
                                 <button
-                                    onClick={() => markAsDeleted(photo.id)}
+                                    onClick={() => markAsDeleted(photo.requestId)}
                                     className="absolute top-0 right-0 p-1 rounded-full w-8 h-8 bg-black bg-opacity-50 text-white"
                                 >
                                     ✕
@@ -424,7 +281,7 @@ const Info = () => {
 
                 <div className='mt-5'>
                     <h2 className={styles.h2}>Giới thiệu</h2>
-                    <Textarea value={sitterData?.bio} name='bio' onChange={handleInputChange} />
+                    <Textarea value={sitterData?.bio} name='bio' onChange={handleInputChange} placeholder="Thông tin về bạn hoặc 1 vài sở thích của bạn" />
                 </div>
 
                 <div className='mt-5 flex flex-col gap-2'>
@@ -487,7 +344,7 @@ const Info = () => {
                     <h3 className={styles.h3}>Mô tả</h3>
                     <Textarea placeholder="Hãy cho mọi người biết về môi trường sống và chuồng nuôi" value={sitterData?.environment} name='environment' onChange={handleInputChange} />
                     <h3 className={styles.h3}>Số lượng mèo bạn có thể chăm sóc</h3>
-                    <Input placeholder="Số lượng mèo có thể chăm sóc" value={sitterData?.maximumQuantity !== undefined ? sitterData.maximumQuantity.toString() : ""} name='maximumQuantity' onChange={handleInputChange} />
+                    <Input type='number' placeholder="Số lượng mèo có thể chăm sóc" value={sitterData?.maximumQuantity !== undefined ? sitterData.maximumQuantity.toString() : ""} name='maximumQuantity' onChange={handleInputChange} />
                     <h3 className={styles.h3}>Hình ảnh môi trường và chuồng, lồng</h3>
                     <div className='flex overflow-x-auto gap-2'>
                         <button
@@ -507,10 +364,10 @@ const Info = () => {
                             multiple
                         />
                         {selectPicture.filter((picture) => picture.isCargoProfilePicture && !picture.isDeleted).map((photo) => (
-                            <div key={photo.id} className="relative w-36 h-36">
+                            <div key={photo.requestId} className="relative w-36 h-36">
                                 <Avatar className="w-full h-full" radius="sm" src={photo.imageUrl} />
                                 <button
-                                    onClick={() => markAsDeleted(photo.id)}
+                                    onClick={() => markAsDeleted(photo.requestId)}
                                     className="absolute top-0 right-0 p-1 rounded-full w-8 h-8 bg-black bg-opacity-50 text-white"
                                 >
                                     ✕
@@ -534,7 +391,7 @@ const Info = () => {
                             type="file"
                             accept="image/*,application/pdf"
                             ref={hiddenFileInput}
-                            onChange={handleImageUpdateChange}
+                            onChange={handleImageChange}
                             style={{ display: 'none' }}
                             multiple
                         />
@@ -607,8 +464,8 @@ const Info = () => {
                 </div>
 
 
-                {/* <Button onClick={handleCreate} className='text-white bg-maincolor'>Lưu</Button> */}
-                <Button onClick={handleUpdate} className='text-white bg-maincolor'>Cập nhật</Button>
+                <Button onClick={handleCreate} className='text-white bg-maincolor'>Lưu</Button>
+                {/* <Button onClick={handleUpdate} className='text-white bg-maincolor'>Cập nhật</Button> */}
             </div>
 
             <Modal isOpen={isOpen} onOpenChange={onOpenChange} size='5xl' className='z-[50] h-[800px] w-[1500px]'>
@@ -636,4 +493,4 @@ const Info = () => {
     )
 }
 
-export default Info
+export default CreateInfo

@@ -11,28 +11,62 @@ import Link from 'next/link';
 import dynamic from 'next/dynamic';
 const Map = dynamic(() => import('../components/Map'), { ssr: false });
 import axiosClient from '../lib/axiosClient';
-import { CatSitter } from '../constants/types/homeType';
+import { CatSitter, UserLocal } from '../constants/types/homeType';
 import useGeoapify from '../hooks/useGeoapify';
 import styles from './service.module.css'
 
-// interface GeoapifySuggestion {
-//     properties: {
-//         formatted: string;
-//     };
-// }
+interface CatSitterData {
+    content: [CatSitter]
+}
+
+interface Address {
+    lon: number
+    lat: number
+    formatted: string
+}
 
 const Service = () => {
     const [selectedService, setSelectedService] = useState<string>('1');
-    const [catSitters, setCatSitters] = useState<CatSitter[]>([]);
+    const [catSitters, setCatSitters] = useState<CatSitterData>();
     const [price, setPrice] = useState<number[]>([20000, 2000000]);
-
     //search location 
     const [address, setAddress] = useState<string>('');
-    // const [geoSuggestions, setGeoSuggestions] = useState([]);
-    // const geoSuggestions = useGeoapify(address);
     const [query, setQuery] = useState<string>('')
     const geoSuggestions = useGeoapify(query);
     const [showSuggestions, setShowSuggestions] = useState<boolean>(false);
+    const [lat, setLat] = useState<number>();
+    const [lng, setLng] = useState<number>();
+    const [name, setName] = useState("")
+
+    const getUserFromStorage = () => {
+        if (typeof window !== "undefined") {
+            const storedUser = localStorage.getItem("user");
+            return storedUser ? JSON.parse(storedUser) : null;
+        }
+    };
+    const user: UserLocal | null = getUserFromStorage();
+
+    useEffect(() => {
+        if (user && user.address) {
+            const fetchLatLng = async () => {
+                try {
+                    const response = await fetch(
+                        `https://api.geoapify.com/v1/geocode/search?text=${encodeURIComponent(
+                            user.address
+                        )}&apiKey=7eaa555d1d1f4dbe9b2792ee9c726f10`
+                    );
+                    const data = await response.json();
+                    if (data && data.features && data.features[0]) {
+                        setLat(data.features[0].geometry.coordinates[1]);
+                        setLng(data.features[0].geometry.coordinates[0]);
+                    }
+                } catch (error) {
+                    console.error("Error fetching geocoding data:", error);
+                }
+            };
+            fetchLatLng();
+        }
+    }, [user]);
 
     const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newAddress = e.target.value;
@@ -41,10 +75,12 @@ const Service = () => {
         setShowSuggestions(true)
     };
     // Handle suggestion click
-    const handleSuggestionClick = (suggestion: string) => {
-        setAddress(suggestion);
+    const handleSuggestionClick = (suggestion: Address) => {
+        setAddress(suggestion.formatted);
         setQuery('');
         setShowSuggestions(false);
+        setLat(suggestion.lat)
+        setLng(suggestion.lon)
     };
 
     const listItemRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
@@ -59,7 +95,7 @@ const Service = () => {
 
     const services = [
         { id: '1', serviceName: 'Gửi thú cưng' },
-        { id: '2', serviceName: 'Trông tại nhà' },
+        { id: '2', serviceName: 'Dịch vụ khác' },
     ];
 
     const [selectedCatNumber, setSelectedCatNumber] = useState<string | null>(null);
@@ -88,9 +124,10 @@ const Service = () => {
     //get cat sitters
     useEffect(() => {
         try {
-            axiosClient('sitter-profiles')
+            axiosClient(`sitter-profiles/search?latitude=${lat}&longitude=${lng}&name=${name}&page=1&size=10&sort=distance&direction=DESC`)
                 .then((res) => {
-                    setCatSitters(res.data);
+                    const filteredData = res.data.content.filter((data: CatSitter) => data.distance <= 12)
+                    setCatSitters({ ...res.data, content: filteredData });
                 })
                 .catch((e) => {
                     console.log(e);
@@ -99,7 +136,7 @@ const Service = () => {
             console.log(error);
 
         }
-    }, [])
+    }, [lat, lng, name])
 
     return (
         <div className='flex flex-cols-3 p-[5px] justify-center'>
@@ -120,6 +157,13 @@ const Service = () => {
                     ))}
                 </Select>
 
+                <h2 className={styles.h2}>Tên người chăm sóc</h2>
+                <Input
+                    value={name}
+                    variant='bordered'
+                    onChange={(e) => setName(e.target.value)}
+                />
+
                 <h2 className={styles.h2}>Địa chỉ</h2>
                 <div className="relative">
                     <Input
@@ -135,7 +179,7 @@ const Service = () => {
                                 <div
                                     key={index}
                                     className={styles.suggestionItem}
-                                    onClick={() => handleSuggestionClick(suggestion.properties.formatted)}
+                                    onClick={() => handleSuggestionClick(suggestion.properties as Address)}
                                 >
                                     <p>{suggestion.properties.formatted}</p>
                                 </div>
@@ -226,9 +270,9 @@ const Service = () => {
             {/* 2 */}
             <div className='flex flex-col justify-start items-start w-[909px] text-black bg-[#FFF6ED] h-[900px] overflow-auto scrollbar-hide px-4'>
                 {
-                    catSitters.length > 0 ?
+                    catSitters && catSitters.content.length > 0 ?
                         (
-                            catSitters.map((catSitter, index) => (
+                            catSitters.content.map((catSitter, index) => (
                                 <div
                                     key={catSitter.id}
                                     ref={(el) => {
@@ -317,7 +361,7 @@ const Service = () => {
             </div >
             {/* 3 */}
             <div className='w-[735px] flex'>
-                <Map markers={catSitters} onMarkerClick={scrollToListItem} />
+                <Map markers={catSitters ? catSitters.content : []} onMarkerClick={scrollToListItem} defaultLat={lat} defaultLng={lng} />
             </div>
         </div >
     )

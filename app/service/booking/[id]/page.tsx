@@ -199,6 +199,8 @@ const Page = () => {
             note: note,
             startDate,
             endDate,
+            isHouseSitting: true,
+            orderType: "OVERNIGHT",
             paymentMethod: paymentMethod === "CAPTURE_WALLET" || paymentMethod === "PAY_WITH_ATM" ? "MOMO" : "WALLET"
         }
 

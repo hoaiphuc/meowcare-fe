@@ -15,8 +15,7 @@ import { useParams } from 'next/navigation';
 import { CatSitter, Certificate, Service } from '@/app/constants/types/homeType';
 import Loading from '@/app/components/Loading';
 import Image from 'next/image';
-
-
+import Lightbox from 'yet-another-react-lightbox';
 
 const Page = () => {
     const params = useParams();
@@ -31,7 +30,10 @@ const Page = () => {
     const [certificates, setCertificates] = useState<Certificate[]>([])
     const [selectedPdf, setSelectedPdf] = useState<string>();
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
-
+    const { isOpen: isImageOpen, onOpen: onImageOpen, onOpenChange: onImageOpenChange } = useDisclosure();
+    const [lightboxOpen, setLightboxOpen] = useState(false);
+    const [lightboxIndex, setLightboxIndex] = useState(0);
+    const [selectedImage, setSelectedImage] = useState<string | null>(null);
     // check user
     useEffect(() => {
         if (typeof window !== 'undefined') {
@@ -39,6 +41,16 @@ const Page = () => {
             setIsUser(Boolean(authToken));
         }
     }, []);
+
+    const handleImageClick = (index: number) => {
+        setLightboxIndex(index);
+        setLightboxOpen(true);
+    };
+
+    const handleImageCertificateClick = (imageUrl: string) => {
+        setSelectedImage(imageUrl);
+        onImageOpen();
+    };
 
     const handleClick = () => {
         setIsClicked(!isClicked); // Toggle the state
@@ -208,7 +220,7 @@ const Page = () => {
             {/* 2 */}
             <div className='w-[745px]'>
                 <div className='bg-transparent p-3'>
-                    <PhotoGallery photos={sitterProfile?.profilePictures} />
+                    <PhotoGallery photos={sitterProfile?.profilePictures.filter((photo) => photo.isCargoProfilePicture === false)} />
                 </div>
                 <div className='mt-20'>
                     <h1 className={styles.h1}>Giới thiệu</h1>
@@ -291,19 +303,23 @@ const Page = () => {
 
                 <h1 className='mt-10 text-xl font-semibold'>An toàn, tin cậy & môi trường</h1>
                 <p className={styles.p}>{sitterProfile?.environment}</p>
+                <p className={styles.p}>Số lượng thú cưng có thể nhận: {sitterProfile?.maximumQuantity}</p>
                 <div className='flex overflow-x-auto gap-2'>
-                    {sitterProfile?.profilePictures.map((photo, index) => (
-                        <div key={index} className="relative w-36 h-36">
+                    {sitterProfile?.profilePictures.filter((photo) => photo.isCargoProfilePicture === true).map((photo, index) => (
+                        <div key={index} className="relative w-36 h-36" onClick={() => handleImageClick(index)}>
                             <Avatar className="w-full h-full" radius="sm" src={photo.imageUrl} />
                         </div>
                     ))}
                 </div>
+
+                {/* Certificate  */}
                 <h1 className='mt-10 text-xl font-semibold'>Chứng chỉ</h1>
                 <div className='flex overflow-x-auto gap-2'>
                     {certificates.map((certificate, index) => (
                         <div key={index} className="relative w-36 h-36">
                             {certificate.certificateType === "IMAGE" ? (
                                 <Avatar
+                                    onClick={() => handleImageCertificateClick(certificate.certificateUrl)}
                                     src={certificate.certificateUrl}
                                     alt={`Certificate ${index + 1}`}
                                     className="w-full h-full object-cover rounded-md"
@@ -346,6 +362,33 @@ const Page = () => {
                     )}
                 </ModalContent>
             </Modal>
+            <Modal isOpen={isImageOpen} onOpenChange={onImageOpenChange} size="lg" className="h-[800px] w-[1500px]">
+                <ModalContent>
+                    {(onClose) => (
+                        <>
+                            <ModalHeader>Chứng chỉ</ModalHeader>
+                            <ModalBody>
+                                {selectedImage && (
+                                    <Avatar src={selectedImage} alt="Selected Certificate" className="w-full h-auto object-contain" radius="none" />
+                                )}
+                            </ModalBody>
+                            <ModalFooter>
+                                <Button color="danger" variant="light" onPress={onClose}>
+                                    Close
+                                </Button>
+                            </ModalFooter>
+                        </>
+                    )}
+                </ModalContent>
+            </Modal>
+            <Lightbox
+                open={lightboxOpen}
+                close={() => setLightboxOpen(false)}
+                index={lightboxIndex}
+                slides={sitterProfile?.profilePictures
+                    .filter((photo) => photo.isCargoProfilePicture === true)
+                    .map((photo) => ({ src: photo.imageUrl }))}
+            />
         </div>
     )
 }
