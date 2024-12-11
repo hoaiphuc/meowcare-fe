@@ -2,9 +2,9 @@ import { ProfileSidebarItem } from '@/app/constants/types/homeType';
 import {
     faAddressCard,
     faWallet,
-    faFileSignature,
     faClockRotateLeft,
     faList,
+    faCat,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
@@ -42,7 +42,7 @@ export const profileSidebar: ProfileSidebarItem[] = [
         path: '/profile/pet',
         icon: (
             <FontAwesomeIcon
-                icon={faFileSignature}
+                icon={faCat}
                 className="h-7 w-7 text-[#902C6C]"
             />
         ),

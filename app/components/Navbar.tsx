@@ -59,7 +59,7 @@ const Navbar = () => {
                     setMenuItems([
                         { name: 'Trang chủ', path: '/' },
                         { name: 'Dịch vụ', path: '/service' },
-                        { name: 'Quản lí dịch vụ', path: '/sitter' },
+                        { name: 'Quản lý dịch vụ', path: '/sitter' },
                     ]);
                 } else {
                     // setIsSitter(false);

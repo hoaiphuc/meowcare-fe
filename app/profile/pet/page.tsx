@@ -339,7 +339,7 @@ const Page = () => {
         <div className="w-[891px] bg-white rounded-2xl shadow-2xl p-5 flex flex-col items-start justify-start">
             {isLoading ? <Skeleton /> :
                 <div>
-                    <h1 className='text-2xl font-bold'>Thú cưng của bạn</h1>
+                    <h1 className='text-2xl font-bold'>Mèo cưng của bạn</h1>
                     <h2 className='mb-4'>Thêm mèo cưng của bạn hoặc chỉnh sửa thông tin</h2>
                     <div className='grid grid-cols-2 gap-5'>
                         <div
@@ -347,7 +347,7 @@ const Page = () => {
                             onClick={onOpenAdd}
                         >
                             <FontAwesomeIcon icon={faCirclePlus} className='fa-2x text-[#902C6C]' />
-                            <h1 className='text-xl'>Thêm thú cưng </h1>
+                            <h1 className='text-xl'>Thêm hồ sơ cho mèo của bạn</h1>
                         </div>
                         {pets && pets.slice().reverse().map((pet) => (
                             <div className={styles.pet} key={pet.id}>
