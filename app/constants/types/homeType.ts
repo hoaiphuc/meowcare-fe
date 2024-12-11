@@ -34,6 +34,7 @@ export interface UserState {
 export interface UserLocal {
   id: string;
   token: string;
+  address: string;
   roles: [
     {
       roleName: string;
@@ -82,6 +83,7 @@ export type CatSitter = {
   status: string;
   latitude: number;
   longitude: number;
+  distance: number;
   profilePictures: [ProfilePicture];
 };
 
