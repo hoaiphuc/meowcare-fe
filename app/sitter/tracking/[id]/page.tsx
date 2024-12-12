@@ -5,7 +5,7 @@ import DateFormat from '@/app/components/DateFormat';
 import { CareSchedules, Order, PetProfile, Task } from '@/app/constants/types/homeType';
 import axiosClient from '@/app/lib/axiosClient';
 import { storage } from '@/app/utils/firebase';
-import { faCamera, faCheck, faVideo } from '@fortawesome/free-solid-svg-icons';
+import { faCamera, faCheck, faClipboardCheck, faPaw, faVideo } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Accordion, AccordionItem, Avatar, Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Tab, Tabs, useDisclosure } from '@nextui-org/react';
 import { formatDate } from 'date-fns';
@@ -543,7 +543,7 @@ const Tracking = () => {
                                         <h2>Ngày bắt đầu: {DateFormat(dataOrder.startDate)}</h2>
                                         <h2>Ngày kết thúc: {DateFormat(dataOrder.endDate)}</h2>
                                         <h2>Ghi chú: {dataOrder.note}</h2>
-                                        <Button className='' onClick={() => completeBooking()}>Hoàn thành dịch vụ</Button>
+                                        <Button className='w-full bg-maincolor text-white my-10' radius='sm' onClick={() => completeBooking()}>Hoàn thành dịch vụ</Button>
                                     </div>
                                 </Tab>
                                 <Tab key="chat" title="Nhắn tin">
@@ -562,7 +562,7 @@ const Tracking = () => {
             </div>
 
             {/* tracking */}
-            <div className='bg-white w-[700px] p-10 shadow-lg rounded-md'>
+            <div className='bg-white w-[900px] p-10 shadow-lg rounded-md'>
                 <h1 className='text-3xl font-semibold mb-5'>Theo dõi lịch chăm sóc</h1>
                 {dateList.length > 0 ? (
                     <div className='flex gap-3 flex-wrap'>
@@ -602,30 +602,43 @@ const Tracking = () => {
                                     }
                                 >
                                     {tasks.map((task) => (
-                                        <div key={task.id} className="flex gap-3 items-center">
-                                            {task.haveEvidence && (
-                                                <FontAwesomeIcon icon={faCheck} className="text-green-500" />
-                                            )}
-                                            <h3 className={task.haveEvidence ? 'text-green-500' : ''}>
-                                                {task.description}
-                                            </h3>
-                                            <Button onClick={() => { setSelectedCat(task.petProfile), onOpenCat() }}>Xem mèo</Button>
+                                        <div key={task.id} className="flex gap-2 items-center justify-between">
+                                            <div>
+                                                {task.haveEvidence && (
+                                                    <FontAwesomeIcon icon={faCheck} className="text-green-500" />
+                                                )}
+                                                <h3 className={task.haveEvidence ? 'text-green-500' : ''}>
+                                                    {task.description}
+                                                </h3>
+                                            </div>
 
-                                            {task.haveEvidence ? (
+                                            <div className='flex gap-1'>
                                                 <Button
-                                                    className="bg-btnbg text-white px-7"
-                                                    onClick={() => handleOpenUpdate(task)}
+                                                    className="bg-gradient-to-r from-maincolor to-[#db6eb3] text-white"
+                                                    onClick={() => { setSelectedCat(task.petProfile), onOpenCat() }}
                                                 >
-                                                    Xem hoạt động
+                                                    <FontAwesomeIcon icon={faPaw} />
+                                                    Xem mèo
                                                 </Button>
-                                            ) : (
-                                                <Button
-                                                    className="bg-btnbg text-white px-7"
-                                                    onClick={() => handleOpenEvidenceTask(task)}
-                                                >
-                                                    Cập nhật hoạt động
-                                                </Button>
-                                            )}
+                                                {task.haveEvidence ? (
+                                                    <Button
+                                                        className="bg-gradient-to-r from-btnbg to-[#5f91ec] text-white px-7"
+                                                        onClick={() => handleOpenUpdate(task)}
+                                                    >
+                                                        <FontAwesomeIcon icon={faClipboardCheck} />
+                                                        Xem hoạt động
+                                                    </Button>
+                                                ) : (
+                                                    <Button
+                                                        className="bg-gradient-to-r from-btnbg to-[#5f91ec] text-white px-7"
+                                                        onClick={() => handleOpenEvidenceTask(task)}
+                                                    >
+                                                        <FontAwesomeIcon icon={faClipboardCheck} />
+                                                        Cập nhật hoạt động
+                                                    </Button>
+                                                )}
+                                            </div>
+
                                         </div>
                                     ))}
                                 </AccordionItem>
@@ -633,7 +646,10 @@ const Tracking = () => {
                         })}
                     </Accordion>
                 ) : (
-                    <p>Hôm nay không có lịch chăm sóc phụ</p>
+                    <div className='flex items-center justify-center my-7'>
+                        <p className='font-semibold'>Vui lòng chọn ngày để xem lịch</p>
+                    </div>
+
                 )}
             </div>
             <Modal isOpen={isOpen} onOpenChange={onOpenChange} isDismissable={false} isKeyboardDismissDisabled={true} size='3xl'>

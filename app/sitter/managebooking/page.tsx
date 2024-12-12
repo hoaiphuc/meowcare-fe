@@ -2,6 +2,8 @@
 
 import { Orders, UserLocal } from '@/app/constants/types/homeType';
 import axiosClient from '@/app/lib/axiosClient'
+import { faMinus } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Avatar, Navbar, NavbarContent, NavbarItem, Pagination } from '@nextui-org/react';
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react'
@@ -112,8 +114,14 @@ const Page = () => {
                                         </div>
                                         <div className='text-secondary'>Hôm nay</div>
                                     </div>
-                                    <h1 className='mb-5'>{activity.user.fullName}: {activity.note}</h1>
-                                    <div>Chăm sóc mèo tại nhà: <span >15 tháng 10</span> - <span className=''>21 tháng 10</span></div>
+                                    <h1 className='mb-5'>{activity.user.fullName}: {activity.note ? activity.note : "Không có ghi chú"}</h1>
+                                    <div className='flex'>
+                                        <div className='font-semibold'>{activity.orderType === "OVERNIGHT" ? "Chăm sóc mèo tại nhà: " : "Dịch vụ khác: "} </div>
+                                        <div className='flex items-center justify-center gap-2 ml-2'>
+                                            {new Date(activity.startDate).toLocaleDateString()} <FontAwesomeIcon icon={faMinus} /> {new Date(activity.endDate).toLocaleDateString()}
+
+                                        </div>
+                                    </div>
 
                                     <h2 className={`${statusColors[activity.status] || 'text-black'}`}>
                                         {statusLabels[activity.status] || ""}

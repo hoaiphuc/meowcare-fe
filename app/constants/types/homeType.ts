@@ -190,6 +190,8 @@ export type Order = {
   status: string;
   createdAt: Date;
   updatedAt: Date;
+  isHouseSitting: boolean;
+  orderType: string;
   user: {
     email: string;
     fullName: string;
