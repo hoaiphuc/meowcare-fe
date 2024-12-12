@@ -7,6 +7,9 @@ import { Orders, UserLocal } from '@/app/constants/types/homeType'
 import axiosClient from '@/app/lib/axiosClient'
 import { Icon } from '@iconify/react/dist/iconify.js'
 import Link from 'next/link'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faMinus } from '@fortawesome/free-solid-svg-icons'
+import { formatDate } from 'date-fns'
 
 const Page = () => {
     const [data, setData] = useState<Orders>();
@@ -43,7 +46,7 @@ const Page = () => {
 
     useEffect(() => {
         setIsLoading(true)
-        axiosClient(`booking-orders/user/pagination?id=${userId}&page=${page}&size=5&sort=createdAt&direction=ASC`)
+        axiosClient(`booking-orders/user/pagination?id=${userId}&page=${page}&size=5&sort=createdAt&direction=DESC`)
             .then((res) => {
                 setData(res.data)
                 setPages(res.data.totalPages)
@@ -124,7 +127,7 @@ const Page = () => {
                                                         <div>
                                                             <h2>
                                                                 <span className={styles.title}>Dịch vụ: </span>
-                                                                {activity.bookingDetailWithPetAndServices[0].service.name}
+                                                                {activity.orderType === "OVERNIGHT" ? "Gửi thú cưng" : "Dịch vụ khác"}
                                                             </h2>
                                                             <h2>
                                                                 <span className={styles.title}>Người chăm sóc: </span>
@@ -134,7 +137,19 @@ const Page = () => {
                                                                 <span className={styles.title}>Mèo của bạn: </span>
                                                                 {activity.bookingDetailWithPetAndServices[0].pet.petName}
                                                             </h2>
-                                                            <h2><span className={styles.title}>Thời gian: </span></h2>
+                                                            <div className='flex items-center justify-center gap-2'>
+                                                                <h2 className={styles.title}>Thời gian: </h2>
+                                                                {activity.startDate && activity.endDate ? (
+                                                                    <>
+                                                                        {formatDate(new Date(activity.startDate), 'dd/MM/yyyy')}
+                                                                        <FontAwesomeIcon icon={faMinus} />
+                                                                        {formatDate(new Date(activity.endDate), 'dd/MM/yyyy')}
+                                                                    </>
+                                                                ) : (
+                                                                    <span>Invalid date</span>
+                                                                )}
+
+                                                            </div>
                                                         </div>
                                                     </div>
                                                     <Button as={Link} href={`/profile/activity/detail/${activity.id}`} className='bg-btnbg text-white rounded-lg mt-3'>Theo dõi lịch</Button>

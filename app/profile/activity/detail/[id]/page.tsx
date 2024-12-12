@@ -1,8 +1,8 @@
 'use client'
 
-import { CareSchedules, Order, PetProfile, Service, Task } from '@/app/constants/types/homeType'
+import { CareSchedules, Order, PetProfile, Task } from '@/app/constants/types/homeType'
 import axiosClient from '@/app/lib/axiosClient'
-import { faCheck, faPaw } from '@fortawesome/free-solid-svg-icons'
+import { faCheck, faClipboardCheck, faPaw } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Accordion, AccordionItem, Avatar, Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Textarea, useDisclosure } from '@nextui-org/react'
 import { formatDate } from 'date-fns'
@@ -42,7 +42,6 @@ const Page = () => {
     const [openImage, setOpenImage] = useState(false);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [slides, setSlides] = useState<Slide[]>([]);
-    const [mainService, setMainService] = useState<Service>()
 
     const statusColors: { [key: number]: string } = {
         0: 'text-[#9E9E9E]',
@@ -121,7 +120,6 @@ const Page = () => {
             axiosClient(`booking-orders/${param.id}`)
                 .then((res) => {
                     setDataOrder(res.data)
-                    setMainService(res.data.bookingDetailWithPetAndServices.find((service: Service) => service.serviceType === "MAIN_SERVICE"))
                 })
                 .catch()
             fetchTask()
@@ -235,10 +233,10 @@ const Page = () => {
             {dataOrder &&
                 <div key={dataOrder.id}>
                     <div className='m-2 shadow-2xl rounded-xl flex p-3 gap-3'>
-                        <Avatar src='' className='w-14  h-14 ' />
+                        <Avatar src={dataOrder.sitter.avatar} className='w-14  h-14 ' />
                         <div>
                             <h2 className='font-semibold'>{dataOrder.sitter.fullName}</h2>
-                            <h1 className='text-[#559070] font-semibold text-xl'>Dịch vụ: {mainService?.name}</h1>
+                            <h1 className='text-[#559070] font-semibold text-xl'>Dịch vụ: {dataOrder.orderType === "OVERNIGHT" ? "Gửi thú cưng" : "Dịch vụ khác"}</h1>
                         </div>
                     </div>
 
@@ -282,28 +280,32 @@ const Page = () => {
                                                 }
                                             >
                                                 {tasks.map((task) => (
-                                                    <div key={task.id} className="flex gap-3 items-center">
-                                                        {task.haveEvidence && (
-                                                            <FontAwesomeIcon icon={faCheck} className="text-green-500" />
-                                                        )}
-                                                        <h3 className={task.haveEvidence ? 'text-green-500' : ''}>
-                                                            {task.description}
-                                                        </h3>
-                                                        <Button
-                                                            className="bg-gradient-to-r from-maincolor to-[#db6eb3] text-white"
-                                                            onClick={() => { setSelectedCat(task.petProfile), onOpenCat() }}
-                                                        >
-                                                            <FontAwesomeIcon icon={faPaw} />
-                                                            Xem mèo
-                                                        </Button>
+                                                    <div key={task.id} className="flex gap-2 items-center justify-between">
+                                                        <div>
+                                                            {task.haveEvidence && (
+                                                                <FontAwesomeIcon icon={faCheck} className="text-green-500" />
+                                                            )}
+                                                            <h3 className={task.haveEvidence ? 'text-green-500' : ''}>
+                                                                {task.description}
+                                                            </h3>
+                                                        </div>
+                                                        <div className='flex gap-1'>
+                                                            <Button
+                                                                className="bg-gradient-to-r from-maincolor to-[#db6eb3] text-white"
+                                                                onClick={() => { setSelectedCat(task.petProfile), onOpenCat() }}
+                                                            >
+                                                                <FontAwesomeIcon icon={faPaw} />
+                                                                Xem mèo
+                                                            </Button>
+                                                            <Button
+                                                                className="bg-gradient-to-r from-btnbg to-[#5f91ec] text-white px-7"
+                                                                onClick={() => handleOpenUpdate(task)}
 
-                                                        <Button
-                                                            className="bg-btnbg text-white px-7"
-                                                            onClick={() => handleOpenUpdate(task)}
-
-                                                        >
-                                                            Xem hoạt động
-                                                        </Button>
+                                                            >
+                                                                <FontAwesomeIcon icon={faClipboardCheck} />
+                                                                Xem hoạt động
+                                                            </Button>
+                                                        </div>
                                                     </div>
                                                 ))}
                                             </AccordionItem>
