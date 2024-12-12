@@ -129,6 +129,86 @@ const Page = () => {
                   if (activity.bookingDetailWithPetAndServices.length < 1) {
                     return null; // Skip rendering this activity
                   }
+                    </Button>
+                    <Button
+                        className={`${styles.button} ${filterStatus === 'CONFIRMED' ? styles.activeButton : ''}`}
+                        onClick={() => setFilterStatus('CONFIRMED')}
+                    >
+                        Đã xác nhận
+                    </Button>
+                    <Button
+                        className={`${styles.button} ${filterStatus === 'IN_PROGRESS' ? styles.activeButton : ''}`}
+                        onClick={() => setFilterStatus('IN_PROGRESS')}
+                    >
+                        Đã diễn ra
+                    </Button>
+                    <Button
+                        className={`${styles.button} ${filterStatus === 'COMPLETED' ? styles.activeButton : ''}`}
+                        onClick={() => setFilterStatus('COMPLETED')}
+                    >
+                        Đã hoàn thành
+                    </Button>
+                    <Button
+                        className={`${styles.button} ${filterStatus === 'CANCELLED' ? styles.activeButton : ''}`}
+                        onClick={() => setFilterStatus('CANCELLED')}
+                    >
+                        Đã hủy
+                    </Button>
+                </div>
+                {isLoading ? (
+                    <div><Skeleton /></div>
+                ) : (
+                    <div className=''>
+                        {
+                            data ? (
+                                data.content
+                                    .filter((activity) =>
+                                        filterStatus === 'ALL' || activity.status === filterStatus
+                                    )
+                                    .map((activity) => {
+                                        // Check if bookingDetailWithPetAndServices exists and has data
+                                        if (
+                                            activity.bookingDetailWithPetAndServices.length < 1
+                                        ) {
+                                            return null; // Skip rendering this activity
+                                        }
+
+                                        return (
+                                            <div key={activity.id} className='border w-[700px] p-3 rounded-lg flex justify-between my-3'>
+                                                <div>
+                                                    <div className='flex'>
+                                                        <Icon icon="cbi:camera-pet" className='text-[#902C6C] w-12 h-11 mr-2' />
+                                                        <div>
+                                                            <h2>
+                                                                <span className={styles.title}>Dịch vụ: </span>
+                                                                {activity.orderType === "OVERNIGHT" ? "Gửi thú cưng" : "Dịch vụ khác"}
+                                                            </h2>
+                                                            <h2>
+                                                                <span className={styles.title}>Người chăm sóc: </span>
+                                                                {activity.sitter.fullName}
+                                                            </h2>
+                                                            <h2>
+                                                                <span className={styles.title}>Mèo của bạn: </span>
+                                                                {activity.bookingDetailWithPetAndServices
+                                                                    .filter(detail => detail.service.serviceType === "MAIN_SERVICE")
+                                                                    .map(detail => detail.pet.petName)
+                                                                    .join(", ") || "Không có"}
+                                                            </h2>
+                                                            <div className='flex items-center gap-2'>
+                                                                <h2 className={styles.title}>Thời gian: </h2>
+                                                                {activity.startDate && activity.endDate ? (
+                                                                    <>
+                                                                        {formatDate(new Date(activity.startDate), 'dd/MM/yyyy')}
+                                                                        <FontAwesomeIcon icon={faMinus} />
+                                                                        {formatDate(new Date(activity.endDate), 'dd/MM/yyyy')}
+                                                                    </>
+                                                                ) : (
+                                                                    activity.startDate
+                                                                        ?
+                                                                        <span>{formatDate(new Date(activity.startDate), 'dd/MM/yyyy')}</span>
+                                                                        :
+                                                                        "Lỗi hiện thị ngày"
+                                                                )}
 
                   return (
                     <div

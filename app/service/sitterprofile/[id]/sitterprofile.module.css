@@ -27,7 +27,7 @@
 }
 
 .time {
-  @apply font-semibold;
+  @apply font-semibold min-w-[134px];
 }
 
 .childService {

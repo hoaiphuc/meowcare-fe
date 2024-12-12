@@ -294,6 +294,96 @@ const Service = () => {
           </Button>
         </div>
       </div>
+            </div>
+
+            {/* 2 */}
+            <div className='flex flex-col justify-start items-start w-[909px] text-black bg-[#FFF6ED] h-[900px] overflow-auto scrollbar-hide px-4'>
+                {
+                    catSitters && catSitters.content.length > 0 ?
+                        (
+                            catSitters.content.map((catSitter, index) => (
+                                <div
+                                    key={catSitter.id}
+                                    ref={(el) => {
+                                        listItemRefs.current[catSitter.id] = el;
+                                    }}
+                                    className={`${styles.selectDiv} min-w-full border-b pb-3 bg-[#FFF6ED]`}>
+                                    <Link href={`/service/sitterprofile/${catSitter.sitterId}`}>
+                                        <div className='flex gap-3 cursor-pointer'>
+                                            <Avatar
+                                                src={catSitter?.avatar || '/User-avatar.png'}
+                                                className='min-h-[80px] min-w-[80px]'
+                                            />
+                                            <div className='flex flex-col gap-1'>
+                                                <div className='flex items-center gap-3'>
+                                                    <p className='text-[26px] font-semibold'>
+                                                        <span className="font-bold">{index + 1}. </span>
+                                                        {catSitter.fullName}
+                                                    </p>
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleClick();
+                                                        }}
+                                                    >
+                                                        <Icon
+                                                            icon='mdi:heart'
+                                                            className={`transition-colors size-3 ${isClicked ? 'text-red-500' : ''
+                                                                }`}
+                                                        />
+                                                    </button>
+                                                </div>
+                                                <p className='text-xs line-clamp-1'>
+                                                    {catSitter.bio}
+                                                </p>
+                                                <p className='text-xs'>
+                                                    Địa chỉ: {catSitter.location}
+                                                </p>
+                                            </div>
+                                            <div className='ml-auto flex flex-col text-right'>
+                                                <p className='text-xs font-semibold text-right'>
+                                                    Giá mỗi ngày
+                                                </p>
+                                                <p className='text-[20px] font-semibold text-[#2B764F]'>
+                                                    {/* {catSitter.price} */}
+                                                    20000
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div className='flex gap-1 text-[#66625F] mt-3 mb-2x`'>
+                                            <FontAwesomeIcon
+                                                icon={faStar}
+                                                className='text-[#F8B816] size-4'
+                                            />
+                                            <p className='text-[14px] font-normal'>{catSitter.rating ? catSitter.rating : 'Chưa có đánh giá'}</p>
+                                            <FontAwesomeIcon
+                                                icon={faCircle}
+                                                className='text-text size-1 self-center px-1'
+                                            />
+                                            {/* <p className=' text-[14px] font-normal'>{catSitter.reviews} Đánh giá</p> */}
+                                            <p className='text-[14px] font-normal'>20 Đánh giá</p>
+                                        </div>
+                                        <p className='text-[14px] my-2 line-clamp-1'>
+                                            {catSitter.bio}
+                                        </p>
+                                        <div className='flex font-semibold text-[#66625F]'>
+                                            <FontAwesomeIcon
+                                                icon={faCircleCheck}
+                                                className='text-green-600 size-4 self-center px-1'
+                                            />
+                                            <p className='text-[10px]'>Đã cập nhật 2 ngày trước</p>
+                                        </div>
+                                    </Link>
+
+                                </div>
+                            ))
+                        )
+                        :
+                        (
+                            <div className='flex flex-col justify-center items-center px-32 py-10'>
+                                <p className='text-xl font-semibold'>Chúng tôi không tìm thấy người chăm sóc thú cưng nào.</p>
+                                <p className='text-[18px]'>Hãy thử thay đổi tiêu chí tìm kiếm hoặc cập nhật vị trí của bạn. </p>
+                            </div>
 
       {/* 2 */}
       <div className="flex flex-col justify-start items-start w-[909px] text-black bg-[#FFF6ED] h-[900px] overflow-auto scrollbar-hide px-4">
