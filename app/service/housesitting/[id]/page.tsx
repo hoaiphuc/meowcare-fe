@@ -220,6 +220,8 @@ const HouseSitting = () => {
             address: address,
             note: note,
             startDate,
+            isHouseSitting: false,
+            orderType: "BUY_SERVICE",
             paymentMethod: paymentMethod === "CAPTURE_WALLET" || paymentMethod === "PAY_WITH_ATM" ? "MOMO" : "WALLET"
         }
 
@@ -462,15 +464,15 @@ const HouseSitting = () => {
                             </Button>
                         </div>
 
-                        <h2 className={styles.h2}>Thêm thú cưng của bạn</h2>
+                        <h2 className={styles.h2}>Chọn mèo của bạn</h2>
                         <Select
                             items={pets}
                             aria-label='pet'
                             labelPlacement='outside'
                             className="select min-w-full"
-                            selectionMode="multiple"
+                            // selectionMode="multiple"
+                            // isMultiline={true}
                             variant="bordered"
-                            isMultiline={true}
                             defaultSelectedKeys={selectedPet}
                             onChange={(event) => handlePetChange(event.target.value)}
                             renderValue={(items) => {
