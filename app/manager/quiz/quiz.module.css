@@ -1,0 +1,7 @@
+.title {
+  @apply text-2xl font-semibold text-maincolor;
+}
+
+.h1 {
+  @apply text-xl;
+}

@@ -15,6 +15,18 @@ const Page = () => {
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
     const [selectedForm, setSelectedForm] = useState<FormRegister>();
 
+    const statusColors: { [key: string]: string } = {
+        PENDING: 'text-[#9E9E9E]', // Chờ duyệt - gray
+        APPROVED: 'text-[#4CAF50]',        // Hoàn thành - green
+        REJECTED: 'text-[#DC3545]',        // Đã hủy - Red
+    };
+
+    const statusLabels: { [key: string]: string } = {
+        PENDING: 'Chờ duyệt',
+        APPROVED: 'Đã duyệt',
+        REJECTED: 'Đã từ chối',
+    };
+
     const fetchForm = useCallback(() => {
         try {
             axiosClient('sitter-form-register')
@@ -38,7 +50,7 @@ const Page = () => {
         const start = (page - 1) * rowsPerPage;
         const end = start + rowsPerPage;
 
-        return data.slice(start, end);
+        return [...data].reverse().slice(start, end);
     }, [page, data]);
 
     //open detail
@@ -69,13 +81,14 @@ const Page = () => {
         }
     }
     //reject
-    const handleReject = () => {
+    const handleReject = (id: string) => {
+        const data = { status: "REJECTED" }
         try {
-            axiosClient("")
+            axiosClient.put(`sitter-form-register/${id}`, data)
                 .then(() => {
                     fetchForm()
                     onOpenChange()
-                    toast.error("Đơn đăng ký này đã bị hủy")
+                    toast.success("Bạn đã từ chối đơn đăng ký này")
                 })
                 .catch(() => {
 
@@ -118,7 +131,9 @@ const Page = () => {
                         <TableRow key={item.id}>
                             <TableCell>{item.fullName}</TableCell>
                             <TableCell>{item.email}</TableCell>
-                            <TableCell>{item.status}</TableCell>
+                            <TableCell className={statusColors[item.status]}>
+                                {statusLabels[item.status]}
+                            </TableCell>
                             <TableCell>
                                 <Dropdown >
                                     <DropdownTrigger>
@@ -132,9 +147,6 @@ const Page = () => {
                                         <DropdownItem onClick={() => handleDetail(item)}>
                                             Xem chi tiết
                                         </DropdownItem>
-                                        <DropdownItem key="delete" className="text-danger" color="danger">
-                                            Xóa
-                                        </DropdownItem>
                                     </DropdownMenu>
                                 </Dropdown>
                             </TableCell>
@@ -146,26 +158,43 @@ const Page = () => {
 
             <Modal isOpen={isOpen} onOpenChange={onOpenChange} size='2xl'>
                 <ModalContent>
-                    {() => (
+                    {(onClose) => (
                         <>
                             <ModalHeader className="flex flex-col gap-1">Đơn đăng ký của {selectedForm?.fullName}</ModalHeader>
                             <ModalBody>
                                 <div className="grid grid-cols-6 gap-3">
-                                    <div className="col-span-2">Email</div>
-                                    <div className="col-span-4">{selectedForm?.email}</div>
-                                    <div className="col-span-2">Số điện thoại</div>
+                                    <div className="col-span-2 font-semibold">Email</div>
+                                    <div className="col-span-4 ">{selectedForm?.email}</div>
+                                    <div className="col-span-2 font-semibold">Số điện thoại</div>
                                     <div className="col-span-4">{selectedForm?.phoneNumber}</div>
-                                    <div className="col-span-2">Địa chỉ</div>
+                                    <div className="col-span-2 font-semibold">Địa chỉ</div>
                                     <div className="col-span-4">{selectedForm?.address}</div>
+                                    <div className="col-span-2 font-semibold">Chứng chỉ</div>
+                                    <div className="col-span-4">
+                                        {selectedForm?.certificates.map((cer) => (
+                                            <div key={cer.id}>
+                                                {cer.certificateName}
+                                            </div>
+                                        ))}
+                                    </div>
+
                                 </div>
                             </ModalBody>
                             <ModalFooter>
-                                <Button color="danger" variant="light" onPress={handleReject}>
-                                    Không duyệt
-                                </Button>
-                                <Button color="primary" onPress={() => handleAccept(selectedForm ? selectedForm?.userId : "", selectedForm ? selectedForm.id : "")}>
-                                    Duyệt
-                                </Button>
+                                {selectedForm?.status === "PENDING" ?
+                                    <div className='flex gap-2'>
+                                        <Button color="danger" variant="light" onPress={() => handleReject(selectedForm ? selectedForm.id : "")}>
+                                            Không duyệt
+                                        </Button>
+                                        <Button color="primary" onPress={() => handleAccept(selectedForm ? selectedForm?.userId : "", selectedForm ? selectedForm.id : "")}>
+                                            Duyệt
+                                        </Button>
+                                    </div>
+                                    :
+                                    <Button onPress={onClose} className=''>
+                                        Đóng
+                                    </Button>
+                                }
                             </ModalFooter>
                         </>
                     )}

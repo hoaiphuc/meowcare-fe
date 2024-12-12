@@ -1,0 +1,17 @@
+.quiz {
+  @apply bg-white gap-3 flex flex-col p-5 rounded-md shadow-md;
+}
+
+.showButton {
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.quiz:hover .showButton {
+  opacity: 1;
+  @apply bg-transparent border-maincolor text-maincolor;
+}
+
+.h2 {
+  @apply text-xl font-semibold;
+}

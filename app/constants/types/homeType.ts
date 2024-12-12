@@ -23,6 +23,7 @@ export type FormRegister = {
   phoneNumber: string;
   address: string;
   status: string;
+  certificates: [Certificate];
 };
 
 export interface UserState {
