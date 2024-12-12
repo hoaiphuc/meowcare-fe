@@ -1,9 +1,10 @@
 "use client";
 
+import { faClock } from "@fortawesome/free-regular-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   Avatar,
   Button,
-  Checkbox,
   Chip,
   DateRangePicker,
   DateValue,
@@ -17,26 +18,24 @@ import {
   Select,
   SelectItem,
   Textarea,
-  useDisclosure,
+  useDisclosure
 } from "@nextui-org/react";
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import styles from "./booking.module.css";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faClock } from "@fortawesome/free-regular-svg-icons";
 // import Link from 'next/link'
-import { useParams, useRouter } from "next/navigation";
-import axiosClient from "@/app/lib/axiosClient";
 import {
   CatSitter,
   PetProfile,
   Service,
   UserType,
 } from "@/app/constants/types/homeType";
-import Image from "next/image";
-import { toast } from "react-toastify";
-import { today, getLocalTimeZone } from "@internationalized/date";
+import axiosClient from "@/app/lib/axiosClient";
+import { getLocalTimeZone, today } from "@internationalized/date";
 import { format } from "date-fns";
+import Image from "next/image";
 import Link from "next/link";
+import { useParams, useRouter } from "next/navigation";
+import { toast } from "react-toastify";
 
 interface BookingDetail {
   quantity: number;
@@ -49,7 +48,7 @@ const Page = () => {
   const router = useRouter();
   const [selectedService, setSelectedService] = useState<string>("");
   const [selectedPet, setSelectedPet] = useState<string[]>([]);
-  const [isRequireFood, setIsRequireFood] = useState(false);
+  // const [isRequireFood, setIsRequireFood] = useState(false);
   const [pets, setPets] = useState<PetProfile[]>([]);
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [childServices, setChildServices] = useState<Service[]>([]);
@@ -70,10 +69,10 @@ const Page = () => {
   const [paymentMethod, setPaymentMethod] = useState("");
   // const [selectedServiceName, setSelectedServiceName] = useState("")
   const [userData, setUserData] = useState<UserType>();
-  const catFoods = [
-    { id: "1", foodName: "Cá" },
-    { id: "2", foodName: "Thịt" },
-  ];
+  // const catFoods = [
+  //   { id: "1", foodName: "Cá" },
+  //   { id: "2", foodName: "Thịt" },
+  // ];
 
   const [selectedPetNames, setSelectedPetNames] = useState<string[]>([]);
 
@@ -86,12 +85,12 @@ const Page = () => {
       .then((res) => {
         setChildServices(res.data);
       })
-      .catch(() => {});
+      .catch(() => { });
     axiosClient(`sitter-profiles/sitter/${params.id}`)
       .then((res) => {
         setSitter(res.data);
       })
-      .catch(() => {});
+      .catch(() => { });
   }, [params.id]);
 
   useEffect(() => {
@@ -121,13 +120,13 @@ const Page = () => {
   }, [userData]);
 
   // Handle service change
-  const handleServiceChange = (serviceId: string) => {
-    setSelectedService(serviceId);
-    // const selected = services.find((service) => service.id === serviceId);
-    // if (selected) {
-    //     setSelectedServiceName(selected.name);
-    // }
-  };
+  // const handleServiceChange = (serviceId: string) => {
+  //   setSelectedService(serviceId);
+  //   // const selected = services.find((service) => service.id === serviceId);
+  //   // if (selected) {
+  //   //     setSelectedServiceName(selected.name);
+  //   // }
+  // };
 
   const handlePetChange = (petIds: string) => {
     if (petIds) {
@@ -333,7 +332,7 @@ const Page = () => {
     selectedService,
   ]);
 
-  useEffect(() => {}, [dateRange]);
+  useEffect(() => { }, [dateRange]);
 
   return (
     <div className="flex flex-col items-center justify-start my-12">

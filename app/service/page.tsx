@@ -1,54 +1,42 @@
-"use client";
+'use client'
 
-import {
-  Avatar,
-  Button,
-  DateRangePicker,
-  Input,
-  Select,
-  SelectItem,
-  Slider,
-} from "@nextui-org/react";
+import { Avatar, Button, DateRangePicker, Input, Select, SelectItem, Slider } from '@nextui-org/react';
 // import data from '@/app/lib/vietnam.json';
-import { useEffect, useRef, useState } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faCircle,
-  faMagnifyingGlass,
-  faStar,
-} from "@fortawesome/free-solid-svg-icons";
-import { faCircleCheck } from "@fortawesome/free-regular-svg-icons";
-import { Icon } from "@iconify/react";
-import Link from "next/link";
-import dynamic from "next/dynamic";
-const Map = dynamic(() => import("../components/Map"), { ssr: false });
-import axiosClient from "../lib/axiosClient";
-import { CatSitter, UserLocal } from "../constants/types/homeType";
-import useGeoapify from "../hooks/useGeoapify";
-import styles from "./service.module.css";
+import { useEffect, useRef, useState } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCircle, faMagnifyingGlass, faStar } from '@fortawesome/free-solid-svg-icons';
+import { faCircleCheck } from '@fortawesome/free-regular-svg-icons';
+import { Icon } from '@iconify/react';
+import Link from 'next/link';
+import dynamic from 'next/dynamic';
+const Map = dynamic(() => import('../components/Map'), { ssr: false });
+import axiosClient from '../lib/axiosClient';
+import { CatSitter, UserLocal } from '../constants/types/homeType';
+import useGeoapify from '../hooks/useGeoapify';
+import styles from './service.module.css'
 
 interface CatSitterData {
-  content: [CatSitter];
+  content: [CatSitter]
 }
 
 interface Address {
-  lon: number;
-  lat: number;
-  formatted: string;
+  lon: number
+  lat: number
+  formatted: string
 }
 
 const Service = () => {
-  const [selectedService, setSelectedService] = useState<string>("1");
+  const [selectedService, setSelectedService] = useState<string>('1');
   const [catSitters, setCatSitters] = useState<CatSitterData>();
   const [price, setPrice] = useState<number[]>([20000, 2000000]);
-  //search location
-  const [address, setAddress] = useState<string>("");
-  const [query, setQuery] = useState<string>("");
+  //search location 
+  const [address, setAddress] = useState<string>('');
+  const [query, setQuery] = useState<string>('')
   const geoSuggestions = useGeoapify(query);
   const [showSuggestions, setShowSuggestions] = useState<boolean>(false);
   const [lat, setLat] = useState<number>();
   const [lng, setLng] = useState<number>();
-  const [name, setName] = useState("");
+  const [name, setName] = useState("")
 
   const getUserFromStorage = () => {
     if (typeof window !== "undefined") {
@@ -87,15 +75,15 @@ const Service = () => {
     const newAddress = e.target.value;
     setAddress(newAddress);
     setQuery(newAddress);
-    setShowSuggestions(true);
+    setShowSuggestions(true)
   };
   // Handle suggestion click
   const handleSuggestionClick = (suggestion: Address) => {
     setAddress(suggestion.formatted);
-    setQuery("");
+    setQuery('');
     setShowSuggestions(false);
-    setLat(suggestion.lat);
-    setLng(suggestion.lon);
+    setLat(suggestion.lat)
+    setLng(suggestion.lon)
   };
 
   const listItemRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
@@ -104,23 +92,17 @@ const Service = () => {
   const scrollToListItem = (id: string) => {
     const element = listItemRefs.current[id];
     if (element) {
-      element.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-        inline: "nearest",
-      });
+      element.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest', });
     }
   };
 
   const services = [
-    { id: "1", serviceName: "Gửi thú cưng" },
-    { id: "2", serviceName: "Dịch vụ khác" },
+    { id: '1', serviceName: 'Gửi thú cưng' },
+    { id: '2', serviceName: 'Dịch vụ khác' },
   ];
 
-  const [selectedCatNumber, setSelectedCatNumber] = useState<string | null>(
-    null
-  );
-  const options = ["1", "2", "3+"];
+  const [selectedCatNumber, setSelectedCatNumber] = useState<string | null>(null);
+  const options = ['1', '2', '3+'];
 
   // Handle service change
   const handleServiceChange = (serviceId: string) => {
@@ -145,30 +127,27 @@ const Service = () => {
   //get cat sitters
   useEffect(() => {
     try {
-      axiosClient(
-        `sitter-profiles/search?latitude=${lat}&longitude=${lng}&name=${name}&page=1&size=10&sort=distance&direction=DESC`
-      )
+      axiosClient(`sitter-profiles/search?latitude=${lat}&longitude=${lng}&name=${name}&page=1&size=10&sort=distance&direction=DESC`)
         .then((res) => {
-          const filteredData = res.data.content.filter(
-            (data: CatSitter) => data.distance <= 12
-          );
+          const filteredData = res.data.content.filter((data: CatSitter) => data.distance <= 12)
           setCatSitters({ ...res.data, content: filteredData });
         })
         .catch((e) => {
           console.log(e);
-        });
+        })
     } catch (error) {
       console.log(error);
+
     }
-  }, [lat, lng, name]);
+  }, [lat, lng, name])
 
   return (
-    <div className="flex flex-cols-3 p-[5px] justify-center">
+    <div className='flex flex-cols-3 p-[5px] justify-center'>
       {/* 1 */}
-      <div className="bg-[#FFF6ED] w-[310px] h-[617px] flex flex-col gap-3 p-[10px] rounded-xl">
+      <div className='bg-[#FFF6ED] w-[310px] h-[617px] flex flex-col gap-3 p-[10px] rounded-xl'>
         <Select
           label={<h2 className={styles.h2}>Loại dịch vụ</h2>}
-          labelPlacement="outside"
+          labelPlacement='outside'
           className={`${styles.h2} min-w-full`}
           variant="bordered"
           defaultSelectedKeys={selectedService}
@@ -181,19 +160,19 @@ const Service = () => {
           ))}
         </Select>
 
-        {/* <h2 className={styles.h2}>Tên người chăm sóc</h2>
-                <Input
-                    value={name}
-                    variant='bordered'
-                    onChange={(e) => setName(e.target.value)}
-                /> */}
+        <h2 className={styles.h2}>Tên người chăm sóc</h2>
+        <Input
+          value={name}
+          variant='bordered'
+          onChange={(e) => setName(e.target.value)}
+        />
 
         <h2 className={styles.h2}>Địa chỉ</h2>
         <div className="relative">
           <Input
             className={styles.searchInput}
             value={address}
-            variant="bordered"
+            variant='bordered'
             onChange={handleAddressChange}
             placeholder="Nhập địa điểm bạn muốn tìm"
           />
@@ -203,9 +182,7 @@ const Service = () => {
                 <div
                   key={index}
                   className={styles.suggestionItem}
-                  onClick={() =>
-                    handleSuggestionClick(suggestion.properties as Address)
-                  }
+                  onClick={() => handleSuggestionClick(suggestion.properties as Address)}
                 >
                   <p>{suggestion.properties.formatted}</p>
                 </div>
@@ -221,15 +198,13 @@ const Service = () => {
           variant="bordered"
         />
 
-        <div className="flex flex-col gap-3">
+        <div className='flex flex-col gap-3'>
           <h2 className={styles.h2}>Số lượng thú cưng</h2>
           <div className={styles.optionsContainer}>
             {options.map((option) => (
               <div
                 key={option}
-                className={`${styles.option} ${
-                  selectedCatNumber === option ? `${styles.selected}` : ""
-                }`}
+                className={`${styles.option} ${selectedCatNumber === option ? `${styles.selected}` : ''}`}
                 onClick={() => setSelectedCatNumber(option)}
               >
                 {option}
@@ -243,7 +218,7 @@ const Service = () => {
                     </p> */}
         <div>
           <h2 className={styles.h2}>Giá mỗi giờ</h2>
-          <div className="flex gap-3 justify-center items-center">
+          <div className='flex gap-3 justify-center items-center'>
             <Input
               aria-label="Giá tối thiểu"
               type="number"
@@ -271,7 +246,7 @@ const Service = () => {
             />
           </div>
           <Slider
-            aria-label="price range"
+            aria-label='price range'
             step={50}
             minValue={20000}
             maxValue={2000000}
@@ -287,202 +262,112 @@ const Service = () => {
           />
         </div>
 
-        <div className="flex items-center justify-end">
-          <Button className="h-12 w-28 font-semibold" variant="bordered">
+        <div className='flex items-center justify-end'>
+          <Button className='h-12 w-28 font-semibold' variant='bordered'>
             <FontAwesomeIcon icon={faMagnifyingGlass} />
             Tìm kiếm
           </Button>
         </div>
       </div>
-            </div>
-
-            {/* 2 */}
-            <div className='flex flex-col justify-start items-start w-[909px] text-black bg-[#FFF6ED] h-[900px] overflow-auto scrollbar-hide px-4'>
-                {
-                    catSitters && catSitters.content.length > 0 ?
-                        (
-                            catSitters.content.map((catSitter, index) => (
-                                <div
-                                    key={catSitter.id}
-                                    ref={(el) => {
-                                        listItemRefs.current[catSitter.id] = el;
-                                    }}
-                                    className={`${styles.selectDiv} min-w-full border-b pb-3 bg-[#FFF6ED]`}>
-                                    <Link href={`/service/sitterprofile/${catSitter.sitterId}`}>
-                                        <div className='flex gap-3 cursor-pointer'>
-                                            <Avatar
-                                                src={catSitter?.avatar || '/User-avatar.png'}
-                                                className='min-h-[80px] min-w-[80px]'
-                                            />
-                                            <div className='flex flex-col gap-1'>
-                                                <div className='flex items-center gap-3'>
-                                                    <p className='text-[26px] font-semibold'>
-                                                        <span className="font-bold">{index + 1}. </span>
-                                                        {catSitter.fullName}
-                                                    </p>
-                                                    <button
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            handleClick();
-                                                        }}
-                                                    >
-                                                        <Icon
-                                                            icon='mdi:heart'
-                                                            className={`transition-colors size-3 ${isClicked ? 'text-red-500' : ''
-                                                                }`}
-                                                        />
-                                                    </button>
-                                                </div>
-                                                <p className='text-xs line-clamp-1'>
-                                                    {catSitter.bio}
-                                                </p>
-                                                <p className='text-xs'>
-                                                    Địa chỉ: {catSitter.location}
-                                                </p>
-                                            </div>
-                                            <div className='ml-auto flex flex-col text-right'>
-                                                <p className='text-xs font-semibold text-right'>
-                                                    Giá mỗi ngày
-                                                </p>
-                                                <p className='text-[20px] font-semibold text-[#2B764F]'>
-                                                    {/* {catSitter.price} */}
-                                                    20000
-                                                </p>
-                                            </div>
-                                        </div>
-                                        <div className='flex gap-1 text-[#66625F] mt-3 mb-2x`'>
-                                            <FontAwesomeIcon
-                                                icon={faStar}
-                                                className='text-[#F8B816] size-4'
-                                            />
-                                            <p className='text-[14px] font-normal'>{catSitter.rating ? catSitter.rating : 'Chưa có đánh giá'}</p>
-                                            <FontAwesomeIcon
-                                                icon={faCircle}
-                                                className='text-text size-1 self-center px-1'
-                                            />
-                                            {/* <p className=' text-[14px] font-normal'>{catSitter.reviews} Đánh giá</p> */}
-                                            <p className='text-[14px] font-normal'>20 Đánh giá</p>
-                                        </div>
-                                        <p className='text-[14px] my-2 line-clamp-1'>
-                                            {catSitter.bio}
-                                        </p>
-                                        <div className='flex font-semibold text-[#66625F]'>
-                                            <FontAwesomeIcon
-                                                icon={faCircleCheck}
-                                                className='text-green-600 size-4 self-center px-1'
-                                            />
-                                            <p className='text-[10px]'>Đã cập nhật 2 ngày trước</p>
-                                        </div>
-                                    </Link>
-
-                                </div>
-                            ))
-                        )
-                        :
-                        (
-                            <div className='flex flex-col justify-center items-center px-32 py-10'>
-                                <p className='text-xl font-semibold'>Chúng tôi không tìm thấy người chăm sóc thú cưng nào.</p>
-                                <p className='text-[18px]'>Hãy thử thay đổi tiêu chí tìm kiếm hoặc cập nhật vị trí của bạn. </p>
-                            </div>
 
       {/* 2 */}
-      <div className="flex flex-col justify-start items-start w-[909px] text-black bg-[#FFF6ED] h-[900px] overflow-auto scrollbar-hide px-4">
-        {catSitters && catSitters.content.length > 0 ? (
-          catSitters.content.map((catSitter, index) => (
-            <div
-              key={catSitter.id}
-              ref={(el) => {
-                listItemRefs.current[catSitter.id] = el;
-              }}
-              className={`${styles.selectDiv} min-w-full border-b pb-3 bg-[#FFF6ED]`}
-            >
-              <Link href={`/service/sitterprofile/${catSitter.sitterId}`}>
-                <div className="flex gap-3 cursor-pointer">
-                  <Avatar
-                    src={catSitter?.avatar || "/User-avatar.png"}
-                    className="h-[80px] w-[80px]"
-                  />
-                  <div className="flex flex-col gap-1">
-                    <div className="flex items-center gap-3">
-                      <p className="text-[26px] font-semibold">
-                        <span className="font-bold">{index + 1}. </span>
-                        {catSitter.fullName}
-                      </p>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleClick();
-                        }}
-                      >
-                        <Icon
-                          icon="mdi:heart"
-                          className={`transition-colors size-3 ${
-                            isClicked ? "text-red-500" : ""
-                          }`}
-                        />
-                      </button>
+      <div className='flex flex-col justify-start items-start w-[909px] text-black bg-[#FFF6ED] h-[900px] overflow-auto scrollbar-hide px-4'>
+        {
+          catSitters && catSitters.content.length > 0 ?
+            (
+              catSitters.content.map((catSitter, index) => (
+                <div
+                  key={catSitter.id}
+                  ref={(el) => {
+                    listItemRefs.current[catSitter.id] = el;
+                  }}
+                  className={`${styles.selectDiv} min-w-full border-b pb-3 bg-[#FFF6ED]`}>
+                  <Link href={`/service/sitterprofile/${catSitter.sitterId}`}>
+                    <div className='flex gap-3 cursor-pointer'>
+                      <Avatar
+                        src={catSitter?.avatar || '/User-avatar.png'}
+                        className='min-h-[80px] min-w-[80px]'
+                      />
+                      <div className='flex flex-col gap-1'>
+                        <div className='flex items-center gap-3'>
+                          <p className='text-[26px] font-semibold'>
+                            <span className="font-bold">{index + 1}. </span>
+                            {catSitter.fullName}
+                          </p>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleClick();
+                            }}
+                          >
+                            <Icon
+                              icon='mdi:heart'
+                              className={`transition-colors size-3 ${isClicked ? 'text-red-500' : ''
+                                }`}
+                            />
+                          </button>
+                        </div>
+                        <p className='text-xs line-clamp-1'>
+                          {catSitter.bio}
+                        </p>
+                        <p className='text-xs'>
+                          Địa chỉ: {catSitter.location}
+                        </p>
+                      </div>
+                      <div className='ml-auto flex flex-col text-right'>
+                        <p className='text-xs font-semibold text-right'>
+                          Giá mỗi ngày
+                        </p>
+                        <p className='text-[20px] font-semibold text-[#2B764F]'>
+                          {/* {catSitter.price} */}
+                          20000
+                        </p>
+                      </div>
                     </div>
-                    <p className="text-xs">{catSitter.bio}</p>
-                    <p className="text-xs">Địa chỉ: {catSitter.location}</p>
-                  </div>
-                  <div className="ml-auto flex flex-col text-right">
-                    <p className="text-xs font-semibold text-right">
-                      Giá mỗi ngày
+                    <div className='flex gap-1 text-[#66625F] mt-3 mb-2x`'>
+                      <FontAwesomeIcon
+                        icon={faStar}
+                        className='text-[#F8B816] size-4'
+                      />
+                      <p className='text-[14px] font-normal'>{catSitter.rating ? catSitter.rating : 'Chưa có đánh giá'}</p>
+                      <FontAwesomeIcon
+                        icon={faCircle}
+                        className='text-text size-1 self-center px-1'
+                      />
+                      {/* <p className=' text-[14px] font-normal'>{catSitter.reviews} Đánh giá</p> */}
+                      <p className='text-[14px] font-normal'>20 Đánh giá</p>
+                    </div>
+                    <p className='text-[14px] my-2 line-clamp-1'>
+                      {catSitter.bio}
                     </p>
-                    <p className="text-[20px] font-semibold text-[#2B764F]">
-                      {/* {catSitter.price} */}
-                      20000
-                    </p>
-                  </div>
-                </div>
-                <div className="flex gap-1 text-[#66625F] mt-3 mb-2x`">
-                  <FontAwesomeIcon
-                    icon={faStar}
-                    className="text-[#F8B816] size-4"
-                  />
-                  <p className="text-[14px] font-normal">
-                    {catSitter.rating ? catSitter.rating : "Chưa có đánh giá"}
-                  </p>
-                  <FontAwesomeIcon
-                    icon={faCircle}
-                    className="text-text size-1 self-center px-1"
-                  />
-                  {/* <p className=' text-[14px] font-normal'>{catSitter.reviews} Đánh giá</p> */}
-                  <p className="text-[14px] font-normal">20 Đánh giá</p>
-                </div>
-                <p className="text-[14px] my-2">{catSitter.bio}</p>
-                <div className="flex font-semibold text-[#66625F]">
-                  <FontAwesomeIcon
-                    icon={faCircleCheck}
-                    className="text-green-600 size-4 self-center px-1"
-                  />
-                  <p className="text-[10px]">Đã cập nhật 2 ngày trước</p>
-                </div>
-              </Link>
-            </div>
-          ))
-        ) : (
-          <div className="flex flex-col justify-center items-center px-32">
-            <p className="text-xl font-semibold">
-              Chúng tôi không tìm thấy người chăm sóc thú cưng nào.
-            </p>
-            <p className="text-[18px]">
-              Hãy thử thay đổi tiêu chí tìm kiếm hoặc cập nhật vị trí của bạn.{" "}
-            </p>
-          </div>
-        )}
-      </div>
-      {/* 3 */}
-      <div className="w-[735px] flex">
-        <Map
-          markers={catSitters ? catSitters.content : []}
-          onMarkerClick={scrollToListItem}
-          defaultLat={lat}
-          defaultLng={lng}
-        />
-      </div>
-    </div>
-  );
-};
+                    <div className='flex font-semibold text-[#66625F]'>
+                      <FontAwesomeIcon
+                        icon={faCircleCheck}
+                        className='text-green-600 size-4 self-center px-1'
+                      />
+                      <p className='text-[10px]'>Đã cập nhật 2 ngày trước</p>
+                    </div>
+                  </Link>
 
-export default Service;
+                </div>
+              ))
+            )
+            :
+            (
+              <div className='flex flex-col justify-center items-center px-32 py-10'>
+                <p className='text-xl font-semibold'>Chúng tôi không tìm thấy người chăm sóc thú cưng nào.</p>
+                <p className='text-[18px]'>Hãy thử thay đổi tiêu chí tìm kiếm hoặc cập nhật vị trí của bạn. </p>
+              </div>
+
+            )
+        }
+      </div >
+      {/* 3 */}
+      <div className='w-[735px] flex'>
+        <Map markers={catSitters ? catSitters.content : []} onMarkerClick={scrollToListItem} defaultLat={lat} defaultLng={lng} />
+      </div>
+    </div >
+  )
+}
+
+export default Service
