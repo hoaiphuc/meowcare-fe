@@ -185,10 +185,21 @@ const Page = () => {
   }, [userId]);
 
   const handleOpenBooking = () => {
-    if (!dateRange.startDate || !dateRange.endDate) {
-      toast.error("Vui lòng chọn ngày bắt đầu và ngày kết thúc");
+    if (!name) {
+      toast.error("Vui lòng nhập họ và tên");
       return;
     }
+
+    if (phoneNumber.length !== 10) {
+      toast.error("Số điện thoại không hợp lệ");
+      return;
+    }
+
+    if (phoneNumber)
+      if (!dateRange.startDate || !dateRange.endDate) {
+        toast.error("Vui lòng chọn ngày bắt đầu và ngày kết thúc");
+        return;
+      }
     if (selectedPet.length < 1) {
       toast.error("Vui lòng chọn ít nhất 1 bé mèo");
       return;

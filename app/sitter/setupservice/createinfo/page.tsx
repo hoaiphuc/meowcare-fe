@@ -109,6 +109,15 @@ const CreateInfo = () => {
     //create profile
     const handleCreate = async () => {
         try {
+            if (selectPicture.filter((pic: ProfilePicture) => pic.isCargoProfilePicture === false).length < 4) {
+                toast.error("Thêm ít nhất 4 ảnh cho hồ sơ của bạn")
+                return
+            }
+
+            if (selectPicture.filter((pic: ProfilePicture) => pic.isCargoProfilePicture === true).length < 1) {
+                toast.error("Thêm ít nhất 1 ảnh cho môi trường và chuồng nuôi")
+                return
+            }
 
             const uploadedPictures = await Promise.all(
                 selectPicture.map(async (picture) => {
@@ -248,34 +257,40 @@ const CreateInfo = () => {
 
                 <div className='mt-5'>
                     <h2 className={styles.h2}>Thêm ảnh cho hồ sơ của bạn</h2>
-                    <div className='flex overflow-x-auto gap-2'>
-                        <button
-                            className="flex flex-col justify-center items-center p-3 bg-pink-100 border border-pink-300 rounded-md text-center w-36 h-36"
-                            onClick={handleImageClick}
-                        >
-                            <FontAwesomeIcon icon={faCamera} className='text-maincolor' size='2xl' />
-                            <p>Thêm hình ảnh</p>
-                            <p>{`${selectPicture.filter((e) => e.isCargoProfilePicture === false && !e.isDeleted).length}/5`}</p>
-                        </button>
-                        <input
-                            type="file"
-                            accept='image/*'
-                            ref={hiddenImageInput}
-                            onChange={(e) => handlePictureChange(e, false)}
-                            style={{ display: 'none' }}
-                            multiple
-                        />
-                        {selectPicture && selectPicture.filter((picture) => picture.isCargoProfilePicture === false && !picture.isDeleted).map((photo) => (
-                            <div key={photo.requestId} className="relative w-36 h-36">
-                                <Avatar className="w-full h-full" radius="sm" src={photo.imageUrl} />
+                    <div className='flex overflow-x-auto '>
+                        <div className='flex gap-2 flex-shrink-0'>
+                            {selectPicture.filter((pic: ProfilePicture) => pic.isCargoProfilePicture === false).length < 10 &&
                                 <button
-                                    onClick={() => markAsDeleted(photo.requestId)}
-                                    className="absolute top-0 right-0 p-1 rounded-full w-8 h-8 bg-black bg-opacity-50 text-white"
+                                    className="flex flex-col justify-center items-center p-3 bg-pink-100 border border-pink-300 rounded-md text-center w-36 h-36"
+                                    onClick={handleImageClick}
                                 >
-                                    ✕
+                                    <FontAwesomeIcon icon={faCamera} className='text-maincolor' size='2xl' />
+                                    <p>Thêm hình ảnh</p>
+                                    <p>{`${selectPicture.filter((e) => e.isCargoProfilePicture === false && !e.isDeleted).length}/10`}</p>
                                 </button>
-                            </div>
-                        ))}
+                            }
+                            <input
+                                type="file"
+                                accept='image/*'
+                                ref={hiddenImageInput}
+                                onChange={(e) => handlePictureChange(e, false)}
+                                style={{ display: 'none' }}
+                                multiple
+                            />
+
+                            {selectPicture && selectPicture.filter((picture) => picture.isCargoProfilePicture === false && !picture.isDeleted).map((photo) => (
+                                <div key={photo.requestId} className="relative w-36 h-36">
+                                    <Avatar className="w-full h-full" radius="sm" src={photo.imageUrl} />
+                                    <button
+                                        onClick={() => markAsDeleted(photo.requestId)}
+                                        className="absolute top-0 right-0 p-1 rounded-full w-8 h-8 bg-black bg-opacity-50 text-white"
+                                    >
+                                        ✕
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+
                     </div>
                 </div>
 
@@ -347,34 +362,39 @@ const CreateInfo = () => {
                     <Input type='number' placeholder="Số lượng mèo có thể chăm sóc" value={sitterData?.maximumQuantity !== undefined ? sitterData.maximumQuantity.toString() : ""} name='maximumQuantity' onChange={handleInputChange} />
                     <h3 className={styles.h3}>Hình ảnh môi trường và chuồng, lồng</h3>
                     <div className='flex overflow-x-auto gap-2'>
-                        <button
-                            className="flex flex-col justify-center items-center p-3 bg-pink-100 border border-pink-300 rounded-md text-center w-36 h-36"
-                            onClick={handleCargoClick}
-                        >
-                            <FontAwesomeIcon icon={faCamera} className='text-maincolor' size='2xl' />
-                            <p>Thêm hình ảnh</p>
-                            <p>{`${selectPicture.filter((e) => e.isCargoProfilePicture && !e.isDeleted).length}/5`}</p>
-                        </button>
-                        <input
-                            type="file"
-                            accept='image/*'
-                            ref={hiddenCargoInput}
-                            onChange={(e) => handlePictureChange(e, true)}
-                            style={{ display: 'none' }}
-                            multiple
-                        />
-                        {selectPicture.filter((picture) => picture.isCargoProfilePicture && !picture.isDeleted).map((photo) => (
-                            <div key={photo.requestId} className="relative w-36 h-36">
-                                <Avatar className="w-full h-full" radius="sm" src={photo.imageUrl} />
+                        <div className="flex gap-2 flex-shrink-0">
+                            {selectPicture.filter((pic: ProfilePicture) => pic.isCargoProfilePicture === true).length < 10 &&
                                 <button
-                                    onClick={() => markAsDeleted(photo.requestId)}
-                                    className="absolute top-0 right-0 p-1 rounded-full w-8 h-8 bg-black bg-opacity-50 text-white"
+                                    className="flex flex-col justify-center items-center p-3 bg-pink-100 border border-pink-300 rounded-md text-center w-36 h-36"
+                                    onClick={handleCargoClick}
                                 >
-                                    ✕
+                                    <FontAwesomeIcon icon={faCamera} className='text-maincolor' size='2xl' />
+                                    <p>Thêm hình ảnh</p>
+                                    <p>{`${selectPicture.filter((e) => e.isCargoProfilePicture && !e.isDeleted).length}/10`}</p>
                                 </button>
-                            </div>
-                        ))}
+                            }
+                            <input
+                                type="file"
+                                accept='image/*'
+                                ref={hiddenCargoInput}
+                                onChange={(e) => handlePictureChange(e, true)}
+                                style={{ display: 'none' }}
+                                multiple
+                            />
+                            {selectPicture.filter((picture) => picture.isCargoProfilePicture && !picture.isDeleted).map((photo) => (
+                                <div key={photo.requestId} className="relative w-36 h-36">
+                                    <Avatar className="w-full h-full" radius="sm" src={photo.imageUrl} />
+                                    <button
+                                        onClick={() => markAsDeleted(photo.requestId)}
+                                        className="absolute top-0 right-0 p-1 rounded-full w-8 h-8 bg-black bg-opacity-50 text-white"
+                                    >
+                                        ✕
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
                     </div>
+
                 </div>
 
                 <div>
