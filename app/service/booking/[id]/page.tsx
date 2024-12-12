@@ -369,7 +369,7 @@ const Page = () => {
               }
             />
 
-            <h2 className={styles.h2}>Chọn thú cưng của bạn</h2>
+            <h2 className={styles.h2}>Chọn mèo của bạn</h2>
             <h3>
               Nếu bạn chưa thêm hồ sơ thú cưng,{" "}
               <Link href="/profile/pet" className="underline font-semibold">
@@ -382,8 +382,8 @@ const Page = () => {
               labelPlacement="outside"
               className="select min-w-full"
               selectionMode="multiple"
-              variant="bordered"
               isMultiline={true}
+              variant="bordered"
               defaultSelectedKeys={selectedPet}
               onChange={(event) => handlePetChange(event.target.value)}
               renderValue={(items) => {
