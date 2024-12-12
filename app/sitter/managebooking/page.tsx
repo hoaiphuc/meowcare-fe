@@ -33,7 +33,7 @@ const Page = () => {
   const menuItems = [
     { name: "Tất cả", status: null },
     // { name: 'Chờ thanh toán', status: 'AWAITING_PAYMENT' },
-    { name: "Chờ xác nhận", status: "AWAITING_CONFIRM" },
+    // { name: "Chờ xác nhận", status: "AWAITING_CONFIRM" },
     { name: "Đã xác nhận", status: "CONFIRMED" },
     { name: "Đang diễn ra", status: "IN_PROGRESS" },
     { name: "Đã hoàn thành", status: "COMPLETED" },
@@ -42,7 +42,7 @@ const Page = () => {
   ];
   const statusColors: { [key: string]: string } = {
     // AWAITING_PAYMENT: 'text-[#e67e22]', // Chờ duyệt - gray
-    AWAITING_CONFIRM: "text-[#9E9E9E]", // Chờ duyệt - gray
+    // AWAITING_CONFIRM: "text-[#9E9E9E]", // Chờ duyệt - gray
     CONFIRMED: "text-[#2E67D1]", // Xác nhận - blue
     IN_PROGRESS: "text-[#FFC107]", // yellow
     COMPLETED: "text-[#4CAF50]", // Hoàn thành - green
@@ -89,9 +89,8 @@ const Page = () => {
                   <div
                     key={item.name}
                     onClick={() => setSelectedStatus(item.status)}
-                    className={`flex flex-row items-center p-2 rounded-lg w-[264px] cursor-pointer h-14 ${
-                      item.status === selectedStatus ? "bg-[#ffeae0]" : ""
-                    }`}
+                    className={`flex flex-row items-center p-2 rounded-lg w-[264px] cursor-pointer h-14 ${item.status === selectedStatus ? "bg-[#ffeae0]" : ""
+                      }`}
                   >
                     {/* {item.icon} */}
                     <span className="font-semibold text-[16px] flex">
@@ -115,7 +114,7 @@ const Page = () => {
                 <Link
                   href={
                     activity.status !== "AWAITING_CONFIRM" &&
-                    activity.status !== "CANCELLED"
+                      activity.status !== "CANCELLED"
                       ? `/sitter/tracking/${activity.id}`
                       : `/sitter/bookingdetail/${activity.id}`
                   }
@@ -140,7 +139,7 @@ const Page = () => {
                     <div className="font-semibold">
                       {activity.orderType === "OVERNIGHT"
                         ? "Chăm sóc mèo tại nhà: "
-                        : "Dịch vụ khác: "}{" "}
+                        : "Dịch vụ khác: "}
                     </div>
                     <div className="flex items-center justify-center gap-2 ml-2">
                       {new Date(activity.startDate).toLocaleDateString()}{" "}
@@ -150,9 +149,8 @@ const Page = () => {
                   </div>
 
                   <h2
-                    className={`${
-                      statusColors[activity.status] || "text-black"
-                    }`}
+                    className={`${statusColors[activity.status] || "text-black"
+                      }`}
                   >
                     {statusLabels[activity.status] || ""}
                   </h2>

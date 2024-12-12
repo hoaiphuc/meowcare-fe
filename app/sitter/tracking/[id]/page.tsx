@@ -543,14 +543,18 @@ const Tracking = () => {
                                         <h2>Ngày bắt đầu: {DateFormat(dataOrder.startDate)}</h2>
                                         <h2>Ngày kết thúc: {DateFormat(dataOrder.endDate)}</h2>
                                         <h2>Ghi chú: {dataOrder.note}</h2>
-                                        <Button className='w-full bg-maincolor text-white my-10' radius='sm' onClick={() => completeBooking()}>Hoàn thành dịch vụ</Button>
+                                        {dataOrder.status === "IN_PROGRESS" &&
+                                            <Button className='w-full bg-maincolor text-white my-10' radius='sm' onClick={() => completeBooking()}>Hoàn thành dịch vụ</Button>
+                                        }
                                     </div>
                                 </Tab>
-                                <Tab key="chat" title="Nhắn tin">
-                                    <div className='h-96'>
-                                        <Chat userId={dataOrder.sitter.id} userName={dataOrder.sitter.fullName} orderId={dataOrder.id} />
-                                    </div>
-                                </Tab>
+                                {dataOrder.status !== "COMPLETED" &&
+                                    <Tab key="chat" title="Nhắn tin">
+                                        <div className='h-96'>
+                                            <Chat userId={dataOrder.sitter.id} userName={dataOrder.sitter.fullName} orderId={dataOrder.id} />
+                                        </div>
+                                    </Tab>
+                                }
                             </Tabs>
                         </div>
                     </div>

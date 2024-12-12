@@ -162,6 +162,7 @@ const Service = () => {
 
         <h2 className={styles.h2}>Tên người chăm sóc</h2>
         <Input
+          placeholder="Nhập tên người bạn muốn tìm"
           value={name}
           variant='bordered'
           onChange={(e) => setName(e.target.value)}

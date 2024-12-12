@@ -15,6 +15,7 @@ import {
   faChevronRight,
   faCircle,
   faEye,
+  faLock,
   faRectangleList,
   faStarHalfStroke,
   faUnlock,
@@ -55,8 +56,8 @@ const Page = () => {
   };
 
   const statusLabels: { [key: string]: string } = {
-    ACTIVE: "Đang hoạt động",
-    INACTIVE: "Đang ngoại tuyến",
+    ACTIVE: "ĐANG HOẠT ĐỘNG",
+    INACTIVE: "KHÔNG HOẠT ĐỘNG",
   };
 
   const getUserFromStorage = () => {
@@ -156,8 +157,7 @@ const Page = () => {
           });
           setSitterStatus(newStatus);
           toast.success(
-            `Trạng thái đã được cập nhật thành ${
-              newStatus === "ACTIVE" ? "Đang hoạt động" : "Đang ngoại tuyến"
+            `Trạng thái đã được cập nhật thành ${newStatus === "ACTIVE" ? "Đang hoạt động" : "Đang ngoại tuyến"
             }`
           );
           onOpenChange();
@@ -165,7 +165,7 @@ const Page = () => {
         .catch(() => {
           toast.error("Đã có lỗi xảy ra, vui lòng thử lại sau");
         });
-    } catch (error) {}
+    } catch (error) { }
   };
 
   return (
@@ -175,9 +175,9 @@ const Page = () => {
           <Avatar
             src={
               userProfile?.avatar &&
-              (userProfile.avatar.startsWith("http://") ||
-                userProfile.avatar.startsWith("https://") ||
-                userProfile.avatar.startsWith("/"))
+                (userProfile.avatar.startsWith("http://") ||
+                  userProfile.avatar.startsWith("https://") ||
+                  userProfile.avatar.startsWith("/"))
                 ? userProfile.avatar
                 : "/User-avatar.png"
             }
@@ -333,8 +333,9 @@ const Page = () => {
                   </div>
                   <div className="px-10">
                     <div>
-                      <h1 className="text-2xl font-semibold">
-                        Dịch vụ của bạn đang {sitterProfile?.status}
+                      <h1 className="flex gap-2 text-2xl font-semibold">
+                        Dịch vụ của bạn đang
+                        <h1 className={statusColors[sitterProfile ? sitterProfile.status : "text-black"]}>{sitterProfile ? statusLabels[sitterProfile.status] : "Đang ngoại tuyến"}</h1>
                       </h1>
                       <h2 className="mb-4">
                         Mở hoạt động để mọi người có thể tìm thấy dịch vụ của
@@ -344,7 +345,7 @@ const Page = () => {
                         <div className="flex flex-col justify-center items-center gap-2">
                           <Button
                             className={styles.modalButton}
-                            onClick={() => {}}
+                            onClick={() => { }}
                           >
                             <FontAwesomeIcon
                               icon={faEye}
@@ -354,21 +355,39 @@ const Page = () => {
                           </Button>
                           <p className="text-[16px] font-semibold">Xem hồ sơ</p>
                         </div>
-                        <div className="flex flex-col justify-center items-center gap-2">
-                          <Button
-                            className={styles.modalButton}
-                            onClick={handleChangeStatus}
-                          >
-                            <FontAwesomeIcon
-                              icon={faUnlock}
-                              size="2x"
-                              className="cursor-pointer"
-                            />
-                          </Button>
-                          <p className="text-[16px] font-semibold">
-                            Mở hoạt động
-                          </p>
-                        </div>
+                        {sitterProfile?.status === "INACTIVE" ?
+                          <div className="flex flex-col justify-center items-center gap-2">
+                            <Button
+                              className={styles.modalButton}
+                              onClick={handleChangeStatus}
+                            >
+                              <FontAwesomeIcon
+                                icon={faUnlock}
+                                size="2x"
+                                className="cursor-pointer"
+                              />
+                            </Button>
+                            <p className="text-[16px] font-semibold">
+                              Mở hoạt động
+                            </p>
+                          </div>
+                          :
+                          <div className="flex flex-col justify-center items-center gap-2">
+                            <Button
+                              className={styles.modalButton}
+                              onClick={handleChangeStatus}
+                            >
+                              <FontAwesomeIcon
+                                icon={faLock}
+                                size="2x"
+                                className="cursor-pointer"
+                              />
+                            </Button>
+                            <p className="text-[16px] font-semibold">
+                              Đóng hoạt động
+                            </p>
+                          </div>
+                        }
                       </div>
                       <hr className="my-10" />
                       <div className="flex flex-col gap-3">

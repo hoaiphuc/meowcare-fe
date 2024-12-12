@@ -111,10 +111,10 @@ const Info = () => {
     const { name, value } = e.target;
     setSitterData(
       (prevData) =>
-        ({
-          ...prevData,
-          [name]: value,
-        } as CatSitter)
+      ({
+        ...prevData,
+        [name]: value,
+      } as CatSitter)
     ); // Type assertion to satisfy TypeScript
   };
 
@@ -131,7 +131,7 @@ const Info = () => {
             setAddress(res.data.location);
           }
         })
-        .catch(() => {});
+        .catch(() => { });
 
       axiosClient(`certificates/user/${userId}`)
         .then((res) => {
@@ -140,7 +140,7 @@ const Info = () => {
         .catch((e) => {
           console.log(e);
         });
-    } catch (error) {}
+    } catch (error) { }
   }, [userId]);
 
   const handleLocationChange = (lat: number, lng: number) => {
@@ -149,11 +149,11 @@ const Info = () => {
 
     setSitterData(
       (prevData) =>
-        ({
-          ...prevData,
-          latitude: lat,
-          longitude: lng,
-        } as CatSitter)
+      ({
+        ...prevData,
+        latitude: lat,
+        longitude: lng,
+      } as CatSitter)
     );
   };
 
@@ -173,11 +173,11 @@ const Info = () => {
     handleLocationChange(suggestion.lat, suggestion.lon);
     setSitterData(
       (prev) =>
-        ({
-          ...prev,
-          latitude: suggestion.lat,
-          longitude: suggestion.lon,
-        } as CatSitter)
+      ({
+        ...prev,
+        latitude: suggestion.lat,
+        longitude: suggestion.lon,
+      } as CatSitter)
     );
 
     // const selectedSuggestion = geoSuggestions.find(s => s.properties.formatted === suggestion);
@@ -195,6 +195,16 @@ const Info = () => {
   // Update profile
   const handleUpdate = async () => {
     try {
+      if (selectPicture.filter((pic: ProfilePicture) => pic.isCargoProfilePicture === false).length < 4) {
+        toast.error("Thêm ít nhất 4 ảnh cho hồ sơ của bạn")
+        return
+      }
+
+      if (selectPicture.filter((pic: ProfilePicture) => pic.isCargoProfilePicture === true).length < 1) {
+        toast.error("Thêm ít nhất 1 ảnh cho môi trường và chuồng nuôi")
+        return
+      }
+
       if (removeList && removeList.length > 0) {
         await Promise.all(
           removeList.map(async (item) => {
@@ -343,7 +353,7 @@ const Info = () => {
       const newCertificates = filesArray.map((file) => ({
         id: "",
         userId: userId || "",
-        certificateType: file.type.includes("pdf") ? "PDF" : "IMAGE",
+        certificateType: "PDF",
         certificateName: file.name,
         institutionName: "",
         certificateUrl: URL.createObjectURL(file),
@@ -430,55 +440,59 @@ const Info = () => {
         </div>
 
         <div className="mt-5">
-          <h2 className={styles.h2}>Thêm ảnh cho hồ sơ của bạn</h2>
-          <div className="flex overflow-x-auto gap-2">
-            <button
-              className="flex flex-col justify-center items-center p-3 bg-pink-100 border border-pink-300 rounded-md text-center w-36 h-36"
-              onClick={handleImageClick}
-            >
-              <FontAwesomeIcon
-                icon={faCamera}
-                className="text-maincolor"
-                size="2xl"
+          <h2 className={styles.h2}>Thêm ảnh cho hồ sơ của bạn </h2>
+          <div className="flex overflow-x-auto">
+            <div className="flex gap-2 flex-shrink-0">
+              {selectPicture.filter((pic: ProfilePicture) => pic.isCargoProfilePicture === false).length < 10 &&
+                <button
+                  className="flex flex-col justify-center items-center p-3 bg-pink-100 border border-pink-300 rounded-md text-center w-36 h-36"
+                  onClick={handleImageClick}
+                >
+                  <FontAwesomeIcon
+                    icon={faCamera}
+                    className="text-maincolor"
+                    size="2xl"
+                  />
+                  <p>Thêm hình ảnh</p>
+                  <p>{`${selectPicture.filter(
+                    (e) => e.isCargoProfilePicture === false && !e.isDeleted
+                  ).length
+                    }/10`}</p>
+                </button>
+              }
+              <input
+                type="file"
+                accept="image/*"
+                ref={hiddenImageInput}
+                onChange={(e) => handlePictureChange(e, false)}
+                style={{ display: "none" }}
+                multiple
               />
-              <p>Thêm hình ảnh</p>
-              <p>{`${
-                selectPicture.filter(
-                  (e) => e.isCargoProfilePicture === false && !e.isDeleted
-                ).length
-              }/5`}</p>
-            </button>
-            <input
-              type="file"
-              accept="image/*"
-              ref={hiddenImageInput}
-              onChange={(e) => handlePictureChange(e, false)}
-              style={{ display: "none" }}
-              multiple
-            />
-            {selectPicture &&
-              selectPicture
-                .filter(
-                  (picture) =>
-                    picture.isCargoProfilePicture === false &&
-                    !picture.isDeleted
-                )
-                .map((photo) => (
-                  <div key={photo.id} className="relative w-36 h-36">
-                    <Avatar
-                      className="w-full h-full"
-                      radius="sm"
-                      src={photo.imageUrl}
-                    />
-                    <button
-                      onClick={() => markAsDeleted(photo.id)}
-                      className="absolute top-0 right-0 p-1 rounded-full w-8 h-8 bg-black bg-opacity-50 text-white"
-                    >
-                      ✕
-                    </button>
-                  </div>
-                ))}
+              {selectPicture &&
+                selectPicture
+                  .filter(
+                    (picture) =>
+                      picture.isCargoProfilePicture === false &&
+                      !picture.isDeleted
+                  )
+                  .map((photo) => (
+                    <div key={photo.id} className="relative w-36 h-36 ">
+                      <Avatar
+                        className="w-full h-full"
+                        radius="sm"
+                        src={photo.imageUrl}
+                      />
+                      <button
+                        onClick={() => markAsDeleted(photo.id)}
+                        className="absolute top-0 right-0 p-1 rounded-full w-8 h-8 bg-black bg-opacity-50 text-white"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))}
+            </div>
           </div>
+
         </div>
 
         <div className="mt-5">
@@ -582,50 +596,53 @@ const Info = () => {
           <h3 className={styles.h3}>
             Hình ảnh môi trường chăm sóc và chuồng, lồng giành cho bé mèo
           </h3>
-          <div className="flex overflow-x-auto gap-2">
-            <button
-              className="flex flex-col justify-center items-center p-3 bg-pink-100 border border-pink-300 rounded-md text-center w-36 h-36"
-              onClick={handleCargoClick}
-            >
-              <FontAwesomeIcon
-                icon={faCamera}
-                className="text-maincolor"
-                size="2xl"
-              />
-              <p>Thêm hình ảnh</p>
-              <p>{`${
-                selectPicture.filter(
-                  (e) => e.isCargoProfilePicture && !e.isDeleted
-                ).length
-              }/5`}</p>
-            </button>
-            <input
-              type="file"
-              accept="image/*"
-              ref={hiddenCargoInput}
-              onChange={(e) => handlePictureChange(e, true)}
-              style={{ display: "none" }}
-              multiple
-            />
-            {selectPicture
-              .filter(
-                (picture) => picture.isCargoProfilePicture && !picture.isDeleted
-              )
-              .map((photo) => (
-                <div key={photo.id} className="relative w-36 h-36">
-                  <Avatar
-                    className="w-full h-full"
-                    radius="sm"
-                    src={photo.imageUrl}
+          <div className="flex overflow-x-auto">
+            <div className="flex gap-2 flex-shrink-0">
+              {selectPicture.filter((pic: ProfilePicture) => pic.isCargoProfilePicture === false).length < 10 &&
+                <button
+                  className="flex flex-col justify-center items-center p-3 bg-pink-100 border border-pink-300 rounded-md text-center w-36 h-36"
+                  onClick={handleCargoClick}
+                >
+                  <FontAwesomeIcon
+                    icon={faCamera}
+                    className="text-maincolor"
+                    size="2xl"
                   />
-                  <button
-                    onClick={() => markAsDeleted(photo.id)}
-                    className="absolute top-0 right-0 p-1 rounded-full w-8 h-8 bg-black bg-opacity-50 text-white"
-                  >
-                    ✕
-                  </button>
-                </div>
-              ))}
+                  <p>Thêm hình ảnh</p>
+                  <p>{`${selectPicture.filter(
+                    (e) => e.isCargoProfilePicture && !e.isDeleted
+                  ).length
+                    }/10`}</p>
+                </button>
+              }
+              <input
+                type="file"
+                accept="image/*"
+                ref={hiddenCargoInput}
+                onChange={(e) => handlePictureChange(e, true)}
+                style={{ display: "none" }}
+                multiple
+              />
+              {selectPicture
+                .filter(
+                  (picture) => picture.isCargoProfilePicture && !picture.isDeleted
+                )
+                .map((photo) => (
+                  <div key={photo.id} className="relative w-36 h-36">
+                    <Avatar
+                      className="w-full h-full"
+                      radius="sm"
+                      src={photo.imageUrl}
+                    />
+                    <button
+                      onClick={() => markAsDeleted(photo.id)}
+                      className="absolute top-0 right-0 p-1 rounded-full w-8 h-8 bg-black bg-opacity-50 text-white"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ))}
+            </div>
           </div>
         </div>
 
@@ -645,14 +662,14 @@ const Info = () => {
             </button>
             <input
               type="file"
-              accept="image/*,application/pdf"
+              accept="application/pdf"
               ref={hiddenFileInput}
               onChange={handleImageUpdateChange}
               style={{ display: "none" }}
               multiple
             />
             {certificates.map((certificate, index) => (
-              <div key={index} className="relative w-36 h-36">
+              <div key={index} className="relative w-36 h-36 flex-shrink-0">
                 {certificate.certificateType === "IMAGE" ? (
                   <Avatar
                     src={certificate.certificateUrl}
