@@ -344,7 +344,7 @@ const Page = () => {
                                                 <h1 className={styles.h1}>Tên:</h1> <p className={styles.p}>{selectedCat.petName}</p>
                                                 <h1 className={styles.h1}>Tuổi:</h1> <p className={styles.p}>{selectedCat.age}</p>
                                                 <h1 className={styles.h1}>Giống loài:</h1> <p className={styles.p}>{selectedCat.breed}</p>
-                                                <h1 className={styles.h1}>Cân nặng:</h1> <p className={styles.p}>{selectedCat.breed}</p>
+                                                <h1 className={styles.h1}>Cân nặng:</h1> <p className={styles.p}>{selectedCat.weight}</p>
                                                 <h1 className={styles.h1}>Những điều cần lưu ý:</h1> <p className={styles.p}>{selectedCat.description}</p>
                                             </div>
                                         </div>

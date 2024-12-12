@@ -149,8 +149,8 @@ const ServiceDetail = () => {
             return;
         }
 
-        if (childServices.length < 2) {
-            toast.error("Bạn phải tạo ít nhất 5 khung thời gian cho dịch vụ này")
+        if (childServices.length < 4) {
+            toast.error("Bạn phải tạo ít nhất 4 khung làm việc cho dịch vụ này")
             return;
         }
 
@@ -169,10 +169,9 @@ const ServiceDetail = () => {
             await Promise.all(childServiceRequests);
 
             // If everything is successful
-            toast.success("Bạn đã tạo dịch vụ và cập nhật dịch vụ thành công");
+            toast.success("Bạn đã tạo dịch vụ và danh sách công việc thành công");
             router.push('/sitter/setupservice');
         } catch (error) {
-            console.error(error);
             toast.error("Đã xảy ra lỗi khi tạo dịch vụ, vui lòng kiểm tra lại");
         } finally {
             setIsLoading(false); // Hide the loading indicator
@@ -188,6 +187,8 @@ const ServiceDetail = () => {
             const toUpdate = childServices.filter((service) => !service.isNew && !service.isDeleted);
             const toDelete = childServices.filter((service) => service.isDeleted);
 
+            await axiosClient.put(`services/${serviceData.id}`, serviceData)
+
             // Perform API calls
             const addPromises = toAdd.map((service) =>
                 axiosClient.post("services", {
@@ -201,6 +202,8 @@ const ServiceDetail = () => {
             const deletePromises = toDelete.map((service) =>
                 axiosClient.delete(`services/${service.id}`)
             );
+
+
 
             // Execute all operations concurrently
             await Promise.all([...addPromises, ...updatePromises, ...deletePromises]);
@@ -319,7 +322,7 @@ const ServiceDetail = () => {
                 <Input
                     type="number"
                     name='price'
-                    placeholder="Giá trung bình là 50.000"
+                    placeholder="Giá hợp lý sẽ thu hút được nhiều người hơn"
                     min={configService?.floorPrice}
                     max={configService?.ceilPrice}
                     value={serviceData.price}
@@ -378,15 +381,15 @@ const ServiceDetail = () => {
                 </div>
 
                 {service ? (
-                    <div>
-                        <div></div>
+                    <div className='flex justify-end'>
                         <Button onClick={() => handleUpdate()} className='bg-cyan-500 hover:bg-cyan-600 text-white'>
                             <FontAwesomeIcon icon={faPencil} />Cập nhật
                         </Button>
                     </div>
                 ) : (
-                    <div>
-                        <Button onClick={() => handleAdd()}>
+                    <div className='flex justify-end'>
+                        <Button onClick={() => handleAdd()} className='bg-cyan-500 hover:bg-cyan-600 text-white'>
+                            <FontAwesomeIcon icon={faPlus} />
                             Tạo
                         </Button>
                     </div>
