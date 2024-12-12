@@ -2,7 +2,7 @@
 
 import { faCat, faCircle, faFilePdf, faShieldCat, faStar } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Avatar, Button, Calendar, DateValue, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, useDisclosure } from '@nextui-org/react';
+import { Avatar, Button, Calendar, DateValue, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Textarea, useDisclosure } from '@nextui-org/react';
 // import Image from 'next/image';
 import React, { useEffect, useState } from 'react'
 import { Icon } from '@iconify/react';
@@ -31,6 +31,7 @@ const Page = () => {
     const [selectedPdf, setSelectedPdf] = useState<string>();
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
     const { isOpen: isImageOpen, onOpen: onImageOpen, onOpenChange: onImageOpenChange } = useDisclosure();
+    const { isOpen: isReportOpen, onOpen: onReportOpen, onOpenChange: onReportOpenChange } = useDisclosure();
     const [lightboxOpen, setLightboxOpen] = useState(false);
     const [lightboxIndex, setLightboxIndex] = useState(0);
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -214,6 +215,11 @@ const Page = () => {
 
                         </div>
                     </div>
+
+                    <div className='flex text-xl gap-3 items-center py-5 font-semibold cursor-pointer' onClick={onReportOpen}>
+                        <Icon icon="noto:warning" />
+                        <p>Báo cáo người dùng này</p>
+                    </div>
                 </div>
             </div>
 
@@ -233,14 +239,14 @@ const Page = () => {
 
                 <div className='flex items-start justify-start gap-5'>
                     <div className='flex flex-col items-center justify-center'>
-                        <h1 className={styles.h1}>Gửi thú cưng</h1>
+                        <h1 className={`${styles.h1} w-[170px]`}>Gửi thú cưng</h1>
                         <Image src='/service/boarding.png' alt='' width={144} height={144} />
                     </div>
                     <div className='flex flex-col items-start justify-start'>
                         <h1 className={styles.h1}>Lịch trình chăm sóc dự kiến</h1>
                         {childService && childService.map((ser) => (
-                            <div key={ser.id} className='flex text-xl items-center gap-3'>
-                                <FontAwesomeIcon icon={faCat} className="text-xs" size='2xs' />
+                            <div key={ser.id} className='flex text-xl items-start gap-3'>
+                                <FontAwesomeIcon icon={faCat} className="text-xs mt-2" size='2xs' />
                                 <div className={styles.time}>{ser.startTime.split(":").slice(0, 2).join(":")} - {ser.endTime.split(":").slice(0, 2).join(":")} : </div>
                                 <p className={styles.childService}>{ser.name}</p>
                             </div>
@@ -251,7 +257,7 @@ const Page = () => {
 
                 <div className='flex items-start justify-start gap-5'>
                     <div className='flex flex-col items-center justify-center'>
-                        <h1 className={styles.h1}>Dịch vụ khác</h1>
+                        <h1 className={`${styles.h1} w-[170px]`}>Dịch vụ khác</h1>
                         <Image src='/service/other.png' alt='' width={144} height={144} />
                     </div>
                     <div className='flex flex-col items-start justify-start gap-3'>
@@ -375,6 +381,32 @@ const Page = () => {
                             <ModalFooter>
                                 <Button color="danger" variant="light" onPress={onClose}>
                                     Close
+                                </Button>
+                            </ModalFooter>
+                        </>
+                    )}
+                </ModalContent>
+            </Modal>
+            <Modal isOpen={isReportOpen} onOpenChange={onReportOpenChange}>
+                <ModalContent>
+                    {(onClose) => (
+                        <>
+                            <ModalHeader className="flex items-center gap-3">
+                                <Icon icon="noto:warning" />
+                                Báo cáo người dùng vi phạm
+                            </ModalHeader>
+                            <ModalBody>
+                                <h1>Loại vi phạm</h1>
+                                <Input />
+                                <h1>Nội dung vi phạm</h1>
+                                <Textarea />
+                            </ModalBody>
+                            <ModalFooter>
+                                <Button color="danger" variant="light" onPress={onClose}>
+                                    Đóng
+                                </Button>
+                                <Button color="primary" onPress={onClose}>
+                                    Gửi báo cáo
                                 </Button>
                             </ModalFooter>
                         </>

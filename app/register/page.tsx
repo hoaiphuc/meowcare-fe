@@ -19,6 +19,7 @@ const Register = () => {
     const toggleVisibilityRepeat = () => setIsVisibleRepeat(!isVisibleRepeat);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [repeatPassword, setRepeatPassword] = useState('');
     const [username, setUserName] = useState('');
     const dataRegister = {
         email: email,
@@ -27,6 +28,36 @@ const Register = () => {
     };
 
     const handleSubmit = async () => {
+        // Validate all fields
+        if (!username || !email || !password) {
+            toast.error('Vui lòng điền đầy đủ thông tin trước khi đăng ký');
+            return;
+        }
+
+        // Check email format
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            toast.error('Vui lòng nhập địa chỉ email hợp lệ');
+            return;
+        }
+
+        // Check username length
+        if (username.length < 6) {
+            toast.error('Tên người dùng phải có ít nhất 6 ký tự');
+            return;
+        }
+
+        // Check password length
+        if (password.length < 6) {
+            toast.error('Mật khẩu phải có ít nhất 6 ký tự');
+            return;
+        }
+
+        if (password !== repeatPassword) {
+            toast.error('Các mật khẩu đã nhập không khớp. Hãy thử lại.');
+            return;
+        }
+
         try {
             await axiosClient
                 .post('users', dataRegister)
@@ -35,6 +66,10 @@ const Register = () => {
                     router.push('/login');
                 })
                 .catch((error) => {
+                    if (error.response.data.status === 2008) {
+                        toast.error('Email này đã được sử dụng, vui lòng thử email khác')
+                        return
+                    }
                     toast.error('Đăng ký tài khoản thất bại, vui lòng thử lại sau!')
                     console.log(error);
                 })
@@ -96,6 +131,7 @@ const Register = () => {
                         size='lg'
                         placeholder="Nhập lại mật khẩu"
                         labelPlacement="outside"
+                        onChange={(e) => setRepeatPassword(e.target.value)}
                         endContent={
                             <button className="focus:outline-none" type="button" onClick={toggleVisibilityRepeat} aria-label="toggle password visibility">
                                 {isVisibleRepeat ? (

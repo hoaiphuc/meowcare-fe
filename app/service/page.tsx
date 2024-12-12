@@ -286,7 +286,7 @@ const Service = () => {
                                         <div className='flex gap-3 cursor-pointer'>
                                             <Avatar
                                                 src={catSitter?.avatar || '/User-avatar.png'}
-                                                className='h-[80px] w-[80px]'
+                                                className='min-h-[80px] min-w-[80px]'
                                             />
                                             <div className='flex flex-col gap-1'>
                                                 <div className='flex items-center gap-3'>
@@ -307,7 +307,7 @@ const Service = () => {
                                                         />
                                                     </button>
                                                 </div>
-                                                <p className='text-xs'>
+                                                <p className='text-xs line-clamp-1'>
                                                     {catSitter.bio}
                                                 </p>
                                                 <p className='text-xs'>
@@ -337,7 +337,7 @@ const Service = () => {
                                             {/* <p className=' text-[14px] font-normal'>{catSitter.reviews} Đánh giá</p> */}
                                             <p className='text-[14px] font-normal'>20 Đánh giá</p>
                                         </div>
-                                        <p className='text-[14px] my-2'>
+                                        <p className='text-[14px] my-2 line-clamp-1'>
                                             {catSitter.bio}
                                         </p>
                                         <div className='flex font-semibold text-[#66625F]'>
@@ -354,7 +354,7 @@ const Service = () => {
                         )
                         :
                         (
-                            <div className='flex flex-col justify-center items-center px-32'>
+                            <div className='flex flex-col justify-center items-center px-32 py-10'>
                                 <p className='text-xl font-semibold'>Chúng tôi không tìm thấy người chăm sóc thú cưng nào.</p>
                                 <p className='text-[18px]'>Hãy thử thay đổi tiêu chí tìm kiếm hoặc cập nhật vị trí của bạn. </p>
                             </div>

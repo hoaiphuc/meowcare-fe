@@ -87,10 +87,10 @@ const Information = () => {
                 <h1 className='font-semibold text-xl py-10'>Vui lòng điền đầy đủ thông tin để chúng tôi đảm bảo thông tin để xác nhận bạn trở thành người chăm sóc mèo</h1>
                 <div className='flex flex-col justify-center items-start gap-6'>
                     {/* <h2>Họ và tên</h2> */}
-                    <Input placeholder="Nhập họ và tên" label="Họ và tên" labelPlacement='outside' variant="bordered" className='input' name="fullName" value={formData.fullName} onChange={handleInputChange} />
-                    <Input placeholder="Nhập họ và tên" label="Email" labelPlacement='outside' variant="bordered" className='input' name="email" value={formData.email} onChange={handleInputChange} />
-                    <Input placeholder="Nhập số điện thoại" label="Số điện thoại" labelPlacement='outside' variant="bordered" className='input' name="phoneNumber" value={formData.phoneNumber} onChange={handleInputChange} />
-                    <Input placeholder="Nhập địa chỉ của bạn" label="Địa chỉ của bạn" labelPlacement='outside' variant="bordered" className='input' name="address" value={formData.address} onChange={handleInputChange} />
+                    <Input placeholder="Nhập họ và tên" isRequired label="Họ và tên" labelPlacement='outside' variant="bordered" className='input' name="fullName" value={formData.fullName} onChange={handleInputChange} />
+                    <Input placeholder="Nhập họ và tên" isRequired label="Email" labelPlacement='outside' variant="bordered" className='input' name="email" value={formData.email} onChange={handleInputChange} />
+                    <Input placeholder="Nhập số điện thoại" isRequired label="Số điện thoại" labelPlacement='outside' variant="bordered" className='input' name="phoneNumber" value={formData.phoneNumber} onChange={handleInputChange} />
+                    <Input placeholder="Nhập địa chỉ của bạn" isRequired label="Địa chỉ của bạn" labelPlacement='outside' variant="bordered" className='input' name="address" value={formData.address} onChange={handleInputChange} />
 
                     <h2 className='text-black'>Bằng cấp và chứng chỉ liên quan thú cưng (nếu có)</h2>
                     <div className="flex overflow-x-auto gap-2 w-full max-w-full">

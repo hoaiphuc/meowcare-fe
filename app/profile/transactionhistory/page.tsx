@@ -64,7 +64,7 @@ const Page = () => {
 
 
         try {
-            axiosClient(`transactions/search/pagination?userId=${userId}&fromTime=${startDate}&toTime=${endDate}&status=COMPLETED&page=${page}&size=10&sort=createdAt&direction=DESC`)
+            axiosClient(`transactions/search/pagination?userId=${userId}&fromTime=${startDate}&toTime=${endDate}&status=COMPLETED&page=${page}&size=6&sort=createdAt&direction=DESC`)
                 .then((res) => {
                     setTransactions(res.data)
                     setPages(res.data.totalPages)
