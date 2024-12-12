@@ -28,7 +28,13 @@ const Map: React.FC<MapProps> = ({ markers, onMarkerClick, defaultLat, defaultLn
     }, []);
 
     useEffect(() => {
-        if (mapRef.current && defaultLat !== undefined && defaultLng !== undefined) {
+        if (
+            mapRef.current &&
+            defaultLat !== undefined &&
+            defaultLng !== undefined &&
+            (defaultLat !== mapRef.current.getCenter().lat ||
+                defaultLng !== mapRef.current.getCenter().lng)
+        ) {
             mapRef.current.flyTo([defaultLat, defaultLng], 12);
             mapRef.current.invalidateSize();
             mapRef.current.once("moveend", () => {
@@ -36,8 +42,6 @@ const Map: React.FC<MapProps> = ({ markers, onMarkerClick, defaultLat, defaultLn
             });
         }
     }, [defaultLat, defaultLng]);
-
-
 
     // Marker rendering
     useEffect(() => {

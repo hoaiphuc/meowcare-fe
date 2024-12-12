@@ -66,7 +66,10 @@ const Service = () => {
             };
             fetchLatLng();
         }
-    }, [user]);
+        console.log("user change??");
+
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newAddress = e.target.value;
