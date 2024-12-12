@@ -42,13 +42,14 @@ const Page = () => {
     });
     const [sitter, setSitter] = useState<CatSitter>()
     const [paymentMethod, setPaymentMethod] = useState("")
-    const [selectedServiceName, setSelectedServiceName] = useState("")
+    // const [selectedServiceName, setSelectedServiceName] = useState("")
     const [userData, setUserData] = useState<UserType>()
     const catFoods = [
         { id: '1', foodName: 'Cá' },
         { id: '2', foodName: 'Thịt' },
     ];
 
+    const [selectedPetNames, setSelectedPetNames] = useState<string[]>([]);
 
     const [userId, setUserId] = useState<string | null>(null);
 
@@ -94,19 +95,28 @@ const Page = () => {
     // Handle service change
     const handleServiceChange = (serviceId: string) => {
         setSelectedService(serviceId);
-        const selected = services.find((service) => service.id === serviceId);
-        if (selected) {
-            setSelectedServiceName(selected.name);
-        }
+        // const selected = services.find((service) => service.id === serviceId);
+        // if (selected) {
+        //     setSelectedServiceName(selected.name);
+        // }
     };
 
     const handlePetChange = (petIds: string) => {
-        if (petIds)
-            setSelectedPet(petIds.split(','));
-        else {
-            setSelectedPet([])
+        if (petIds) {
+            const selectedIds = petIds.split(',');
+            setSelectedPet(selectedIds);
+
+            // Map selected IDs to pet names and filter out undefined values
+            const names = selectedIds
+                .map((petId) => pets.find((pet) => pet.id === petId)?.petName)
+                .filter((name): name is string => name !== undefined); // Explicitly assert type
+            setSelectedPetNames(names);
+        } else {
+            setSelectedPet([]);
+            setSelectedPetNames([]);
         }
-    }
+    };
+
 
     //get basic service
     useEffect(() => {
@@ -115,6 +125,7 @@ const Page = () => {
                 .then((res) => {
                     setServices(res.data);
                     setSelectedService(res.data[0].id)
+
                 })
                 .catch((e) => {
                     console.log(e);
@@ -235,29 +246,16 @@ const Page = () => {
         }
     }
 
-    // const handlePay = () => {
-    //     try {
-    //         axiosClient.post(`booking-orders/payment-url?id=${bookingId}&requestType=${paymentMethod}&redirectUrl=${process.env.NEXT_PUBLIC_BASE_URL}/payment-result`)
-    //             .then((res) => {
-    //                 window.open(res.data.payUrl, '_self');
-    //             })
-    //             .catch(() => {
-    //                 toast.error("Thanh toán thất bại, vui lòng thử lại sau")
-    //             })
-    //     } catch (error) {
-    //         console.log(error);
-    //     }
-    // }
-
     // Function to convert DateValue to Date
     const convertDateValueToDate = (dateValue: DateValue): Date => {
         return new Date(dateValue.year, dateValue.month - 1, dateValue.day);
     };
 
     const bookingDetails = useMemo(() => {
-        let numberOfNights = 1;
+        let numberOfNights = 0;
         let formattedStartDate = 'Chưa chọn';
         let formattedEndDate = 'Chưa chọn';
+        let priceForPet = 0;
 
         if (dateRange.startDate && dateRange.endDate) {
             const start = convertDateValueToDate(dateRange.startDate);
@@ -265,13 +263,13 @@ const Page = () => {
             const diffTime = end.getTime() - start.getTime();
             numberOfNights = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
             if (numberOfNights <= 0) numberOfNights = 1;
-
+            priceForPet = services[0].price * numberOfNights
             formattedStartDate = start.toLocaleDateString();
             formattedEndDate = end.toLocaleDateString();
         }
 
-        return { numberOfNights, formattedStartDate, formattedEndDate };
-    }, [dateRange]);
+        return { numberOfNights, formattedStartDate, formattedEndDate, priceForPet };
+    }, [dateRange.endDate, dateRange.startDate, services]);
 
     //calculate price
     const totalPrice = useMemo(() => {
@@ -282,9 +280,6 @@ const Page = () => {
         if (basicService) {
             totalPerNight += basicService.price;
         }
-
-
-
         return totalPerNight * bookingDetails.numberOfNights * selectedPet.length;
     }, [services, bookingDetails.numberOfNights, selectedPet.length, selectedService]);
 
@@ -395,7 +390,7 @@ const Page = () => {
                     {/* Final price */}
                     <div className='border flex flex-col p-3 rounded-lg gap-3'>
                         <h2 className={styles.h2}>Thông tin đặt lịch </h2>
-                        <h3>Dịch vụ: {services.map((service) => service.name)}</h3>
+                        <h3>Dịch vụ: <span className='font-semibold'>{services.map((service) => service.name)}</span></h3>
                         <div className='flex flex-cols-3 justify-between'>
                             <div>
                                 <h3>Ngày nhận</h3>
@@ -449,22 +444,25 @@ const Page = () => {
                                         <div className='flex items-start justify-start flex-col w-full'>
                                             <h2 className={styles.h2}>Thông tin đặt lịch của bạn</h2>
                                             <div className='grid grid-cols-2 w-80'>
-                                                <h3 className={styles.h3}>Mã đặt hàng</h3> <h3>123</h3>
-                                                <h3 className={styles.h3}>Dịch vụ</h3> <h3>{selectedServiceName}</h3>
-                                                <h3 className={styles.h3}>Ngày gửi</h3> <h3>{format(new Date(bookingDetails.formattedStartDate), 'dd/MM/yyyy')}</h3>
-                                                <h3 className={styles.h3}>Ngày Nhận</h3> <h3>{format(new Date(bookingDetails.formattedEndDate), 'dd/MM/yyyy')}</h3>
-                                                <h3 className={styles.h3}>Người chăm sóc</h3> <h3>{sitter?.fullName}</h3>
-                                                <h3 className={styles.h3}>Số lượng thú cưng</h3> <h3>1</h3>
+                                                <h3 className={styles.h3}>Dịch vụ</h3> <h3 className={styles.h3}>Gửi thú cưng</h3>
+                                                <h3 className={styles.h3}>Ngày gửi</h3> <h3 className={styles.h3}>{format(new Date(bookingDetails.formattedStartDate), 'dd/MM/yyyy')}</h3>
+                                                <h3 className={styles.h3}>Ngày Nhận</h3> <h3 className={styles.h3}>{format(new Date(bookingDetails.formattedEndDate), 'dd/MM/yyyy')}</h3>
+                                                <h3 className={styles.h3}>Người chăm sóc</h3> <h3 className={styles.h3}>{sitter?.fullName}</h3>
+                                                <h3 className={styles.h3}>Số lượng thú cưng</h3> <h3 className={styles.h3}>{selectedPet.length}</h3>
                                             </div>
                                         </div>
 
                                         <div className='flex flex-col items-start justify-start w-full'>
                                             <h2 className={styles.h2}>Tổng giá dịch vụ</h2>
+                                            {selectedPetNames.map((name, index) => (
+                                                <div key={index} className='grid grid-cols-5 w-full'>
+                                                    <div className={`${styles.money}`}>Tên bé mèo</div>
+                                                    <div className={`${styles.money} col-span-2 font-semibold`}>{name}</div>
+                                                    <div className={styles.money}>{bookingDetails.priceForPet.toLocaleString("de")}</div>
+                                                    <div className={styles.money}>VND</div>
+                                                </div>
+                                            ))}
                                             <div className='grid grid-cols-5 w-full'>
-                                                <div className={styles.money}>123</div>
-                                                <div className={`${styles.money} col-span-2`}>Đức Tấn</div>
-                                                <div className={styles.money}>150.000</div>
-                                                <div className={styles.money}>VND</div>
 
                                                 <div className={`${styles.money} col-span-3`}>Tổng cộng</div>
                                                 <div className={styles.money}>{totalPrice.toLocaleString("de")}</div>
