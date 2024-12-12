@@ -135,9 +135,12 @@ const Page = () => {
                                                             </h2>
                                                             <h2>
                                                                 <span className={styles.title}>Mèo của bạn: </span>
-                                                                {activity.bookingDetailWithPetAndServices[0].pet.petName}
+                                                                {activity.bookingDetailWithPetAndServices
+                                                                    .filter(detail => detail.service.serviceType === "MAIN_SERVICE")
+                                                                    .map(detail => detail.pet.petName)
+                                                                    .join(", ") || "Không có"}
                                                             </h2>
-                                                            <div className='flex items-center justify-center gap-2'>
+                                                            <div className='flex items-center gap-2'>
                                                                 <h2 className={styles.title}>Thời gian: </h2>
                                                                 {activity.startDate && activity.endDate ? (
                                                                     <>
@@ -146,7 +149,11 @@ const Page = () => {
                                                                         {formatDate(new Date(activity.endDate), 'dd/MM/yyyy')}
                                                                     </>
                                                                 ) : (
-                                                                    <span>Invalid date</span>
+                                                                    activity.startDate
+                                                                        ?
+                                                                        <span>{formatDate(new Date(activity.startDate), 'dd/MM/yyyy')}</span>
+                                                                        :
+                                                                        "Lỗi hiện thị ngày"
                                                                 )}
 
                                                             </div>
