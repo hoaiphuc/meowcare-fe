@@ -203,19 +203,19 @@ const ServiceDetail = () => {
                 axiosClient.delete(`services/${service.id}`)
             );
 
-
-
             // Execute all operations concurrently
             await Promise.all([...addPromises, ...updatePromises, ...deletePromises]);
 
-            // Refetch the updated list from the server
-            fetchChildeService();
-
             toast.success("Cập nhật thành công!");
-        } catch (error) {
-            console.error(error);
-            toast.error("Có lỗi xảy ra trong quá trình cập nhật!");
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } catch (error: any) {
+            console.log(error);
+            if (error.response.data.status === 2014) {
+                toast.error("Thời gian của công việc tối thiểu 1 giờ và tối đa 3 giờ");
+            } else
+                toast.error("Có lỗi xảy ra trong quá trình cập nhật!");
         } finally {
+            fetchChildeService();
             setIsLoading(false); // Hide loading indicator
         }
     };

@@ -349,14 +349,13 @@ const OtherService = () => {
     };
 
     const markAsDeletedSlot = (id: string) => {
-        setAdditionServices((prev) =>
-            prev.map((service) =>
-                service.id === id
-                    ? { ...service, isDeleted: true }
-                    : service
+        setSlots((prev) =>
+            prev.map((slot) =>
+                slot.id === id ? { ...slot, isDeleted: true } : slot
             )
         );
     };
+
     const handleInputSlotChange = (id: string, field: string, value: TimeInputValue | string) => {
         // const currentDate = today.toISOString().split('T')[0];
         if (field === "startTime" || field === "endTime") {
@@ -442,11 +441,11 @@ const OtherService = () => {
             onOpenChange()
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (error: any) {
-            // toast.error("Có lỗi xảy ra khi cập nhật slot");
             console.log(error);
             if (error.response.data.status === 2014) {
                 toast.error("Thời gian của slot tối thiểu 1 giờ và tối đa 3 giờ");
-            }
+            } else
+                toast.error("Có lỗi xảy ra trong quá trình cập nhật!");
 
         }
     }
@@ -458,9 +457,6 @@ const OtherService = () => {
         const date = new Date(dateValue);
         return new Time(date.getHours(), date.getMinutes()); // Extract hours and minutes
     };
-
-
-
 
     return (
         <div className='flex flex-col justify-center items-center my-10 text-black'>
@@ -604,7 +600,7 @@ const OtherService = () => {
                                             <TableColumn> </TableColumn>
                                         </TableHeader>
                                         <TableBody className='mt-3'>
-                                            {slots.map((slot: Slot) => (
+                                            {slots.filter((slot) => !slot.isDeleted).map((slot: Slot) => (
                                                 <TableRow key={slot.id} >
                                                     <TableCell className='pl-0'>
                                                         <Input
