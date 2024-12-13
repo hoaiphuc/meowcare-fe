@@ -206,50 +206,56 @@ const Page = () => {
         </div>
         {/* Profile */}
         <div className="my-10">
-          <h1 className={styles.h1}>Cài đặt hồ sơ</h1>
-          <div className="flex flex-col gap-3">
-            <Button
-              className="flex gap-3 text-white bg-maincolor"
-              as={Link}
+          <h1 className="text-3xl font-bold text-gray-800 mb-6">
+            Cài đặt hồ sơ
+          </h1>
+          <div className="flex flex-col gap-5">
+            {/* Basic Information Button */}
+            <Link
               href={
                 sitterProfile
                   ? "/sitter/setupservice/info"
                   : "/sitter/setupservice/createinfo"
               }
+              className="flex items-center justify-between px-6 py-4 bg-maincolor text-white rounded-lg shadow-md hover:bg-maincolor-dark transition-all"
             >
-              {sitterProfile ? (
-                <FontAwesomeIcon
-                  icon={faCheck}
-                  className="text-green-500"
-                  size="2x"
-                />
-              ) : (
+              <div className="flex items-center gap-3">
+                {sitterProfile ? (
+                  <FontAwesomeIcon
+                    icon={faCheck}
+                    className="text-green-400"
+                    size="lg"
+                  />
+                ) : (
+                  <FontAwesomeIcon
+                    icon={faXmark}
+                    className="text-red-400"
+                    size="lg"
+                  />
+                )}
+                <h3 className="text-lg font-medium">Thông tin cơ bản</h3>
+              </div>
+              <FontAwesomeIcon icon={faChevronRight} className="text-white" />
+            </Link>
+
+            {/* Work Schedule Button */}
+            <Link
+              href="/sitter/setupservice/calendar"
+              className="flex items-center justify-between px-6 py-4 bg-gray-200 text-gray-800 rounded-lg shadow-md hover:bg-gray-300 transition-all"
+            >
+              <div className="flex items-center gap-3">
                 <FontAwesomeIcon
                   icon={faXmark}
-                  className="text-red-500"
-                  size="2x"
+                  className="text-red-400"
+                  size="lg"
                 />
-              )}
-              <h3>Thông tin cơ bản</h3>
-            </Button>
-            <Button
-              className="flex items-center gap-3"
-              as={Link}
-              href="/sitter/setupservice/calendar"
-            >
-              <FontAwesomeIcon
-                icon={faXmark}
-                className="text-red-500"
-                size="2x"
-              />
-              <h3 className={styles.h3}>Lịch làm việc</h3>
-            </Button>
-            {/* <div className="flex items-center gap-3">
-                            <FontAwesomeIcon icon={faXmark} className="text-red-500" size="2x" />
-                            <h3 className={styles.h3}>Thông tin liên lạc khẩn cấp</h3>
-                        </div> */}
+                <h3 className="text-lg font-medium">Lịch làm việc</h3>
+              </div>
+              <FontAwesomeIcon icon={faChevronRight} className="text-gray-600" />
+            </Link>
           </div>
         </div>
+
         <div className="mt-10">
           <h1 className={styles.h1}>Cài đặt loại dịch vụ</h1>
           <div className="flex flex-col gap-5">

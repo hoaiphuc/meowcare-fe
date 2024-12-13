@@ -13,7 +13,7 @@ import { formatDate } from 'date-fns'
 
 const Page = () => {
   const [data, setData] = useState<Orders>();
-  const [filterStatus, setFilterStatus] = useState<string>('ALL');
+  const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [pages, setPages] = useState(5);
   const [isLoading, setIsLoading] = useState(true);
@@ -32,6 +32,7 @@ const Page = () => {
     COMPLETED: 'text-[#4CAF50]',        // Hoàn thành - green
     CANCELLED: 'text-[#DC3545]',        // Đã hủy - Red
   };
+
   const statusLabels: { [key: string]: string } = {
     AWAITING_PAYMENT: 'Chờ thanh toán',
     // AWAITING_CONFIRM: 'Chờ xác nhận',
@@ -41,65 +42,60 @@ const Page = () => {
     CANCELLED: 'Đã hủy',
   };
 
+  const menuItems = [
+    { name: "Tất cả", status: null },
+    { name: 'Chờ thanh toán', status: 'AWAITING_PAYMENT' },
+    // { name: "Chờ xác nhận", status: "AWAITING_CONFIRM" },
+    { name: "Đã xác nhận", status: "CONFIRMED" },
+    { name: "Đang diễn ra", status: "IN_PROGRESS" },
+    { name: "Đã hoàn thành", status: "COMPLETED" },
+    { name: "Đã hủy", status: "CANCELLED" },
+    // Add more menu items as needed
+  ];
   const user: UserLocal | null = getUserFromStorage();
   const userId = user?.id;
 
   useEffect(() => {
-    setIsLoading(true)
-    axiosClient(`booking-orders/user/pagination?id=${userId}&page=${page}&size=5&sort=createdAt&direction=DESC`)
-      .then((res) => {
-        setData(res.data)
-        setPages(res.data.totalPages)
-        setIsLoading(false)
+    const fetchData = async () => {
+      setIsLoading(true)
 
-      })
-      .catch((e) => {
+      try {
+        // Construct the API URL dynamically based on selectedStatus
+        const url = selectedStatus
+          ? `booking-orders/user/status?userId=${userId}&status=${selectedStatus}&page=${page - 1}&size=10&prop=createdAt&direction=DESC`
+          : `booking-orders/user/status?userId=${userId}&page=${page - 1}&size=10&prop=createdAt&direction=DESC`;
+
+        const res = await axiosClient(url);
+        setData(res.data);
+        setPages(res.data.totalPages);
         setIsLoading(false)
-        console.log(e);
-      })
-  }, [userId, page])
+      } catch (error) {
+        setIsLoading(false)
+        console.log(error);
+
+      }
+    };
+
+    fetchData();
+  }, [userId, page, selectedStatus]);
 
   return (
     <div className="w-[891px] bg-white rounded-2xl shadow-2xl py-10">
       <div className="ml-20 w-full gap-5 flex flex-col">
         <h1 className="text-2xl font-bold">Hoạt động</h1>
-        <div className='flex gap-3'>
-          <Button
-            className={`${styles.button} ${filterStatus === 'ALL' ? styles.activeButton : ''}`}
-            onClick={() => setFilterStatus('ALL')}
-          >
-            Tất cả
-          </Button>
-          {/* <Button
-            className={`${styles.button} ${filterStatus === 'AWAITING_PAYMENT' ? styles.activeButton : ''}`}
-            onClick={() => setFilterStatus('AWAITING_PAYMENT')}
-          >
-            Chờ xác nhận
-          </Button> */}
-          <Button
-            className={`${styles.button} ${filterStatus === 'CONFIRMED' ? styles.activeButton : ''}`}
-            onClick={() => setFilterStatus('CONFIRMED')}
-          >
-            Đã xác nhận
-          </Button>
-          <Button
-            className={`${styles.button} ${filterStatus === 'IN_PROGRESS' ? styles.activeButton : ''}`}
-            onClick={() => setFilterStatus('IN_PROGRESS')}
-          >
-            Đã diễn ra
-          </Button>
-          <Button
-            className={`${styles.button} ${filterStatus === 'COMPLETED' ? styles.activeButton : ''}`}
-            onClick={() => setFilterStatus('COMPLETED')}
-          >
-            Đã hoàn thành
-          </Button>
-          <Button
-            className={`${styles.button} ${filterStatus === 'CANCELLED' ? styles.activeButton : ''}`}
-            onClick={() => setFilterStatus('CANCELLED')}
-          >
-            Đã hủy
-          </Button>
+        <div className="flex gap-3">
+          {menuItems.map((item) => (
+            <Button
+              key={item.status}
+              className={`${styles.button} ${selectedStatus === (item.status) ? styles.activeButton : ''}`}
+              onClick={() => {
+                setSelectedStatus(item.status);
+                setPage(1); // Reset to page 1 when changing status
+              }}
+            >
+              {item.name}
+            </Button>
+          ))}
         </div>
         {isLoading ? (
           <div><Skeleton /></div>
@@ -108,9 +104,6 @@ const Page = () => {
             {
               data ? (
                 data.content
-                  .filter((activity) =>
-                    filterStatus === 'ALL' || activity.status === filterStatus
-                  )
                   .map((activity) => {
                     // Check if bookingDetailWithPetAndServices exists and has data
                     if (

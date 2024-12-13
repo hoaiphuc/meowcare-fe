@@ -12,7 +12,7 @@ import 'yet-another-react-lightbox/styles.css';
 import PhotoGallery from '@/app/components/PhotoGallery';
 import axiosClient from '@/app/lib/axiosClient';
 import { useParams } from 'next/navigation';
-import { CatSitter, Certificate, Service } from '@/app/constants/types/homeType';
+import { CatSitter, Certificate, Service, UserLocal } from '@/app/constants/types/homeType';
 import Loading from '@/app/components/Loading';
 import Image from 'next/image';
 import Lightbox from 'yet-another-react-lightbox';
@@ -42,6 +42,14 @@ const Page = () => {
             setIsUser(Boolean(authToken));
         }
     }, []);
+
+    const getUserFromStorage = () => {
+        if (typeof window !== "undefined") {
+            const storedUser = localStorage.getItem("user");
+            return storedUser ? JSON.parse(storedUser) : null;
+        }
+    };
+    const user: UserLocal | null = getUserFromStorage();
 
     const handleImageClick = (index: number) => {
         setLightboxIndex(index);
@@ -167,7 +175,13 @@ const Page = () => {
                         </div>
                     </div>
                     <div className='flex gap-3 w-full mt-7'>
-                        <Button onClick={() => handleClick()} className='w-full rounded-full text-white bg-[#2E67D1] shadow-sm'>Theo dõi</Button>
+                        <Button
+                            onClick={() => handleClick()}
+                            className='w-full rounded-full text-white bg-[#2E67D1] shadow-sm'
+                            isDisabled={user?.id === params.id}
+                        >
+                            Theo dõi
+                        </Button>
                     </div>
                 </div>
 
@@ -184,7 +198,14 @@ const Page = () => {
                                         <p className={styles.p}>Giá <span className='text-[#2B764F]'>{ser.price.toLocaleString("de")}đ</span> <span className='font-semibold'>/ ngày</span></p>
                                     </div>
                                 </div>
-                                <Button as={Link} href={isUser ? `/service/booking/${sitterProfile?.sitterId}` : `/login`} className={styles.button}>Đặt lịch</Button>
+                                <Button
+                                    as={Link}
+                                    href={isUser ? `/service/booking/${sitterProfile?.sitterId}` : `/login`}
+                                    className={styles.button}
+                                    isDisabled={user?.id === params.id}
+                                >
+                                    Đặt lịch
+                                </Button>
                             </div>
                         ))}
                     </div>
@@ -198,7 +219,14 @@ const Page = () => {
                                 <p className={styles.p}>Dịch vụ chăm sóc mèo</p>
                             </div>
                         </div>
-                        <Button as={Link} href={isUser ? `/service/housesitting/${sitterProfile?.sitterId}` : `/login`} className={styles.button}>Đặt lịch</Button>
+                        <Button
+                            as={Link}
+                            href={isUser ? `/service/housesitting/${sitterProfile?.sitterId}` : `/login`}
+                            className={styles.button}
+                            isDisabled={user?.id === params.id}
+                        >
+                            Đặt lịch
+                        </Button>
                     </div>
 
                     {/* Calender  */}

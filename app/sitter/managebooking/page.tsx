@@ -59,17 +59,24 @@ const Page = () => {
   };
 
   useEffect(() => {
-    axiosClient(
-      `booking-orders/sitter/pagination?id=${userId}&page=${page}&size=10&sort=createdAt&direction=DESC`
-    )
-      .then((res) => {
+    const fetchData = async () => {
+      try {
+        // Construct the API URL dynamically based on selectedStatus
+        const url = selectedStatus
+          ? `booking-orders/sitter/status?sitterId=${userId}&status=${selectedStatus}&page=${page - 1}&size=10&prop=createdAt&direction=DESC`
+          : `booking-orders/sitter/status?sitterId=${userId}&page=${page - 1}&size=10&prop=createdAt&direction=DESC`;
+
+        const res = await axiosClient(url);
         setData(res.data);
         setPages(res.data.totalPages);
-      })
-      .catch((e) => {
-        console.log(e);
-      });
-  }, [userId, page]);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    fetchData();
+  }, [userId, page, selectedStatus]);
+
 
   return (
     <div className="flex flex-col mt-12 justify-center items-center text-black">
@@ -88,7 +95,10 @@ const Page = () => {
                 {menuItems.map((item) => (
                   <div
                     key={item.name}
-                    onClick={() => setSelectedStatus(item.status)}
+                    onClick={() => {
+                      setSelectedStatus(item.status); // Set new status
+                      setPage(1); // Reset page to 1
+                    }}
                     className={`flex flex-row items-center p-2 rounded-lg w-[264px] cursor-pointer h-14 ${item.status === selectedStatus ? "bg-[#ffeae0]" : ""
                       }`}
                   >
@@ -105,7 +115,6 @@ const Page = () => {
         <div className="w-[804px] flex flex-col gap-5 bg-transparent">
           {data?.content && data.content.length > 0 ? (
             data.content
-              .filter((activity) => activity.status !== "AWAITING_PAYMENT") // Exclude items with status "AWAITING_CONFIRM"
               .filter(
                 (activity) =>
                   selectedStatus === null || activity.status === selectedStatus
