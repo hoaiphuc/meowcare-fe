@@ -21,6 +21,7 @@ interface UserAnswersState {
 
 const Page = () => {
     const params = useParams()
+    const router = useRouter()
     const [quiz, setQuiz] = useState<QuizQuestions[]>([]);
     const [page, setPage] = useState(1);
     const rowsPerPage = 5;
@@ -30,7 +31,7 @@ const Page = () => {
     });
     const start = (page - 1) * rowsPerPage;
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
-    const router = useRouter()
+    const [timeLeft, setTimeLeft] = useState(15 * 60);
 
     useEffect(() => {
         try {
@@ -92,8 +93,10 @@ const Page = () => {
                     toast.success('Nộp bài thành công')
                     router.push(`/besitter/result/${res.data.score}`)
                 })
-                .catch(() => {
-                    toast.error('Đã xảy ra lỗi vùi lòng thử lại')
+                .catch((e) => {
+                    console.log(e);
+                    if (e.response.data.status === 2014)
+                        toast.error('Bạn phải hoàn thành hết tất cả câu hỏi')
                 })
         } catch (error) {
             console.log(error);
@@ -108,12 +111,60 @@ const Page = () => {
         return quiz?.slice(start, end);
     }, [quiz, start]);
 
+
+    //count down time
+    useEffect(() => {
+        // Load or initialize the expiration time
+        const storedExpirationTime = localStorage.getItem('quizExpirationTime');
+        const currentTime = Math.floor(Date.now() / 1000); // Current time in seconds
+
+        if (storedExpirationTime) {
+            const remainingTime = parseInt(storedExpirationTime, 10) - currentTime;
+            if (remainingTime > 0) {
+                setTimeLeft(remainingTime); // Use the remaining time
+            } else {
+                handleSubmit(); // Auto-submit if time expired
+            }
+        } else {
+            const expirationTime = currentTime + 15 * 60; // 20 minutes from now
+            localStorage.setItem('quizExpirationTime', expirationTime.toString());
+        }
+    }, []);
+
+    useEffect(() => {
+        if (timeLeft <= 0) {
+            handleSubmit(); // Auto-submit when time is up
+            return;
+        }
+
+        const timer = setInterval(() => {
+            setTimeLeft((prev) => prev - 1);
+        }, 1000);
+
+        return () => clearInterval(timer); // Cleanup interval
+    }, [timeLeft]);
+
+    // Format time in mm:ss format
+    const formatTime = (time: number) => {
+        const minutes = Math.floor(time / 60);
+        const seconds = time % 60;
+        return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    };
+
     return (
         <div className='flex flex-col justify-center items-center my-10 text-black'>
-            <h1 className='text-4xl font-semibold mb-5'>Bài kiểm tra</h1>
             <div className='flex gap-10'>
-                <div>
-                    <Button onClick={handleSubmit}>Nộp bài</Button>
+                <div className='bg-white p-10 h-[260px] shadow-md rounded-sm'>
+                    <h1 className='text-4xl font-semibold mb-5'>Bài kiểm tra</h1>
+                    <div className="mb-5 font-bold text-xl">
+                        Thời gian làm bài: 15 phút
+                    </div>
+                    <div className="mb-5 text-red-500 font-bold text-xl">
+                        <span className='text-black'>Thời gian còn lại:</span> {formatTime(timeLeft)}
+                    </div>
+                    <div className='flex justify-end'>
+                        <Button onClick={handleSubmit} className='bg-maincolor text-white'>Nộp bài</Button>
+                    </div>
                 </div>
                 <div className={styles.quizContainer}>
                     {items ? (
