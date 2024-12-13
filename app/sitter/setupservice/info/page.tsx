@@ -1,7 +1,22 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
-import styles from "./info.module.css";
+import {
+  CatSitter,
+  Certificate,
+  ProfilePicture,
+  UserLocal,
+} from "@/app/constants/types/homeType";
+import useGeoapify from "@/app/hooks/useGeoapify";
+import axiosClient from "@/app/lib/axiosClient";
+import CatSitterSkill from "@/app/lib/CatSitterSkill.json";
+import { storage } from "@/app/utils/firebase";
+import {
+  faCamera,
+  faCheck,
+  faFilePdf,
+  faXmark,
+} from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   Autocomplete,
   AutocompleteItem,
@@ -15,31 +30,17 @@ import {
   ModalFooter,
   ModalHeader,
   Textarea,
-  useDisclosure,
+  useDisclosure
 } from "@nextui-org/react";
-import CatSitterSkill from "@/app/lib/CatSitterSkill.json";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faCamera,
-  faCheck,
-  faFilePdf,
-  faXmark,
-} from "@fortawesome/free-solid-svg-icons";
-import axiosClient from "@/app/lib/axiosClient";
-import {
-  CatSitter,
-  Certificate,
-  ProfilePicture,
-  UserLocal,
-} from "@/app/constants/types/homeType";
-import { useRouter } from "next/navigation";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import "leaflet/dist/leaflet.css";
-import useGeoapify from "@/app/hooks/useGeoapify";
 import dynamic from "next/dynamic";
+import { useRouter } from "next/navigation";
+import React, { useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { storage } from "@/app/utils/firebase";
 import { v4 as uuidv4 } from "uuid";
+import styles from "./info.module.css";
+import Loading from "@/app/components/Loading";
 
 const MapComponent = dynamic(() => import("@/app/components/MapPick"), {
   ssr: false,
@@ -73,16 +74,8 @@ const Info = () => {
   //for update certificates
   const [removeList, setRemoveList] = useState<Certificate[]>([]);
   const [addList, setAddList] = useState<Certificate[]>([]);
-  const [selectPicture, setSelectPicture] = useState<ProfilePicture[]>([
-    //     {
-    //     id: uuidv4(),
-    //     imageName: "",
-    //     imageUrl: "",
-    //     isCargoProfilePicture: true,
-    //     isNew: true,
-    //     isDeleted: false,
-    // }
-  ]);
+  const [selectPicture, setSelectPicture] = useState<ProfilePicture[]>([]);
+  const [isLoading, setIsLoading] = useState(false)
 
   const getUserFromStorage = () => {
     if (typeof window !== "undefined") {
@@ -123,6 +116,8 @@ const Info = () => {
     try {
       axiosClient(`sitter-profiles/sitter/${userId}`)
         .then((res) => {
+          console.log(res.data);
+
           setSitterData(res.data);
           if (res.data.profilePictures) {
             setSelectPicture(res.data.profilePictures);
@@ -194,6 +189,7 @@ const Info = () => {
 
   // Update profile
   const handleUpdate = async () => {
+    setIsLoading(true)
     try {
       if (selectPicture.filter((pic: ProfilePicture) => pic.isCargoProfilePicture === false).length < 4) {
         toast.error("Thêm ít nhất 4 ảnh cho hồ sơ của bạn")
@@ -202,6 +198,16 @@ const Info = () => {
 
       if (selectPicture.filter((pic: ProfilePicture) => pic.isCargoProfilePicture === true).length < 1) {
         toast.error("Thêm ít nhất 1 ảnh cho môi trường và chuồng nuôi")
+        return
+      }
+
+      if (!sitterData) {
+        toast.error("Dữ liệu không hợp lệ. Vui lòng kiểm tra lại!");
+        return;
+      }
+
+      if (sitterData.fullRefundDay < 1 || sitterData.fullRefundDay > 7) {
+        toast.error("Số ngày hoàn tiền phải nằm trong khoảng từ 1 đến 7")
         return
       }
 
@@ -282,25 +288,13 @@ const Info = () => {
         })
       );
 
-      // await axiosClient.put(`sitter-profiles/${sitterData?.id}/profile-pictures`, uploadedPictures);
-
-      // // Delete profile pictures
-      // if (toDelete.length > 0) {
-      //     try {
-      //         await axiosClient.delete(`sitter-profiles/${sitterData?.id}/profile-pictures`, {
-      //             data: toDelete, // Pass the array in the `data` field
-      //         });
-      //     } catch (error) {
-      //         console.error("Error deleting profile pictures:", error);
-      //         toast.error("Lỗi khi xóa hình ảnh hồ sơ.");
-      //     }
-      // }
-
       const updatedSitterData = {
         ...sitterData,
         location: address, // Include address as location
         profilePictures: uploadedPictures,
       };
+
+      console.log(updatedSitterData);
 
       axiosClient
         .put(`sitter-profiles/${sitterData?.id}`, updatedSitterData)
@@ -313,12 +307,11 @@ const Info = () => {
         });
     } catch (error) {
       console.error("Error in handleUpdate:", error);
+      toast.error("Đã xảy ra lỗi trong quá trình cập nhật.");
+    } finally {
+      setIsLoading(false); // Always reset loading state
     }
   };
-
-  // const handleRemoveEvidence = (index: number) => {
-  //     setSelectedTaskEvidence((prevEvidence) => prevEvidence.filter((_, i) => i !== index));
-  // };
 
   //certificate upload
   const handleCertificateClick = () => {
@@ -327,24 +320,6 @@ const Info = () => {
     }
   };
 
-  // const handleCertificateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-  //     if (event.target.files) {
-  //         const filesArray = Array.from(event.target.files);
-
-  //         const newCertificates = filesArray.map((file) => ({
-  //             id: "",
-  //             userId: sitterData?.sitterId || "",
-  //             certificateType: file.type.includes("pdf") ? "PDF" : "IMAGE",
-  //             certificateName: file.name,
-  //             institutionName: "",
-  //             certificateUrl: URL.createObjectURL(file),
-  //             description: ""
-  //         }));
-
-  //         // Update the certificates state
-  //         setCertificates((prevCertificates) => [...prevCertificates, ...newCertificates]);
-  //     }
-  // };
   const handleImageUpdateChange = (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
@@ -426,6 +401,9 @@ const Info = () => {
     );
   };
 
+  if (isLoading) {
+    return <Loading />
+  }
   return (
     <div className="flex items-center justify-center my-10">
       <div className="flex flex-col gap-5 w-[754px]">
@@ -454,10 +432,7 @@ const Info = () => {
                     size="2xl"
                   />
                   <p>Thêm hình ảnh</p>
-                  <p>{`${selectPicture.filter(
-                    (e) => e.isCargoProfilePicture === false && !e.isDeleted
-                  ).length
-                    }/10`}</p>
+                  <p>{`${selectPicture.filter((e) => e.isCargoProfilePicture === false && !e.isDeleted).length}/10`}</p>
                 </button>
               }
               <input
@@ -499,14 +474,29 @@ const Info = () => {
           <h2 className={styles.h2}>Giới thiệu</h2>
           <Textarea
             value={sitterData?.bio}
+            variant="bordered"
             name="bio"
             onChange={handleInputChange}
+          />
+        </div>
+
+        <div className="flex mt-5 gap-3 items-center">
+          <h2 className={styles.h2}>Số ngày hoàn tiền (?)</h2>
+          <Input
+            type="number"
+            variant="bordered"
+            value={sitterData?.fullRefundDay.toString()}
+            name="fullRefundDay"
+            className="w-32"
+            onChange={handleInputChange}
+            endContent="Ngày"
           />
         </div>
 
         <div className="mt-5 flex flex-col gap-2">
           <h2 className={styles.h2}>Kinh nghiệm</h2>
           <Textarea
+            variant="bordered"
             placeholder="Hãy cho mọi người biết về kinh nghiệm chăm sóc mèo của bạn"
             value={sitterData?.experience}
             name="experience"

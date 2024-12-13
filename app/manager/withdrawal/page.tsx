@@ -63,7 +63,7 @@ const Page = () => {
 
   const handleAccept = (id: string) => {
     try {
-      axiosClient(`request-withdrawal/completeRequest/${id}`)
+      axiosClient.put(`request-withdrawal/completeRequest/${id}`)
         .then(() => {
           toast.success("Bạn đã chấp nhận yêu cầu này")
         })

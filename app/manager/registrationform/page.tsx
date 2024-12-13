@@ -61,7 +61,7 @@ const Page = () => {
 
     //accept
     const handleAccept = async (userId: string, id: string) => {
-        const data = { status: "APPROVED" }
+        const data = { ...selectedForm, status: "APPROVED" }
         try {
             await axiosClient.put(`sitter-form-register/${id}`, data)
                 .then(() => { })
@@ -82,7 +82,7 @@ const Page = () => {
     }
     //reject
     const handleReject = (id: string) => {
-        const data = { status: "REJECTED" }
+        const data = { ...selectedForm, status: "REJECTED" }
         try {
             axiosClient.put(`sitter-form-register/${id}`, data)
                 .then(() => {

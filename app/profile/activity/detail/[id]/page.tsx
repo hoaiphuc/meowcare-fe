@@ -286,7 +286,7 @@ const Page = () => {
                                                                 <FontAwesomeIcon icon={faCheck} className="text-green-500" />
                                                             )}
                                                             <h3 className={task.haveEvidence ? 'text-green-500' : ''}>
-                                                                {task.description}
+                                                                {task.name}
                                                             </h3>
                                                         </div>
                                                         <div className='flex gap-1'>
