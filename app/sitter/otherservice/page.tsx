@@ -331,7 +331,7 @@ const OtherService = () => {
 
 
 
-    //slot manage
+    // =====================================================SLOT manage========================================================
     const addNewSlot = () => {
         const newSlot: Slot = {
             id: uuidv4(),
@@ -341,7 +341,8 @@ const OtherService = () => {
             duration: 0,
             isNew: true,
             isDeleted: false,
-            selected: false
+            selected: false,
+            isUpdate: false
         };
 
         setSlots((prevState) => [...prevState, newSlot]);
@@ -367,20 +368,20 @@ const OtherService = () => {
                 setSlots((prev) =>
                     prev.map((slot) => {
                         if (slot.id === id) {
-                            const updatedSlot = { ...slot, [field]: updatedDate };
+                            const updatedSlot = { ...slot, [field]: updatedDate, isUpdate: true };
 
-                            if (field === "endTime" && updatedSlot.startTime) {
-                                // Calculate duration if both startTime and endTime are set
-                                const start = new Date(updatedSlot.startTime);
-                                const end = new Date(updatedDate);
-                                const duration = Math.round((end.getTime() - start.getTime()) / 60000); // Convert milliseconds to minutes
+                            // if (field === "endTime" && updatedSlot.startTime) {
+                            //     // Calculate duration if both startTime and endTime are set
+                            //     const start = new Date(updatedSlot.startTime);
+                            //     const end = new Date(updatedDate);
+                            //     const duration = Math.round((end.getTime() - start.getTime()) / 60000); // Convert milliseconds to minutes
 
-                                if (duration >= 0) {
-                                    updatedSlot.duration = duration;
-                                } else {
-                                    toast.error("Giờ kết thúc phải sau giờ bắt đầu");
-                                }
-                            }
+                            //     if (duration >= 0) {
+                            //         updatedSlot.duration = duration;
+                            //     } else {
+
+                            //     }
+                            // }
                             return updatedSlot;
                         }
                         return slot;
@@ -403,39 +404,51 @@ const OtherService = () => {
     }
 
     const handleUpdateSlot = async () => {
-        onOpenChange()
-        // Separate child services by their state
-        const toAdd = slots.filter((slot) => slot.isNew);
-        const toUpdate = slots.filter((slot) => !slot.isNew && !slot.isDeleted);
-        const toDelete = slots.filter((slot) => slot.isDeleted);
+        try {
+            // Separate child services by their state
+            const toAdd = slots.filter((slot) => slot.isNew);
+            const toUpdate = slots.filter((slot) => slot.isUpdate && !slot.isNew && !slot.isDeleted);
+            const toDelete = slots.filter((slot) => slot.isDeleted);
 
-        // Perform API calls
-        const addPromises = toAdd.map((slot) =>
-            axiosClient.post("booking-slots", {
-                ...slot,
-                startTime: (slot.startTime as Date).toISOString(),
-                endTime: (slot.endTime as Date).toISOString(),
-                id: undefined,
-            })
-        );
-        const updatePromises = toUpdate.map((slot) =>
-            axiosClient.put(`booking-slots/${slot.id}`, {
-                ...slot,
-                startTime: (slot.startTime as Date).toISOString(),
-                endTime: (slot.endTime as Date).toISOString(),
-            })
-        );
-        const deletePromises = toDelete.map((slot) =>
-            axiosClient.delete(`booking-slots/${slot.id}`)
-        );
+            // Perform API calls
+            const addPromises = toAdd.map(async (slot) => {
+                try {
+                    const response = await axiosClient.post("booking-slots", {
+                        ...slot,
+                        startTime: (slot.startTime as Date).toISOString(),
+                        endTime: (slot.endTime as Date).toISOString(),
+                        id: undefined,
+                    });
+                    return response.data;
+                } catch (error) {
+                    throw error;
+                }
+            });
+            const updatePromises = toUpdate.map((slot) =>
+                axiosClient.put(`booking-slots/${slot.id}`, {
+                    ...slot,
+                    startTime: (slot.startTime as Date).toISOString(),
+                    endTime: (slot.endTime as Date).toISOString(),
+                })
+            );
+            const deletePromises = toDelete.map((slot) =>
+                axiosClient.delete(`booking-slots/${slot.id}`)
+            );
 
-        // Execute all operations concurrently
-        await Promise.all([...addPromises, ...updatePromises, ...deletePromises]);
+            await Promise.all([...addPromises, ...updatePromises, ...deletePromises]);
 
-        // Refetch the updated list from the server
-        // fetchChildeService();
+            fetchData();
+            toast.success("Cập nhật slot thành công");
+            onOpenChange()
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } catch (error: any) {
+            // toast.error("Có lỗi xảy ra khi cập nhật slot");
+            console.log(error);
+            if (error.response.data.status === 2014) {
+                toast.error("Thời gian của slot tối thiểu 1 giờ và tối đa 3 giờ");
+            }
 
-        toast.success("Cập nhật slot thành công");
+        }
     }
 
     const parseTimeString = (dateValue: Date | undefined) => {
@@ -461,7 +474,6 @@ const OtherService = () => {
 
                 <div>
                     <h1 className={styles.title}>Dịch vụ hiện có</h1>
-                    <h2>Nếu bạn chưa có slot, <span onClick={onOpen} className='underline cursor-pointer'>thêm tại đây</span></h2>
                     <Accordion
                         selectedKeys={expandedKeys}
                         onSelectionChange={(keys) => setExpandedKeys(new Set(keys))}
@@ -518,7 +530,7 @@ const OtherService = () => {
                                         }
                                     /> */}
                                     <h1 className='font-semibold text-xl text-maincolor'>Vui lòng chọn slot hoạt động</h1>
-                                    <div className="flex w-full gap-3">
+                                    <div className="flex w-full gap-3 flex-wrap">
                                         <div
                                             onClick={onOpen}
                                             className='border rounded-lg h-10 w-32 flex items-center justify-center cursor-pointer gap-3 bg-maincolor text-white'
@@ -566,8 +578,7 @@ const OtherService = () => {
                     </Button>
                 </div>
 
-                <div>
-                    <div></div>
+                <div className='flex justify-end'>
                     <Button onClick={() => handleUpdate()} className='bg-cyan-500 hover:bg-cyan-600 text-white'>
                         <FontAwesomeIcon icon={faPencil} />Cập nhật
                     </Button>

@@ -141,6 +141,23 @@ const Service = () => {
     }
   }, [lat, lng, name])
 
+  const handleSearch = async () => {
+    try {
+      const response = await fetch(
+        `https://api.geoapify.com/v1/geocode/search?text=${encodeURIComponent(
+          address
+        )}&apiKey=7eaa555d1d1f4dbe9b2792ee9c726f10`
+      );
+      const data = await response.json();
+      if (data && data.features && data.features[0]) {
+        setLat(data.features[0].geometry.coordinates[1]);
+        setLng(data.features[0].geometry.coordinates[0]);
+      }
+    } catch (error) {
+      console.error("Error fetching geocoding data:", error);
+    }
+  };
+
   return (
     <div className='flex flex-cols-3 p-[5px] justify-center'>
       {/* 1 */}
@@ -223,6 +240,7 @@ const Service = () => {
             <Input
               aria-label="Giá tối thiểu"
               type="number"
+              variant='bordered'
               value={price[0].toString().toLocaleString()}
               onChange={(e) => handleInputChange(0, e.target.value)}
               className={styles.input}
@@ -236,6 +254,7 @@ const Service = () => {
             <Input
               aria-label="Giá tối đa"
               type="number"
+              variant='bordered'
               value={price[1].toString().toLocaleString()}
               onChange={(e) => handleInputChange(1, e.target.value)}
               className={styles.input}
@@ -264,7 +283,7 @@ const Service = () => {
         </div>
 
         <div className='flex items-center justify-end'>
-          <Button className='h-12 w-28 font-semibold' variant='bordered'>
+          <Button className='h-12 w-28 font-semibold' variant='bordered' onClick={() => handleSearch()}>
             <FontAwesomeIcon icon={faMagnifyingGlass} />
             Tìm kiếm
           </Button>
