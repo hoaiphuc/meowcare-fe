@@ -258,6 +258,7 @@ export type CareSchedules = {
 export type Task = {
   id: string;
   description: string;
+  name: string;
   startTime: Date;
   endTime: Date;
   status: number;

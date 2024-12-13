@@ -10,7 +10,7 @@ import { UserLocal } from '../constants/types/homeType';
 import { useAppDispatch, useAppSelector } from '../lib/hooks';
 import { fetchUserProfile, logout } from '../lib/slices/userSlice';
 import useNotifications from './Notification';
-import { differenceInMinutes } from 'date-fns';
+// import { differenceInMinutes } from 'date-fns';
 
 const Navbar = () => {
     const router = useRouter();
@@ -28,7 +28,7 @@ const Navbar = () => {
     ]);
 
     // get notifications
-    const currentDate = new Date();
+    // const currentDate = new Date();
     const notifications = useNotifications(user?.id);
     const notificationItems = notifications.length > 0
         ? notifications.map((notification) => ({
@@ -156,8 +156,8 @@ const Navbar = () => {
                                         <DropdownItem key={notification.key} className='w-96 h-20'>
                                             <div className='flex text-wrap justify-between gap-5 overflow-auto'>
                                                 <div>
-                                                    <p>{notification.message}</p>
-                                                    <p>{differenceInMinutes(currentDate, new Date(notification.createAt))}</p>
+                                                    {/* <p>{notification.message}</p>
+                                                    <p>{differenceInMinutes(currentDate, new Date(notification.createAt))}</p> */}
                                                 </div>
                                                 <div>
                                                     {notification.isRead ? "" : <FontAwesomeIcon icon={faCircle} className='text-blue-600' />}

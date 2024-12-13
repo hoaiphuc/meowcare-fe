@@ -15,6 +15,7 @@ import CatSitterSkill from '@/app/lib/CatSitterSkill.json'
 import axiosClient from '@/app/lib/axiosClient';
 import useGeoapify from '@/app/hooks/useGeoapify';
 import { toast } from 'react-toastify';
+import Loading from '@/app/components/Loading';
 
 const MapComponent = dynamic(() => import('@/app/components/MapPick'), {
     ssr: false,
@@ -46,6 +47,7 @@ const CreateInfo = () => {
     const [certificates, setCertificates] = useState<Certificate[]>([])
     const [selectedPdf, setSelectedPdf] = useState<string>();
     const [selectPicture, setSelectPicture] = useState<ProfilePicture[]>([])
+    const [isLoading, setIsLoading] = useState(false)
 
     const getUserFromStorage = () => {
         if (typeof window !== "undefined") {
@@ -108,6 +110,7 @@ const CreateInfo = () => {
 
     //create profile
     const handleCreate = async () => {
+        setIsLoading(true)
         try {
             if (selectPicture.filter((pic: ProfilePicture) => pic.isCargoProfilePicture === false).length < 4) {
                 toast.error("Thêm ít nhất 4 ảnh cho hồ sơ của bạn")
@@ -116,6 +119,16 @@ const CreateInfo = () => {
 
             if (selectPicture.filter((pic: ProfilePicture) => pic.isCargoProfilePicture === true).length < 1) {
                 toast.error("Thêm ít nhất 1 ảnh cho môi trường và chuồng nuôi")
+                return
+            }
+
+            if (!sitterData) {
+                toast.error("Dữ liệu không hợp lệ. Vui lòng kiểm tra lại!");
+                return;
+            }
+
+            if (sitterData.fullRefundDay < 1 || sitterData.fullRefundDay > 7) {
+                toast.error("Số ngày hoàn tiền phải nằm trong khoảng từ 1 đến 7")
                 return
             }
 
@@ -138,7 +151,6 @@ const CreateInfo = () => {
                 ...sitterData, // Include existing data
                 location: address,
                 profilePictures: uploadedPictures, // Add uploaded pictures
-                fullRefundDay: 1
             } as CatSitter;
 
             const profileResponse = await axiosClient.post("sitter-profiles", completeSitterData)
@@ -175,6 +187,8 @@ const CreateInfo = () => {
             router.push("/sitter/setupservice");
         } catch (error) {
 
+        } finally {
+            setIsLoading(false); // Always reset loading state
         }
     }
 
@@ -246,6 +260,10 @@ const CreateInfo = () => {
         setSelectPicture((prevPictures) => prevPictures.filter((picture) => picture.requestId !== id));
     };
 
+    if (isLoading) {
+        return <Loading />
+    }
+
     return (
         <div className='flex items-center justify-center my-10'>
             <div className='flex flex-col gap-5 w-[754px]'>
@@ -298,6 +316,19 @@ const CreateInfo = () => {
                 <div className='mt-5'>
                     <h2 className={styles.h2}>Giới thiệu</h2>
                     <Textarea value={sitterData?.bio} name='bio' onChange={handleInputChange} placeholder="Thông tin về bạn hoặc 1 vài sở thích của bạn" />
+                </div>
+
+                <div className="flex mt-5 gap-3 items-center">
+                    <h2 className={styles.h2}>Số ngày hoàn tiền (?)</h2>
+                    <Input
+                        type="number"
+                        variant="bordered"
+                        value={sitterData?.fullRefundDay.toString()}
+                        name="fullRefundDay"
+                        className="w-32"
+                        onChange={handleInputChange}
+                        endContent="Ngày"
+                    />
                 </div>
 
                 <div className='mt-5 flex flex-col gap-2'>
