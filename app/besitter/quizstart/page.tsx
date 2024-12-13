@@ -55,7 +55,7 @@ const Page = () => {
             <div className='flex items-center flex-col mx-96 text-center gap-3'>
                 <h2>Nhấn nút dưới đây để bắt đầu ngay – mỗi câu hỏi là cơ hội để bạn khám phá thêm những điều thú vị về loài mèo. Bạn đã sẵn sàng chưa? Cùng thử thách bản thân và xem bạn hiểu mèo đến mức nào!</h2>
                 <h2>Số lần đã làm trong tháng: {historyQuiz.length}/3</h2>
-                <h2>Thời gian giới hạn: 20 phút</h2>
+                <h2>Thời gian giới hạn: 15 phút</h2>
                 {quizzes[Math.floor(Math.random() * quizzes.length)] && (
                     <Button
                         as={Link}

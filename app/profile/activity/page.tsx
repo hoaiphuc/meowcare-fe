@@ -62,8 +62,8 @@ const Page = () => {
       try {
         // Construct the API URL dynamically based on selectedStatus
         const url = selectedStatus
-          ? `booking-orders/user/status?userId=${userId}&status=${selectedStatus}&page=${page - 1}&size=10&prop=createdAt&direction=DESC`
-          : `booking-orders/user/status?userId=${userId}&page=${page - 1}&size=10&prop=createdAt&direction=DESC`;
+          ? `booking-orders/user/status?userId=${userId}&status=${selectedStatus}&page=${page - 1}&size=3&prop=createdAt&direction=DESC`
+          : `booking-orders/user/status?userId=${userId}&page=${page - 1}&size=3&prop=createdAt&direction=DESC`;
 
         const res = await axiosClient(url);
         setData(res.data);

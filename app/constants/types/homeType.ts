@@ -86,6 +86,7 @@ export type CatSitter = {
   longitude: number;
   distance: number;
   profilePictures: [ProfilePicture];
+  fullRefundDay: number;
 };
 
 export type ProfilePicture = {
