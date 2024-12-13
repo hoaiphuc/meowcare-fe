@@ -116,7 +116,12 @@ const Page = () => {
                       <div key={activity.id} className='border w-[700px] p-3 rounded-lg flex justify-between my-3'>
                         <div>
                           <div className='flex'>
-                            <Icon icon="cbi:camera-pet" className='text-[#902C6C] w-12 h-11 mr-2' />
+                            {activity.orderType === "OVERNIGHT" ?
+                              <Icon icon="cbi:camera-pet" className='text-[#902C6C] w-12 h-11 mr-2' />
+                              :
+                              <Icon icon="mdi:home-find-outline" className='text-[#902C6C] w-12 h-11 mr-2' />
+
+                            }
                             <div>
                               <h2>
                                 <span className={styles.title}>Dịch vụ: </span>
