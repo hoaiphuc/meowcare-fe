@@ -28,6 +28,7 @@ const HouseSitting = () => {
     const [pets, setPets] = useState<PetProfile[]>([]);
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
     const [services, setServices] = useState<Service[]>([])
+    const [basedServices, setBasedServices] = useState<Service[]>([])
     const [name, setName] = useState('');
     const [phoneNumber, setPhoneNumber] = useState('');
     const [address, setAddress] = useState('')
@@ -45,7 +46,7 @@ const HouseSitting = () => {
             // 1. Fetch all addition services
             const serviceRes = await axiosClient(`services/sitter/${params.id}/type?serviceType=ADDITION_SERVICE&status=ACTIVE`)
             const services: Service[] = serviceRes.data;
-
+            setBasedServices(serviceRes.data)
             const updatedServices = await Promise.all(
                 services.map(async (service) => {
                     const slotRes = await axiosClient(`/booking-slots/sitter-booking-slots-by-service?sitterId=${params.id}&serviceId=${service.id}&date=${selectedDate}&status=AVAILABLE`);
@@ -313,6 +314,11 @@ const HouseSitting = () => {
 
 
     const addNewAdditionService = () => {
+        if (!selectedDate) {
+            toast.error("Vui lòng chọn ngày muốn đặt lịch trước");
+            return;
+        }
+
         const newService: Service = {
             id: uuidv4(),
             name: "",
@@ -536,12 +542,11 @@ const HouseSitting = () => {
                 <div className='w-[427px]'>
                     <div className='border flex flex-col p-3 rounded-lg gap-3 mb-10'>
                         <h2 className={styles.h2}>Bảng giá dịch vụ</h2>
-                        {services.map((service) => (
+                        {basedServices.map((service) => (
                             <div className='flex justify-between' key={service.id}>
                                 <h3>{service.name}</h3>
                                 <div className='flex flex-col left-0'>
-                                    <h3 className='text-[#2B764F]'>{service.price.toLocaleString("de")}đ</h3>
-                                    <h4>giá lần</h4>
+                                    <h3 className='text-[#2B764F]'>{service.price.toLocaleString("de")}đ <span className='text-black'>/ lần</span></h3>
                                 </div>
                             </div>
                         ))}

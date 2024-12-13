@@ -417,4 +417,5 @@ export type Slot = {
   isDeleted: boolean;
   selected: boolean;
   wasSelected?: boolean;
+  isUpdate: boolean;
 };
