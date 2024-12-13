@@ -4,8 +4,7 @@ import Loading from "@/app/components/Loading";
 import {
   CatSitter,
   ConfigService,
-  Service,
-  UserLocal,
+  Service
 } from "@/app/constants/types/homeType";
 import axiosClient from "@/app/lib/axiosClient";
 import { useAppDispatch, useAppSelector } from "@/app/lib/hooks";
@@ -23,6 +22,7 @@ import {
   faXmark,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { Icon } from "@iconify/react/dist/iconify.js";
 import {
   Avatar,
   Button,
@@ -33,11 +33,10 @@ import {
   useDisclosure,
 } from "@nextui-org/react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import styles from "./setupservice.module.css";
-import { toast } from "react-toastify";
-import { Icon } from "@iconify/react/dist/iconify.js";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
+import styles from "./setupservice.module.css";
 
 const Page = () => {
   const router = useRouter();
@@ -59,16 +58,6 @@ const Page = () => {
     ACTIVE: "ĐANG HOẠT ĐỘNG",
     INACTIVE: "KHÔNG HOẠT ĐỘNG",
   };
-
-  const getUserFromStorage = () => {
-    if (typeof window !== "undefined") {
-      const storedUser = localStorage.getItem("user");
-      return storedUser ? JSON.parse(storedUser) : null;
-    }
-  };
-
-  const user: UserLocal | null = getUserFromStorage();
-  const sitterId = user?.sitterProfile ? user?.sitterProfile.id : null;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -149,7 +138,7 @@ const Page = () => {
     const newStatus = sitterStatus === "ACTIVE" ? "INACTIVE" : "ACTIVE";
     try {
       axiosClient
-        .put(`sitter-profiles/status/${sitterId}?status=${newStatus}`)
+        .put(`sitter-profiles/status/${sitterProfile.id}?status=${newStatus}`)
         .then(() => {
           setSitterProfile({
             ...sitterProfile,

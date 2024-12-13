@@ -129,8 +129,7 @@ const Service = () => {
     try {
       axiosClient(`sitter-profiles/search?latitude=${lat}&longitude=${lng}&name=${name}&page=1&size=10&sort=distance&direction=DESC`)
         .then((res) => {
-          const filteredData = res.data.content.filter((data: CatSitter) => data.distance <= 12)
-          setCatSitters({ ...res.data, content: filteredData });
+          setCatSitters(res.data);
         })
         .catch((e) => {
           console.log(e);

@@ -250,7 +250,7 @@ const Page = () => {
       paymentMethod:
         paymentMethod === "CAPTURE_WALLET" || paymentMethod === "PAY_WITH_ATM"
           ? "MOMO"
-          : "WALLET",
+          : paymentMethod,
     };
 
     if (
@@ -702,7 +702,7 @@ const Page = () => {
                             value="cash"
                             className="px-5"
                             aria-label="cash"
-                            onClick={() => setPaymentMethod("CASH")}
+                            onClick={() => setPaymentMethod("PAY_LATER")}
                           >
                             <div className="flex items-center">
                               <Image

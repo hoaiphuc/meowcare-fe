@@ -138,6 +138,7 @@ const CreateInfo = () => {
                 ...sitterData, // Include existing data
                 location: address,
                 profilePictures: uploadedPictures, // Add uploaded pictures
+                fullRefundDay: 1
             } as CatSitter;
 
             const profileResponse = await axiosClient.post("sitter-profiles", completeSitterData)
