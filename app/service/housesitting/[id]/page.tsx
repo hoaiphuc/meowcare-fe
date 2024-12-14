@@ -223,7 +223,10 @@ const HouseSitting = () => {
             startDate,
             isHouseSitting: false,
             orderType: "BUY_SERVICE",
-            paymentMethod: paymentMethod === "CAPTURE_WALLET" || paymentMethod === "PAY_WITH_ATM" ? "MOMO" : "WALLET"
+            paymentMethod:
+                paymentMethod === "CAPTURE_WALLET" || paymentMethod === "PAY_WITH_ATM"
+                    ? "MOMO"
+                    : paymentMethod,
         }
 
         if (paymentMethod === "CAPTURE_WALLET" || paymentMethod === "PAY_WITH_ATM") {
@@ -671,7 +674,7 @@ const HouseSitting = () => {
                                                     </Radio>
                                                 </div>
                                                 <div className='border border-black p-3'>
-                                                    <Radio value="cash" className='px-5' aria-label='cash' onClick={() => setPaymentMethod("CASH")}>
+                                                    <Radio value="cash" className='px-5' aria-label='cash' onClick={() => setPaymentMethod("PAY_LATER")}>
                                                         <div className='flex items-center'>
                                                             <Image src='/cash.png' alt='' width={51} height={44} className='mx-3 w-[71px] h-[54px]' />
                                                             <div>

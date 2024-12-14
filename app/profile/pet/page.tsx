@@ -451,7 +451,7 @@ const Page = () => {
                                                         </SelectItem>
                                                     ))}
                                                 </Select>
-                                                <Input label={<h1 className={styles.heading1}>Cân nặng</h1>} placeholder='Kg' labelPlacement='outside' name='weight' value={petData.weight} onChange={handleInputChange} />
+                                                <Input label={<h1 className={styles.heading1}>Cân nặng</h1>} placeholder='Cân nặng' labelPlacement='outside' endContent="kg" name='weight' value={petData.weight} onChange={handleInputChange} />
 
                                             </div>
                                         </div>
@@ -545,7 +545,7 @@ const Page = () => {
                                                     </SelectItem>
                                                 ))}
                                             </Select>
-                                            <Input type='number' name='weight' value={updatePet.weight} onChange={handleUpdateInputChange} label={<h1 className={styles.heading1}>Cân nặng</h1>} placeholder='Kg' labelPlacement='outside' />
+                                            <Input type='number' name='weight' value={updatePet.weight} onChange={handleUpdateInputChange} label={<h1 className={styles.heading1}>Cân nặng</h1>} endContent="kg" labelPlacement='outside' />
                                         </div>
                                     </div>
                                 </div>
