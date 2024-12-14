@@ -151,9 +151,22 @@ const Page = () => {
                         : "Dịch vụ khác: "}
                     </div>
                     <div className="flex items-center justify-center gap-2 ml-2">
-                      {new Date(activity.startDate).toLocaleDateString()}{" "}
-                      <FontAwesomeIcon icon={faMinus} />{" "}
-                      {new Date(activity.endDate).toLocaleDateString()}
+                      {activity.startDate && activity.endDate ?
+                        (
+                          <>
+                            {new Date(activity.startDate).toLocaleDateString()}{" "}
+                            <FontAwesomeIcon icon={faMinus} />{" "}
+                            {new Date(activity.endDate).toLocaleDateString()}
+                          </>
+                        )
+                        :
+                        (
+                          activity.startDate
+                            ?
+                            <span> {new Date(activity.startDate).toLocaleDateString()}</span>
+                            :
+                            "Lỗi hiện thị ngày"
+                        )}
                     </div>
                   </div>
 
