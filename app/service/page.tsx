@@ -2,18 +2,17 @@
 
 import { Avatar, Button, DateRangePicker, Input, Select, SelectItem, Slider } from '@nextui-org/react';
 // import data from '@/app/lib/vietnam.json';
-import { useEffect, useRef, useState } from 'react';
+import { faCircle, faMagnifyingGlass, faRoad, faStar } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCircle, faMagnifyingGlass, faStar } from '@fortawesome/free-solid-svg-icons';
-import { faCircleCheck } from '@fortawesome/free-regular-svg-icons';
 import { Icon } from '@iconify/react';
-import Link from 'next/link';
 import dynamic from 'next/dynamic';
-const Map = dynamic(() => import('../components/Map'), { ssr: false });
-import axiosClient from '../lib/axiosClient';
+import Link from 'next/link';
+import { useEffect, useRef, useState } from 'react';
 import { CatSitter, UserLocal } from '../constants/types/homeType';
 import useGeoapify from '../hooks/useGeoapify';
-import styles from './service.module.css'
+import axiosClient from '../lib/axiosClient';
+import styles from './service.module.css';
+const Map = dynamic(() => import('../components/Map'), { ssr: false });
 
 interface CatSitterData {
   content: [CatSitter]
@@ -127,7 +126,7 @@ const Service = () => {
   //get cat sitters
   useEffect(() => {
     try {
-      axiosClient(`sitter-profiles/search?latitude=${lat}&longitude=${lng}&name=${name}&page=1&size=10&sort=distance&direction=DESC`)
+      axiosClient(`sitter-profiles/search?latitude=${lat ?? 10.8231}&longitude=${lng ?? 106.6297}&name=${name}&page=1&size=10&sort=distance&direction=DESC`)
         .then((res) => {
           setCatSitters(res.data);
         })
@@ -339,7 +338,7 @@ const Service = () => {
                         </p>
                         <p className='text-[20px] font-semibold text-[#2B764F]'>
                           {/* {catSitter.price} */}
-                          20000
+                          20.000đ
                         </p>
                       </div>
                     </div>
@@ -361,10 +360,10 @@ const Service = () => {
                     </p>
                     <div className='flex font-semibold text-[#66625F]'>
                       <FontAwesomeIcon
-                        icon={faCircleCheck}
+                        icon={faRoad}
                         className='text-green-600 size-4 self-center px-1'
                       />
-                      <p className='text-[10px]'>Đã cập nhật 2 ngày trước</p>
+                      <p className='text-[13px]'>Khoảng cách đến đó: {Math.round(catSitter.distance)} km</p>
                     </div>
                   </Link>
 

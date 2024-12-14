@@ -308,8 +308,8 @@ const Page = () => {
                         <h1 className={styles.h1}>Thông tin dịch vụ</h1>
                         <div className='flex'>
                             <p className={styles.tableBlockTitle}>Tên dịch vụ</p>
-                            {/* <p className={styles.tableBlockTitle}>Thời gian</p> */}
                             <p className={styles.tableBlockTitle}>Giá tiền</p>
+                            <p className={styles.tableBlockTitle}>Đơn vị</p>
                         </div>
                         {additionServices && additionServices.map((ser) => (
                             <div key={ser.id} className='flex text-xl items-center justify-start'>
@@ -317,8 +317,8 @@ const Page = () => {
                                     <FontAwesomeIcon icon={faShieldCat} size='2xs' className='mr-2' />
                                     {ser.name}
                                 </p>
-                                {/* <p className={styles.tableBlock}>{ser.duration} phút</p> */}
                                 <p className={styles.tableBlock}>{ser.price.toLocaleString("de")}</p>
+                                <p className={styles.tableBlock}>1 lần</p>
                             </div>
                         ))}
                     </div>

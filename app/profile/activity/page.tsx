@@ -157,7 +157,13 @@ const Page = () => {
                               </div>
                             </div>
                           </div>
-                          <Button as={Link} href={`/profile/activity/detail/${activity.id}`} className='bg-btnbg text-white rounded-lg mt-3'>Theo dõi lịch</Button>
+                          <Button
+                            as={Link}
+                            href={activity.orderType === "OVERNIGHT" ? `/profile/activity/detail/${activity.id}` : `/profile/activity/detailother/${activity.id}`}
+                            className='bg-btnbg text-white rounded-lg mt-3'
+                          >
+                            Theo dõi lịch
+                          </Button>
                         </div>
                         <h2 className={`${statusColors[activity.status] || 'text-black'}`}>
                           {statusLabels[activity.status] || 'Trạng thái không xác định'}
