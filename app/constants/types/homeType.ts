@@ -125,6 +125,12 @@ export type Service = {
   selectedSlot?: string;
 };
 
+export type ReportType = {
+  id: string;
+  name: string;
+  description: string;
+};
+
 export type ConfigService = {
   id: string;
   ceilPrice: number;
