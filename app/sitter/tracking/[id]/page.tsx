@@ -539,14 +539,15 @@ const Tracking = () => {
                         <div className='w-full'>
                             <Tabs aria-label="Options" className='w-full' fullWidth>
                                 <Tab key="info" title=" Thông tin đặt lịch">
-                                    <div className='bg-[#FFE3D5] text-black p-2 rounded-md'>
-                                        <h2>Ngày bắt đầu: {DateFormat(dataOrder.startDate)}</h2>
-                                        <h2>Ngày kết thúc: {DateFormat(dataOrder.endDate)}</h2>
-                                        <h2>Ghi chú: {dataOrder.note}</h2>
-                                        {dataOrder.status === "IN_PROGRESS" &&
-                                            <Button className='w-full bg-maincolor text-white my-10' radius='sm' onClick={() => completeBooking()}>Hoàn thành dịch vụ</Button>
-                                        }
-                                    </div>
+                                    {dataOrder &&
+                                        <div className='bg-[#FFE3D5] text-black p-2 rounded-md'>
+                                            <h2>Ngày bắt đầu: {DateFormat(dataOrder.startDate)}</h2>
+                                            <h2>Ghi chú: {dataOrder.note}</h2>
+                                            {dataOrder.status === "IN_PROGRESS" &&
+                                                <Button className='w-full bg-maincolor text-white my-10' radius='sm' onClick={() => completeBooking()}>Hoàn thành dịch vụ</Button>
+                                            }
+                                        </div>
+                                    }
                                 </Tab>
                                 {dataOrder.status !== "COMPLETED" &&
                                     <Tab key="chat" title="Nhắn tin">
