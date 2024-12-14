@@ -2,7 +2,7 @@
 
 import { faCat, faCircle, faFilePdf, faShieldCat, faStar } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Avatar, Button, Calendar, DateValue, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Textarea, useDisclosure } from '@nextui-org/react';
+import { Avatar, Button, Calendar, DateValue, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Select, SelectItem, Textarea, useDisclosure } from '@nextui-org/react';
 // import Image from 'next/image';
 import React, { useEffect, useState } from 'react'
 import { Icon } from '@iconify/react';
@@ -12,7 +12,7 @@ import 'yet-another-react-lightbox/styles.css';
 import PhotoGallery from '@/app/components/PhotoGallery';
 import axiosClient from '@/app/lib/axiosClient';
 import { useParams } from 'next/navigation';
-import { CatSitter, Certificate, Service, UserLocal } from '@/app/constants/types/homeType';
+import { CatSitter, Certificate, ReportType, Service, UserLocal } from '@/app/constants/types/homeType';
 import Loading from '@/app/components/Loading';
 import Image from 'next/image';
 import Lightbox from 'yet-another-react-lightbox';
@@ -35,6 +35,8 @@ const Page = () => {
     const [lightboxOpen, setLightboxOpen] = useState(false);
     const [lightboxIndex, setLightboxIndex] = useState(0);
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
+    const [reportType, setReportType] = useState<ReportType[]>([])
+
     // check user
     useEffect(() => {
         if (typeof window !== 'undefined') {
@@ -80,6 +82,20 @@ const Page = () => {
             console.log(error);
         }
     }, [params])
+
+    useEffect(() => {
+        try {
+            axiosClient("report-types")
+                .then((res) => {
+                    setReportType(res.data)
+                })
+                .catch((e) => {
+                    console.log(e);
+                })
+        } catch (error) {
+            console.log(error);
+        }
+    })
 
     useEffect(() => {
         const fetchData = async () => {
@@ -425,6 +441,16 @@ const Page = () => {
                             </ModalHeader>
                             <ModalBody>
                                 <h1>Loại vi phạm</h1>
+                                <Select
+                                    className=""
+                                    aria-label="Favorite Animal"
+                                    placeholder="Select an animal"
+                                >
+                                    {reportType.map((type: ReportType) => (
+                                        <SelectItem key={type.id}>{type.name}</SelectItem>
+                                    ))}
+                                </Select>
+                                <h1>Lí do</h1>
                                 <Input />
                                 <h1>Nội dung vi phạm</h1>
                                 <Textarea />
