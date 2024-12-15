@@ -1,7 +1,7 @@
 'use client'
 
-import { Avatar, Button, Chip, DatePicker, DateValue, Input, Modal, ModalBody, ModalContent, ModalFooter, Radio, RadioGroup, Select, SelectItem, Textarea, useDisclosure } from '@nextui-org/react'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { Avatar, Button, Chip, DatePicker, DateValue, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Radio, RadioGroup, Select, SelectItem, Textarea, useDisclosure } from '@nextui-org/react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import styles from './housesitting.module.css'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useParams, useRouter } from 'next/navigation'
@@ -10,8 +10,12 @@ import { CatSitter, PetProfile, Service, Slot, UserType } from '@/app/constants/
 import Image from 'next/image'
 import { toast } from 'react-toastify'
 import { today, getLocalTimeZone } from '@internationalized/date';
-import { faMinus, faPlus, faTrash } from '@fortawesome/free-solid-svg-icons'
+import { faCat, faMinus, faPlus, faTrash } from '@fortawesome/free-solid-svg-icons'
 import { v4 as uuidv4 } from 'uuid';
+import Loading from '@/app/components/Loading'
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import CatBreed from '@/app/lib/CatBreed.json';
+import { storage } from '@/app/utils/firebase'
 
 interface BookingDetail {
     quantity: number;
@@ -34,12 +38,28 @@ const HouseSitting = () => {
     const [address, setAddress] = useState('')
     const [note, setNote] = useState('')
     const todayDate = today(getLocalTimeZone());
+    const maxDate = todayDate.add({ months: 3 });
     const [selectedDate, setSelectedDate] = useState<DateValue | null>(null);
     const [sitter, setSitter] = useState<CatSitter>()
     const [paymentMethod, setPaymentMethod] = useState("")
     const [userData, setUserData] = useState<UserType>()
-
+    const { isOpen: isOpenAdd, onOpen: onOpenAdd, onOpenChange: onOpenChangeAdd } = useDisclosure();
     const [userId, setUserId] = useState<string | null>(null);
+    //image data
+    const [selectedImage, setSelectedImage] = useState<File | null>(null);
+    const [previewImage, setPreviewImage] = useState<string | null>(null);
+    const hiddenFileInput = useRef<HTMLInputElement>(null);
+    const [petData, setPetData] = useState({
+        petName: '',
+        profilePicture: '',
+        age: '',
+        breed: "",
+        species: '',
+        weight: '',
+        gender: '',
+        description: '',
+    });
+    const [isLoading, setIsLoading] = useState(false)
 
     const fetchData = useCallback(async () => {
         try {
@@ -124,23 +144,8 @@ const HouseSitting = () => {
         setSelectedPet(petIds.split(','));
     }
 
-    //get addition service
-    // useEffect(() => {
-    //     try {
-    //         axiosClient(`services/sitter/${params.id}/type?serviceType=ADDITION_SERVICE&status=ACTIVE`)
-    //             .then((res) => {
-    //                 setServices(res.data);
-    //             })
-    //             .catch((e) => {
-    //                 console.log(e);
-    //             })
-    //     } catch (error) {
-    //         console.log(error);
-    //     }
-    // }, [params.id])
-
     //get pets
-    useEffect(() => {
+    const fetchPets = useCallback(() => {
         try {
             axiosClient(`/pet-profiles/user/${userId}`)
                 .then((res) => {
@@ -148,7 +153,19 @@ const HouseSitting = () => {
                 })
                 .catch((e) => {
                     console.log(e);
-                })
+                });
+        } catch (error) {
+
+        }
+    }, [userId])
+
+    useEffect(() => {
+        fetchPets()
+    }, [fetchPets])
+
+    //get pets
+    useEffect(() => {
+        try {
             axiosClient(`/users/${userId}`)
                 .then((res) => {
                     setUserData(res.data);
@@ -343,6 +360,97 @@ const HouseSitting = () => {
         setSelectedServices((prevState) => [...prevState, newService]);
     };
 
+    //image upload
+    const handleImageClick = () => {
+        if (hiddenFileInput.current) {
+            hiddenFileInput.current.click();
+        }
+    };
+
+    const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (file) {
+            setSelectedImage(file);
+            setPreviewImage(URL.createObjectURL(file));
+        }
+    };
+
+
+    const handleGenderChange = (value: string) => {
+        setPetData({
+            ...petData,
+            gender: value,
+        });
+    };
+
+    const handleAddPet = async () => {
+        setIsLoading(true)
+        try {
+            let profilePictureUrl = '';
+            if (selectedImage) {
+                const storageRef = ref(storage, `petProfiles/${uuidv4()}_${selectedImage.name}`);
+
+                // Upload the file
+                await uploadBytes(storageRef, selectedImage);
+
+                // Get the download URL
+                profilePictureUrl = await getDownloadURL(storageRef);
+            }
+
+            // Prepare pet data with the profile picture URL
+            const petDataWithImage = {
+                ...petData,
+                profilePicture: profilePictureUrl,
+            };
+
+            axiosClient.post('/pet-profiles', petDataWithImage)
+                .then(() => {
+                    onOpenChangeAdd();
+                    setPetData({
+                        petName: '',
+                        age: '',
+                        breed: '',
+                        weight: '',
+                        species: '',
+                        gender: '',
+                        description: '',
+                        profilePicture: '',
+                    });
+                    fetchPets();
+                    setIsLoading(false)
+                })
+                .catch((e) => {
+                    console.log(e);
+                    setIsLoading(false)
+                })
+
+        } catch (error) {
+            console.log(error);
+            setIsLoading(false)
+        }
+    }
+
+    //handle breed change
+    const handleBreedChange = (breedId: string) => {
+        const selectedBreed = CatBreed.find((breed) => breed.id.toString() === breedId)?.breed || "";
+        setPetData((prev) => ({
+            ...prev,
+            breed: selectedBreed,
+        }));
+    };
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const { name, value } = e.target;
+        setPetData({
+            ...petData,
+            [name]: value
+        });
+    }
+
+    if (isLoading) {
+        return <Loading />
+    }
+
     return (
         <div className='flex flex-col items-center justify-start my-12'>
             <h1 className={styles.h1}>Đặt dịch vụ</h1>
@@ -354,6 +462,7 @@ const HouseSitting = () => {
                         <DatePicker
                             label="Ngày bắt đầu"
                             minValue={todayDate}
+                            maxValue={maxDate}
                             visibleMonths={2}
                             onChange={(e) => setSelectedDate(e)}
                         />
@@ -474,6 +583,12 @@ const HouseSitting = () => {
                         </div>
 
                         <h2 className={styles.h2}>Chọn mèo của bạn</h2>
+                        <h3 className="flex gap-2">
+                            Nếu bạn chưa thêm hồ sơ thú cưng, {" "}
+                            <div onClick={onOpenAdd} className="underline font-semibold cursor-pointer">
+                                thêm tại đây
+                            </div>
+                        </h3>
                         <Select
                             items={pets}
                             aria-label='pet'
@@ -693,6 +808,92 @@ const HouseSitting = () => {
                             <ModalFooter className='w-full flex justify-center'>
                                 <Button className='bg-btnbg text-white w-[206px] rounded-full h-[42px]' onPress={() => handleBooking()}>
                                     Thanh toán
+                                </Button>
+                            </ModalFooter>
+                        </>
+                    )}
+                </ModalContent>
+            </Modal>
+
+            {/* add new pet  */}
+            <Modal isOpen={isOpenAdd} onOpenChange={onOpenChangeAdd} size='5xl'>
+                <ModalContent>
+                    {() => (
+                        <>
+                            <ModalHeader className="flex items-end gap-2">
+                                <FontAwesomeIcon icon={faCat} className='fa-2x' />
+                                <div className='items-end mb-[-6px]'>
+                                    <h1 className='text-2xl font-bold'>Bé mèo của bạn</h1>
+                                </div>
+                            </ModalHeader>
+                            <ModalBody className='flex gap-5 '>
+                                <div className='flex gap-10'>
+                                    <div className='relative group w-[200px] h-[200px]'>
+                                        <Avatar className='w-full h-full' radius="sm" src={previewImage || '/noimagecat.jpg'} />
+                                        <div className="absolute inset-0 flex items-center justify-center">
+                                            <Button
+                                                onClick={handleImageClick}
+                                                className=' bg-black bg-opacity-50 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300'
+                                            >
+                                                Chọn ảnh cho hồ sơ
+                                            </Button>
+                                        </div>
+                                        <input
+                                            type="file"
+                                            accept='image/*'
+                                            ref={hiddenFileInput}
+                                            onChange={handleImageChange}
+                                            style={{ display: 'none' }}
+                                        />
+                                    </div>
+                                    <div className='flex flex-col gap-5'>
+                                        <div className='flex gap-5'>
+                                            <Input label={<h1 className={styles.heading1}>Tên bé mèo</h1>} placeholder='Tên' labelPlacement='outside' name='petName' value={petData.petName} onChange={handleInputChange} />
+                                            <Input label={<h1 className={styles.heading1}>Tuổi</h1>} placeholder='Nhập tuổi cho bé mèo' labelPlacement='outside' name='age' value={petData.age} onChange={handleInputChange} />
+                                            <RadioGroup
+                                                label={<h1 className={styles.heading1}>Giới tính</h1>}
+                                                className='w-full'
+                                                value={petData.gender}
+                                                onValueChange={handleGenderChange}
+                                            >
+                                                <div className='flex gap-3'>
+                                                    <Radio value="Bé đực">Bé đực</Radio>
+                                                    <Radio value="Bé cái">Bé cái</Radio>
+                                                </div>
+                                            </RadioGroup>
+                                        </div>
+                                        <div className='flex gap-5'>
+                                            <Select
+                                                label="Giống loài"
+                                                labelPlacement='outside'
+                                                placeholder="Giống mèo của bạn"
+                                                className="select"
+                                                variant="bordered"
+                                                onChange={(event) => handleBreedChange(event.target.value)}
+                                            >
+                                                {CatBreed.map((breed) => (
+                                                    <SelectItem key={breed.id} value={breed.id}>
+                                                        {breed.breed}
+                                                    </SelectItem>
+                                                ))}
+                                            </Select>
+                                            <Input label={<h1 className={styles.heading1}>Cân nặng</h1>} placeholder='Cân nặng' labelPlacement='outside' endContent="kg" name='weight' value={petData.weight} onChange={handleInputChange} />
+
+                                        </div>
+                                    </div>
+                                </div>
+                                <Textarea
+                                    name='description'
+                                    value={petData.description}
+                                    onChange={handleInputChange}
+                                    label={<h1 className={styles.heading1}>Những thông tin mà người chăm sóc mèo cần lưu ý</h1>}
+                                    placeholder='Thêm hướng dẫn chăm sóc để phù hợp với bé mèo của bạn'
+                                    labelPlacement='outside'
+                                />
+                            </ModalBody>
+                            <ModalFooter className='flex justify-center items-center'>
+                                <Button color="primary" onPress={handleAddPet} className='rounded-full'>
+                                    Lưu
                                 </Button>
                             </ModalFooter>
                         </>

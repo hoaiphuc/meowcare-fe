@@ -435,3 +435,14 @@ export type Slot = {
   wasSelected?: boolean;
   isUpdate: boolean;
 };
+
+export type Config = {
+  id: string;
+  configKey: string;
+  configValue: string;
+  description: string;
+  createdBy: Date;
+  createdAt: Date;
+  updatedBy: Date;
+  updatedAt: Date;
+};
