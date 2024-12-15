@@ -1,18 +1,47 @@
+'use client'
+
 import { Button, Divider } from '@nextui-org/react'
 import Image from 'next/image'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import "./besitter.scss"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCheck } from '@fortawesome/free-solid-svg-icons'
-import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { showConfirmationDialog } from '../components/confirmationDialog'
 const BeSister = () => {
+    const router = useRouter();
+    const [user, setUser] = useState(null);
+
+    useEffect(() => {
+        // Safely access localStorage in useEffect (runs on client-side)
+        const storedUser = localStorage.getItem("user");
+        setUser(storedUser ? JSON.parse(storedUser) : null);
+    }, []);
+
+    const handleNavigate = async () => {
+        if (!user) {
+            const isConfirmed = await showConfirmationDialog({
+                title: 'Bạn cần đăng nhập để đăng ký làm người chăm sóc?',
+                confirmButtonText: 'Chắc chắn rồi',
+                denyButtonText: 'Để sau nhé',
+                confirmButtonColor: '#00BB00',
+            });
+            if (isConfirmed) {
+                router.push("login")
+            } else {
+                return
+            }
+        }
+        router.push("besitter/sitter/")
+    }
+
     return (
         <div>
             <div className='bg-[url("/besitter/bg.png")] bg-cover'>
                 <div className='flex flex-col gap-3 justify-center items-center pt-80 pb-36 text-white px-[500px] text-center'>
                     <h1 className='font-bold text-4xl'>Trở thành người chăm sóc mèo</h1>
                     <h1 className='font-semibold text-2xl '>Nếu mèo là đam mê của bạn, hãy gia nhập và trở thành người chăm sóc đáng tin cậy cho những chú mèo cần được yêu thương!</h1>
-                    <Button as={Link} href='besitter/sitter/1' className='bg-[#2E67D1] rounded-full text-white mt-10 px-20 py-8 font-semibold text-xl'>Bắt đầu</Button>
+                    <Button onClick={() => handleNavigate()} className='bg-[#2E67D1] rounded-full text-white mt-10 px-20 py-8 font-semibold text-xl'>Bắt đầu</Button>
                 </div>
             </div>
 
@@ -51,7 +80,7 @@ const BeSister = () => {
                         <p className='circle-p'>Sau khi hoàn thành quá trình chăm sóc. Thanh toán có thể được rút sau hai ngày kể từ khi bạn hoàn thành dịch vụ.</p>
                     </div>
                 </div>
-                <Button as={Link} href='besitter/sitter/1' className='bg-[#2E67D1] rounded-full text-white mt-10 px-20 py-8 font-semibold text-xl'>Bắt đầu</Button>
+                <Button onClick={() => handleNavigate()} className='bg-[#2E67D1] rounded-full text-white mt-10 px-20 py-8 font-semibold text-xl'>Bắt đầu</Button>
             </div>
 
             <div className='grid grid-cols-2 my-32'>
@@ -102,7 +131,7 @@ const BeSister = () => {
 
             <div className='flex flex-col justify-center items-center gap-5'>
                 <h1 className='text-[32px] font-semibold'>Kết nối với chủ vật nuôi sau khi hồ sơ của bạn được chấp thuận</h1>
-                <Button as={Link} href='besitter/sitter/1' className='bg-btnbg  text-xl p-6 rounded-full text-white'>Bắt đầu xây dựng hồ sơ</Button>
+                <Button onClick={() => handleNavigate()} className='bg-btnbg  text-xl p-6 rounded-full text-white'>Bắt đầu xây dựng hồ sơ</Button>
             </div>
 
         </div>

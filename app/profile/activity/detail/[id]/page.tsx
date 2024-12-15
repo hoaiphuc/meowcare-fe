@@ -2,20 +2,20 @@
 
 import { CareSchedules, Order, PetProfile, Task } from '@/app/constants/types/homeType'
 import axiosClient from '@/app/lib/axiosClient'
-import { faCheck, faClipboardCheck, faPaw } from '@fortawesome/free-solid-svg-icons'
+import { faCheck, faClipboardCheck, faMessage, faPaw } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { Accordion, AccordionItem, Avatar, Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Textarea, useDisclosure } from '@nextui-org/react'
+import { Accordion, AccordionItem, Avatar, Button, Drawer, DrawerBody, DrawerContent, DrawerHeader, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Textarea, useDisclosure } from '@nextui-org/react'
 import { formatDate } from 'date-fns'
 import { useParams } from 'next/navigation'
-import React, { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import styles from "./detail.module.css"
 // Import Lightbox and the Video plugin
-import Lightbox from 'yet-another-react-lightbox';
-import Video from 'yet-another-react-lightbox/plugins/video';
-import { Slide } from 'yet-another-react-lightbox';
+import Lightbox, { Slide } from 'yet-another-react-lightbox'
+import Video from 'yet-another-react-lightbox/plugins/video'
 
 // Import styles for Lightbox and Video plugin
-import 'yet-another-react-lightbox/styles.css';
+import Chat from '@/app/components/Chat'
+import 'yet-another-react-lightbox/styles.css'
 // import 'yet-another-react-lightbox/plugins/video.css';
 
 
@@ -36,6 +36,7 @@ const Page = () => {
     const [filteredTasks, setFilteredTasks] = useState<Task[]>([]);
     const [selectedCat, setSelectedCat] = useState<PetProfile | null>()
     const { isOpen: isOpenCat, onOpen: onOpenCat, onOpenChange: onOpenChangeCat } = useDisclosure();
+    const { isOpen: isOpenChat, onOpen: onOpenChat, onOpenChange: onOpenChangeChat } = useDisclosure();
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
     const [selectTaskEvidence, setSelectedTaskEvidence] = useState<TaskEvident[]>([])
     const [selectedTask, setSelectedTask] = useState<Task>();
@@ -232,12 +233,17 @@ const Page = () => {
         <div className='w-[891px] bg-white rounded-2xl shadow-2xl'>
             {dataOrder &&
                 <div key={dataOrder.id}>
-                    <div className='m-2 shadow-2xl rounded-xl flex p-3 gap-3'>
-                        <Avatar src={dataOrder.sitter.avatar} className='w-14  h-14 ' />
-                        <div>
-                            <h2 className='font-semibold'>{dataOrder.sitter.fullName}</h2>
-                            <h1 className='text-[#559070] font-semibold text-xl'>Dịch vụ: {dataOrder.orderType === "OVERNIGHT" ? "Gửi thú cưng" : "Dịch vụ khác"}</h1>
+                    <div className='m-2 shadow-2xl rounded-xl flex justify-between items-center'>
+                        <div className='flex  p-3 gap-3'>
+                            <Avatar src={dataOrder.sitter.avatar} className='w-14  h-14 ' />
+                            <div>
+                                <h2 className='font-semibold'>{dataOrder.sitter.fullName}</h2>
+                                <h1 className='text-[#559070] font-semibold text-xl'>Dịch vụ: {dataOrder.orderType === "OVERNIGHT" ? "Gửi thú cưng" : "Dịch vụ khác"}</h1>
+                            </div>
                         </div>
+                        <Button onPress={onOpenChat} variant='bordered' className='text-maincolor'>
+                            <FontAwesomeIcon icon={faMessage} />
+                        </Button>
                     </div>
 
                     {/* tracking */}
@@ -455,6 +461,22 @@ const Page = () => {
                     )}
                 </ModalContent>
             </Modal>
+            <Drawer isOpen={isOpenChat} onOpenChange={onOpenChangeChat}>
+                <DrawerContent>
+                    {() => (
+                        <>
+                            <DrawerHeader className="flex flex-col gap-1">Nhắn tin cho người chăm sóc</DrawerHeader>
+                            <DrawerBody>
+                                {dataOrder &&
+                                    <div className='h-full'>
+                                        <Chat userId={dataOrder.user.id} userName={dataOrder.user.fullName} orderId={dataOrder.id} />
+                                    </div>
+                                }
+                            </DrawerBody>
+                        </>
+                    )}
+                </DrawerContent>
+            </Drawer>
             {openImage && (
                 <Lightbox
                     open={openImage}
