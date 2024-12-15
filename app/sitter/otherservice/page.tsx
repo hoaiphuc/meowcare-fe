@@ -367,7 +367,7 @@ const OtherService = () => {
                 setSlots((prev) =>
                     prev.map((slot) => {
                         if (slot.id === id) {
-                            const updatedSlot = { ...slot, [field]: updatedDate, isUpdate: true };
+                            const updatedSlot = { ...slot, [field]: updatedDate };
 
                             // if (field === "endTime" && updatedSlot.startTime) {
                             //     // Calculate duration if both startTime and endTime are set
@@ -406,7 +406,7 @@ const OtherService = () => {
         try {
             // Separate child services by their state
             const toAdd = slots.filter((slot) => slot.isNew);
-            const toUpdate = slots.filter((slot) => slot.isUpdate && !slot.isNew && !slot.isDeleted);
+            // const toUpdate = slots.filter((slot) => slot.isUpdate && !slot.isNew && !slot.isDeleted);
             const toDelete = slots.filter((slot) => slot.isDeleted);
 
             // Perform API calls
@@ -423,19 +423,22 @@ const OtherService = () => {
                     throw error;
                 }
             });
-            const updatePromises = toUpdate.map((slot) =>
-                axiosClient.put(`booking-slots/${slot.id}`, {
-                    ...slot,
-                    startTime: (slot.startTime as Date).toISOString(),
-                    endTime: (slot.endTime as Date).toISOString(),
-                })
-            );
+            // const updatePromises = toUpdate.map((slot) =>
+            //     axiosClient.put(`booking-slots/${slot.id}`, {
+            //         ...slot,
+            //         startTime: (slot.startTime as Date).toISOString(),
+            //         endTime: (slot.endTime as Date).toISOString(),
+            //         isNew: undefined,
+            //         isUpdate: undefined,
+            //     })
+            // );
             const deletePromises = toDelete.map((slot) =>
                 axiosClient.delete(`booking-slots/${slot.id}`)
             );
 
-            await Promise.all([...addPromises, ...updatePromises, ...deletePromises]);
+            await Promise.all([...addPromises, ...deletePromises]);
 
+            fetchSlot();
             fetchData();
             toast.success("Cập nhật slot thành công");
             onOpenChange()
@@ -613,6 +616,7 @@ const OtherService = () => {
                                                     </TableCell>
                                                     <TableCell className='w-28'>
                                                         <TimeInput
+                                                            isDisabled={!slot.isNew}
                                                             aria-label='starttime'
                                                             hourCycle={24}
                                                             value={parseTimeString(slot.startTime as Date)}
@@ -621,6 +625,7 @@ const OtherService = () => {
                                                     </TableCell>
                                                     <TableCell className='w-28'>
                                                         <TimeInput
+                                                            isDisabled={!slot.isNew}
                                                             aria-label='endtime'
                                                             hourCycle={24}
                                                             value={parseTimeString(slot.endTime as Date)}
