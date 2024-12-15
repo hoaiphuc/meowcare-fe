@@ -7,6 +7,7 @@ import {
   faRectangleList,
   faUser,
   faCoins,
+  faTasks,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
@@ -30,6 +31,11 @@ export const navbarManager: SideNavItem[] = [
     title: "Bài kiểm tra",
     path: "/manager/quiz",
     icon: <FontAwesomeIcon icon={faRectangleList} className="w-7 h-7" />,
+  },
+  {
+    title: "Quản lý dịch vụ",
+    path: "/manager/bookingorder",
+    icon: <FontAwesomeIcon icon={faTasks} className="w-7 h-7 " />,
   },
   {
     title: "Báo cáo",
