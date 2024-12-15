@@ -26,6 +26,7 @@ import {
 } from "@nextui-org/react";
 // import Image from 'next/image';
 import React, { useEffect, useState } from "react";
+
 import { Icon } from "@iconify/react";
 import styles from "./sitterprofile.module.css";
 import Link from "next/link";
@@ -56,7 +57,7 @@ const Page = () => {
   const [skills, setSkills] = useState([]);
   const [certificates, setCertificates] = useState<Certificate[]>([]);
   const [selectedPdf, setSelectedPdf] = useState<string>();
-  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
   const {
     isOpen: isImageOpen,
     onOpen: onImageOpen,
@@ -66,6 +67,11 @@ const Page = () => {
     isOpen: isReportOpen,
     onOpen: onReportOpen,
     onOpenChange: onReportOpenChange,
+  } = useDisclosure();
+  const {
+    isOpen: isCancelOpen,
+    onOpen: onCancelOpen,
+    onOpenChange: onCancelOpenChange,
   } = useDisclosure();
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
@@ -357,7 +363,54 @@ const Page = () => {
             <h1 className={styles.h1}>Vị trí</h1>
             <div className="flex justify-center"></div>
           </div>
+          <div>
+            {/* Chính sách hủy lịch */}
+            <div
+              className="flex text-xl gap-3 items-center py-5 font-semibold cursor-pointer "
+              onClick={onCancelOpen}
+            >
+              <Icon icon="mdi:calendar-remove" />
+              <p>Chính sách hủy lịch</p>
+            </div>
 
+            {/* Modal Chính sách hủy lịch */}
+            <Modal
+              isOpen={isCancelOpen}
+              onClose={onCancelOpenChange}
+              size="md"
+              closeButton
+            >
+              <ModalContent>
+                <ModalHeader className="font-bold text-lg">
+                  Chính sách hủy lịch
+                </ModalHeader>
+                <ModalBody>
+                  <ul className="list-disc pl-5 space-y-2 text-gray-700">
+                    <li>
+                      Hủy lịch <b>trước ngày</b> so với ngày bắt đầu dịch vụ sẽ{" "}
+                      <b>không mất phí</b>.
+                    </li>
+                    <li>
+                      Hủy lịch trong <b> ngày trước ngày bắt đầu</b> sẽ bị tính
+                      phí <b>50%</b>.
+                    </li>
+                    <li>
+                      Hủy lịch <b>vào ngày bắt đầu</b> hoặc{" "}
+                      <b>sau khi dịch vụ diễn ra</b> sẽ bị tính phí <b>100%</b>.
+                    </li>
+                  </ul>
+                  <div className="mt-5 flex justify-center">
+                    <button
+                      onClick={onClose}
+                      className="w-[120px] h-[40px] text-white font-semibold bg-blue-500 rounded-full hover:bg-blue-600"
+                    >
+                      Đóng
+                    </button>
+                  </div>
+                </ModalBody>
+              </ModalContent>
+            </Modal>
+          </div>
           <div
             className="flex text-xl gap-3 items-center py-5 font-semibold cursor-pointer"
             onClick={onReportOpen}
