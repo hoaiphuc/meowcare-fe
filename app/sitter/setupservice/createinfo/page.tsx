@@ -323,7 +323,7 @@ const CreateInfo = () => {
                     <Input
                         type="number"
                         variant="bordered"
-                        value={sitterData?.fullRefundDay.toString()}
+                        value={sitterData?.fullRefundDay ? sitterData.fullRefundDay.toString() : ""}
                         name="fullRefundDay"
                         className="w-32"
                         onChange={handleInputChange}

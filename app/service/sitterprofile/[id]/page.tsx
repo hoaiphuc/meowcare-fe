@@ -37,6 +37,7 @@ import { useParams } from "next/navigation";
 import {
   CatSitter,
   Certificate,
+  Report,
   ReportType,
   Service,
   UserLocal,
@@ -44,6 +45,7 @@ import {
 import Loading from "@/app/components/Loading";
 import Image from "next/image";
 import Lightbox from "yet-another-react-lightbox";
+import { toast } from "react-toastify";
 
 const Page = () => {
   const params = useParams();
@@ -78,6 +80,14 @@ const Page = () => {
   const [lightboxIndex, setLightboxIndex] = useState(0);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [reportType, setReportType] = useState<ReportType[]>([]);
+  const [report, setReport] = useState<Report>({
+    id: "",
+    userId: "",
+    reportTypeId: "",
+    reportedUserId: "",
+    reason: "",
+    description: "",
+  });
 
   // check user
   useEffect(() => {
@@ -137,7 +147,7 @@ const Page = () => {
     } catch (error) {
       console.log(error);
     }
-  });
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -226,6 +236,62 @@ const Page = () => {
         unavailableDate.getDate() === dateToCheck.getDate()
     );
   };
+
+  const handleReportDetailChange = (field: keyof Report, value: string) => {
+    setReport((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  }
+
+  const handleSendReport = () => {
+    if (!user || !sitterProfile) {
+      toast.error("Bạn cần phải đăng nhập để báo cáo người dùng này");
+      return;
+    }
+
+    if (!report.reportTypeId) {
+      toast.error("Vui lòng chọn loại vi phạm");
+      return;
+    }
+
+    if (!report.reason) {
+      toast.error("Vui lòng nhập lí do");
+      return;
+    }
+
+    if (!report.description) {
+      toast.error("Vui lòng nhập nội dung vi phạm");
+      return;
+    }
+
+    try {
+      const finalReport = {
+        ...report,
+        userId: user.id, // Current user ID
+        reportedUserId: sitterProfile.sitterId, // ID of the sitter being reported
+      };
+      axiosClient.post("reports", finalReport)
+        .then(() => {
+          toast.success("Báo cáo người dùng này thành công")
+        })
+        .catch(() => {
+          toast.error("Đã xảy ra lỗi vui lòng thử lại sau")
+        })
+      setReport({
+        id: "",
+        userId: "",
+        reportTypeId: "",
+        reportedUserId: "",
+        reason: "",
+        description: "",
+      });
+      onReportOpenChange()
+    } catch (error) {
+
+    }
+  }
+
   return (
     <div className="flex flex-cols-2 my-10 gap-10 justify-center">
       <div className="flex flex-col gap-2 w-[352px]">
@@ -668,23 +734,24 @@ const Page = () => {
                 <h1>Loại vi phạm</h1>
                 <Select
                   className=""
-                  aria-label="Favorite Animal"
-                  placeholder="Select an animal"
+                  aria-label="report"
+                  placeholder="Chọn loại report"
+                  onChange={(event) => handleReportDetailChange("reportTypeId", event.target.value)}
                 >
                   {reportType.map((type: ReportType) => (
                     <SelectItem key={type.id}>{type.name}</SelectItem>
                   ))}
                 </Select>
                 <h1>Lí do</h1>
-                <Input />
+                <Input value={report?.reason} onChange={(e) => handleReportDetailChange("reason", e.target.value)} />
                 <h1>Nội dung vi phạm</h1>
-                <Textarea />
+                <Textarea value={report?.description} onChange={(e) => handleReportDetailChange("description", e.target.value)} />
               </ModalBody>
               <ModalFooter>
                 <Button color="danger" variant="light" onPress={onClose}>
                   Đóng
                 </Button>
-                <Button color="primary" onPress={onClose}>
+                <Button color="primary" onPress={handleSendReport}>
                   Gửi báo cáo
                 </Button>
               </ModalFooter>

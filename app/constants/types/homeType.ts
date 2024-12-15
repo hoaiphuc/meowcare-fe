@@ -41,6 +41,7 @@ export interface UserState {
 
 export interface UserLocal {
   id: string;
+  email: string;
   token: string;
   address: string;
   roles: [
@@ -334,9 +335,12 @@ export type QuizResult = {
 export type Report = {
   id: string;
   userId: string;
+  reportedUserId: string;
   reportTypeId: string;
   reason: string;
   description: string;
+  reportedUserEmail?: string;
+  userEmail?: string;
 };
 
 export type Transactions = {
