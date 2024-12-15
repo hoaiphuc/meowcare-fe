@@ -13,6 +13,13 @@ export type UserType = {
   status: number;
   gender: string;
   address: string;
+  roles: [
+    {
+      id: string;
+      roleName: string;
+      description: string;
+    }
+  ];
 };
 
 export type FormRegister = {

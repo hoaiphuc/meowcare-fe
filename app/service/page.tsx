@@ -48,7 +48,6 @@ const Service = () => {
   const [showSuggestions, setShowSuggestions] = useState<boolean>(false);
   const [lat, setLat] = useState<number>();
   const [lng, setLng] = useState<number>();
-  const [name, setName] = useState("");
 
   const getUserFromStorage = () => {
     if (typeof window !== "undefined") {
@@ -146,9 +145,8 @@ const Service = () => {
   useEffect(() => {
     try {
       axiosClient(
-        `sitter-profiles/search?latitude=${lat ?? 10.8231}&longitude=${
-          lng ?? 106.6297
-        }&name=${name}&page=1&size=10&sort=distance&direction=DESC`
+        `sitter-profiles/search?latitude=${lat ?? 10.8231}&longitude=${lng ?? 106.6297
+        }&page=1&size=10&sort=distance&direction=DESC`
       )
         .then((res) => {
           setCatSitters(res.data);
@@ -159,7 +157,7 @@ const Service = () => {
     } catch (error) {
       console.log(error);
     }
-  }, [lat, lng, name]);
+  }, [lat, lng]);
 
   const handleSearch = async () => {
     try {
@@ -244,9 +242,8 @@ const Service = () => {
             {options.map((option) => (
               <div
                 key={option}
-                className={`${styles.option} ${
-                  selectedCatNumber === option ? `${styles.selected}` : ""
-                }`}
+                className={`${styles.option} ${selectedCatNumber === option ? `${styles.selected}` : ""
+                  }`}
                 onClick={() => setSelectedCatNumber(option)}
               >
                 {option}
@@ -349,9 +346,8 @@ const Service = () => {
                       >
                         <Icon
                           icon="mdi:heart"
-                          className={`transition-colors size-3 ${
-                            isClicked ? "text-red-500" : ""
-                          }`}
+                          className={`transition-colors size-3 ${isClicked ? "text-red-500" : ""
+                            }`}
                         />
                       </button>
                     </div>

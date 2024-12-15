@@ -94,7 +94,7 @@ const ServiceDetail = () => {
         .catch((e) => {
           console.log(e);
         });
-    } catch (error) {}
+    } catch (error) { }
   }, [userId]);
 
   useEffect(() => {
@@ -396,7 +396,7 @@ const ServiceDetail = () => {
                   </li>
                   <li>
                     Bạn có thể thêm hoặc xóa các khung giờ công việc bằng nút
-                    "+" và biểu tượng thùng rác.
+                    <FontAwesomeIcon icon={faPlus} /> và biểu tượng thùng rác.
                   </li>
                   <li>
                     Số lượng khung giờ tối thiểu là <b>4</b> và tối đa là{" "}

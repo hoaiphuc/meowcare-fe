@@ -57,7 +57,7 @@ const Page = () => {
   const [skills, setSkills] = useState([]);
   const [certificates, setCertificates] = useState<Certificate[]>([]);
   const [selectedPdf, setSelectedPdf] = useState<string>();
-  const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
+  const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const {
     isOpen: isImageOpen,
     onOpen: onImageOpen,
@@ -73,6 +73,7 @@ const Page = () => {
     onOpen: onCancelOpen,
     onOpenChange: onCancelOpenChange,
   } = useDisclosure();
+
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -240,9 +241,8 @@ const Page = () => {
             >
               <Icon
                 icon="mdi:heart"
-                className={`transition-colors w-10 h-10 ${
-                  isClicked ? "text-red-500  " : ""
-                }`}
+                className={`transition-colors w-10 h-10 ${isClicked ? "text-red-500  " : ""
+                  }`}
               />
             </button>
           </div>
@@ -366,48 +366,52 @@ const Page = () => {
           <div>
             {/* Chính sách hủy lịch */}
             <div
-              className="flex text-xl gap-3 items-center py-5 font-semibold cursor-pointer "
-              onClick={onCancelOpen}
+              className="flex text-xl gap-3 items-center py-5 "
             >
               <Icon icon="mdi:calendar-remove" />
-              <p>Chính sách hủy lịch</p>
+              <p>Chính sách hủy lịch: </p>
+              <p onClick={onCancelOpen} className="cursor-pointer font-semibold underline">{sitterProfile?.fullRefundDay} ngày</p>
             </div>
 
             {/* Modal Chính sách hủy lịch */}
             <Modal
               isOpen={isCancelOpen}
-              onClose={onCancelOpenChange}
+              onOpenChange={onCancelOpenChange}
               size="md"
               closeButton
             >
               <ModalContent>
-                <ModalHeader className="font-bold text-lg">
-                  Chính sách hủy lịch
-                </ModalHeader>
-                <ModalBody>
-                  <ul className="list-disc pl-5 space-y-2 text-gray-700">
-                    <li>
-                      Hủy lịch <b>trước ngày</b> so với ngày bắt đầu dịch vụ sẽ{" "}
-                      <b>không mất phí</b>.
-                    </li>
-                    <li>
-                      Hủy lịch trong <b> ngày trước ngày bắt đầu</b> sẽ bị tính
-                      phí <b>50%</b>.
-                    </li>
-                    <li>
-                      Hủy lịch <b>vào ngày bắt đầu</b> hoặc{" "}
-                      <b>sau khi dịch vụ diễn ra</b> sẽ bị tính phí <b>100%</b>.
-                    </li>
-                  </ul>
-                  <div className="mt-5 flex justify-center">
-                    <button
-                      onClick={onClose}
-                      className="w-[120px] h-[40px] text-white font-semibold bg-blue-500 rounded-full hover:bg-blue-600"
-                    >
-                      Đóng
-                    </button>
-                  </div>
-                </ModalBody>
+                {(onClose) => (
+                  <>
+                    <ModalHeader className="font-bold text-lg text-black">
+                      Chính sách hủy lịch
+                    </ModalHeader>
+                    <ModalBody>
+                      <ul className="list-disc pl-5 space-y-2 text-gray-700">
+                        <li>
+                          Hủy lịch <b>trước {sitterProfile?.fullRefundDay} ngày</b> so với ngày bắt đầu dịch vụ sẽ{" "}
+                          <b>không mất phí</b>.
+                        </li>
+                        <li>
+                          Hủy lịch trong <b> ngày trước ngày bắt đầu</b> sẽ bị tính
+                          phí <b>50%</b>.
+                        </li>
+                        <li>
+                          Hủy lịch <b>vào ngày bắt đầu</b> hoặc{" "}
+                          <b>sau khi dịch vụ diễn ra</b> sẽ bị tính phí <b>100%</b>.
+                        </li>
+                      </ul>
+                    </ModalBody>
+                    <ModalFooter className="flex items-center justify-center">
+                      <Button
+                        onPress={onClose}
+                        className="w-[120px] h-[40px] text-white font-semibold bg-blue-500 rounded-full hover:bg-blue-600"
+                      >
+                        Đóng
+                      </Button>
+                    </ModalFooter>
+                  </>
+                )}
               </ModalContent>
             </Modal>
           </div>
@@ -497,7 +501,7 @@ const Page = () => {
                     {ser.name}
                   </p>
                   <p className={styles.tableBlock}>
-                    {ser.price.toLocaleString("de")}
+                    {ser.price.toLocaleString("de")}đ
                   </p>
                   <p className={styles.tableBlock}>1 lần</p>
                 </div>

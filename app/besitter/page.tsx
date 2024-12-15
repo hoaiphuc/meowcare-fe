@@ -32,7 +32,7 @@ const BeSister = () => {
                 return
             }
         }
-        router.push("besitter/sitter/")
+        router.push("besitter/sitter/1")
     }
 
     return (
