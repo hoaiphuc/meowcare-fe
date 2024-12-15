@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   Button,
   Input,
@@ -9,64 +9,91 @@ import {
   ModalContent,
   ModalFooter,
   ModalHeader,
+  useDisclosure,
 } from "@nextui-org/react";
+import axiosClient from "@/app/lib/axiosClient";
+import { Config } from "@/app/constants/types/homeType";
+import { toast } from "react-toastify";
 
 const SystemSettings = () => {
-  const [settings, setSettings] = useState({
-    catSittersPerPage: 10, // Default value for cat sitters per page
-    discountPercentage: 5, // Default percentage for completed services
-  });
+  // const [config, setConfig] = useState<Config[]>([]);
+  const [commission, setCommission] = useState<Config>(); // Commission value
+  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const [initialCommissionValue, setInitialCommissionValue] = useState<string>("");
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const fetchConfig = useCallback(async () => {
+    try {
+      const res = await axiosClient("api/config");
+      // setConfig(res.data);
+      // Find and set the commission setting
+      const commissionSetting = res.data.find(
+        (data: Config) => data.configKey === "APP_COMMISSION_SETTING"
+      );
+      if (commissionSetting) {
+        setCommission(commissionSetting);
+        setInitialCommissionValue(commissionSetting.configValue);
+      }
+    } catch (error) {
+      console.error("Error fetching config:", error);
+    }
+  }, []);
 
-  // Handle input changes
+  useEffect(() => {
+    fetchConfig();
+  }, [fetchConfig]); // Run only once on mount
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setSettings((prevState) => ({
-      ...prevState,
-      [name]: parseInt(value, 10), // Ensure numeric values
-    }));
+    if (commission) {
+      setCommission({
+        ...commission,
+        configValue: e.target.value,
+      });
+    }
   };
 
   const handleSaveSettings = () => {
-    setIsModalOpen(true); // Show confirmation modal
+    if (commission?.configValue !== initialCommissionValue) {
+      onOpen();
+    } else {
+      toast.info("Không có thay đổi để cập nhật");
+    }
   };
+  const handleUpdate = () => {
+    try {
+      axiosClient.put(`api/config/${commission?.id}`, commission)
+        .then(() => {
+          toast.success("Cập nhật thành công")
+        })
+        .catch(() => {
+          toast.error("Cập nhật thất bại")
+        })
+      onOpenChange()
+    } catch (error) {
+
+    }
+  }
 
   return (
     <div className="flex flex-col justify-start w-full mx-10 gap-5 my-3">
       <h1 className="font-semibold text-3xl">Cài đặt hệ thống</h1>
       <div className="flex flex-col gap-5">
-        {/* Số lượng Cat Sitter mỗi trang */}
-        <div>
-          <h2 className="font-medium text-lg">
-            Số lượng Cat Sitter trong mỗi trang
-          </h2>
-          <Input
-            className="w-full"
-            type="number"
-            variant="bordered"
-            name="catSittersPerPage"
-            value={settings.catSittersPerPage.toString()}
-            onChange={handleInputChange}
-            placeholder="Nhập số lượng cat sitter mỗi trang"
-          />
-        </div>
-
         {/* Phần trăm chiết khấu */}
-        <div>
-          <h2 className="font-medium text-lg">
-            Phần trăm chiết khấu mỗi dịch vụ hoàn thành
-          </h2>
-          <Input
-            className="w-full"
-            type="number"
-            variant="bordered"
-            name="discountPercentage"
-            value={settings.discountPercentage.toString()}
-            onChange={handleInputChange}
-            placeholder="Nhập phần trăm chiết khấu"
-          />
-        </div>
+        {commission && (
+          <div>
+            <h2 className="font-medium text-lg">
+              Phần trăm chiết khấu mỗi dịch vụ hoàn thành
+            </h2>
+            <Input
+              className="w-full"
+              type="number"
+              variant="bordered"
+              name="discountPercentage"
+              value={commission.configValue}
+              onChange={(e) => handleInputChange(e)}
+              placeholder="Nhập phần trăm chiết khấu"
+            />
+          </div>
+        )}
       </div>
 
       {/* Nút Lưu */}
@@ -77,40 +104,35 @@ const SystemSettings = () => {
       </div>
 
       {/* Modal xác nhận */}
-      <Modal isOpen={isModalOpen} onOpenChange={setIsModalOpen}>
+      <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
         <ModalContent>
-          <ModalHeader>Xác nhận cài đặt</ModalHeader>
-          <ModalBody>
-            <p>Bạn có chắc muốn lưu các cài đặt này không?</p>
-            <div className="mt-3">
-              <p>
-                <strong>Số lượng Cat Sitter mỗi trang:</strong>{" "}
-                {settings.catSittersPerPage}
-              </p>
-              <p>
-                <strong>Phần trăm chiết khấu:</strong>{" "}
-                {settings.discountPercentage}%
-              </p>
-            </div>
-          </ModalBody>
-          <ModalFooter>
-            <Button
-              color="danger"
-              variant="light"
-              onClick={() => setIsModalOpen(false)}
-            >
-              Hủy
-            </Button>
-            <Button
-              color="primary"
-              onClick={() => {
-                setIsModalOpen(false);
-                console.log("Cài đặt đã lưu:", settings);
-              }}
-            >
-              Xác nhận
-            </Button>
-          </ModalFooter>
+          {(onClose) => (
+            <>
+              <ModalHeader>Xác nhận cài đặt</ModalHeader>
+              <ModalBody>
+                <p>Bạn có chắc muốn lưu các cài đặt này không?</p>
+                <div className="mt-3">
+                  <p>
+                    <strong>Phần trăm chiết khấu:</strong> {commission?.configValue}%
+                  </p>
+                </div>
+              </ModalBody>
+              <ModalFooter>
+                <Button
+                  color="danger"
+                  variant="light"
+                  onClick={onClose}
+                >
+                  Hủy
+                </Button>
+                <Button
+                  color="primary"
+                  onClick={handleUpdate}>
+                  Xác nhận
+                </Button>
+              </ModalFooter>
+            </>
+          )}
         </ModalContent>
       </Modal>
     </div>

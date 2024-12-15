@@ -70,7 +70,6 @@ const Wallet = () => {
         }));
     }
 
-
     const handleSendRequest = () => {
         try {
             axiosClient.post("request-withdrawal/createNewRequest", requestData)
@@ -90,8 +89,8 @@ const Wallet = () => {
     const handleTopUp = () => {
         try {
             axiosClient.post(`wallets/top-up/momo?userId=${userId}&amount=${topUpMoney}&redirectUrl=${process.env.NEXT_PUBLIC_BASE_URL}&requestType=CAPTURE_WALLET`)
-                .then(() => {
-
+                .then((res) => {
+                    window.open(res.data.payUrl, "_self");
                 })
                 .catch(() => {
                     toast.error("Có lỗi xảy ra, vui lòng thử lại sau")
