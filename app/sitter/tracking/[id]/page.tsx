@@ -515,7 +515,24 @@ const Tracking = () => {
                     toast.success("Bạn đã hoàn thành dịch vụ này")
                     router.push("/sitter/managebooking")
                 })
-                .catch(() => { })
+                .catch((e) => {
+                    console.log(e);
+                })
+        } catch (error) {
+
+        }
+    }
+
+    const cancelBooking = () => {
+        try {
+            axiosClient.put(`booking-orders/status/${param.id}?status=CANCELLED`)
+                .then(() => {
+                    toast.success("Bạn đã hoàn thành dịch vụ này")
+                    router.push("/sitter/managebooking")
+                })
+                .catch((e) => {
+                    console.log(e);
+                })
         } catch (error) {
 
         }
@@ -543,8 +560,11 @@ const Tracking = () => {
                                         <div className='bg-[#FFE3D5] text-black p-2 rounded-md'>
                                             <h2>Ngày bắt đầu: {DateFormat(dataOrder.startDate)}</h2>
                                             <h2>Ghi chú: {dataOrder.note}</h2>
-                                            {dataOrder.status === "IN_PROGRESS" &&
+                                            {dataOrder.status === "IN_PROGRESS" ?
                                                 <Button className='w-full bg-maincolor text-white my-10' radius='sm' onClick={() => completeBooking()}>Hoàn thành dịch vụ</Button>
+
+                                                :
+                                                <Button className='w-full bg-red-600 text-white my-10' onClick={() => cancelBooking()}>Hủy dịch vụ</Button>
                                             }
                                         </div>
                                     }
@@ -613,7 +633,7 @@ const Tracking = () => {
                                                     <FontAwesomeIcon icon={faCheck} className="text-green-500" />
                                                 )}
                                                 <h3 className={task.haveEvidence ? 'text-green-500' : ''}>
-                                                    {task.description}
+                                                    {task.name}
                                                 </h3>
                                             </div>
 
@@ -956,7 +976,7 @@ const Tracking = () => {
                                                 <h1 className={styles.h1}>Tên:</h1> <p className={styles.p}>{selectedCat.petName}</p>
                                                 <h1 className={styles.h1}>Tuổi:</h1> <p className={styles.p}>{selectedCat.age}</p>
                                                 <h1 className={styles.h1}>Giống loài:</h1> <p className={styles.p}>{selectedCat.breed}</p>
-                                                <h1 className={styles.h1}>Cân nặng:</h1> <p className={styles.p}>{selectedCat.weight}</p>
+                                                <h1 className={styles.h1}>Cân nặng:</h1> <p className={styles.p}>{selectedCat.weight} kg</p>
                                                 <h1 className={styles.h1}>Những điều cần lưu ý:</h1> <p className={styles.p}>{selectedCat.description}</p>
                                             </div>
                                         </div>

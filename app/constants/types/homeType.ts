@@ -201,6 +201,7 @@ export type Order = {
   isHouseSitting: boolean;
   orderType: string;
   user: {
+    id: string;
     email: string;
     fullName: string;
     avatar: string;
