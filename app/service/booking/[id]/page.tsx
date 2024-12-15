@@ -284,7 +284,7 @@ const Page = () => {
         .then(() => {
           router.push("/payment-result?resultCode=0");
           toast.success(
-            "Đã đặt lịch thành công, hãy chờ người chăm sóc chấp nhận"
+            "Đã đặt lịch thành công, bạn có thể xem tại phần hoạt động"
           );
         })
         .catch(() => {

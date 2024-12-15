@@ -251,7 +251,7 @@ const HouseSitting = () => {
             axiosClient.post(`booking-orders/with-details`, data)
                 .then(() => {
                     router.push("/payment-result?resultCode=0")
-                    toast.success("Đã đặt lịch thành công, hãy chờ người chăm sóc chấp nhận")
+                    toast.success("Đã đặt lịch thành công, bạn có thể xem nó ở phần hoạt động")
                 })
                 .catch(() => {
                     router.push("/payment-result?resultCode=1")
