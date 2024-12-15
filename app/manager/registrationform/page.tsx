@@ -2,7 +2,7 @@
 
 import { FormRegister } from '@/app/constants/types/homeType';
 import axiosClient from '@/app/lib/axiosClient';
-import { faBars } from '@fortawesome/free-solid-svg-icons';
+import { faBars, faFilePdf } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Pagination, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, useDisclosure } from '@nextui-org/react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
@@ -13,7 +13,9 @@ const Page = () => {
     const [data, setData] = useState<FormRegister[]>([]);
     const rowsPerPage = 10;
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
+    const { isOpen: isOpenCer, onOpen: onOpenCer, onOpenChange: onOpenChangeCer } = useDisclosure();
     const [selectedForm, setSelectedForm] = useState<FormRegister>();
+    const [selectedPdf, setSelectedPdf] = useState<string>();
 
     const statusColors: { [key: string]: string } = {
         PENDING: 'text-[#9E9E9E]', // Chờ duyệt - gray
@@ -156,7 +158,7 @@ const Page = () => {
                 </TableBody>
             </Table>
 
-            <Modal isOpen={isOpen} onOpenChange={onOpenChange} size='2xl'>
+            <Modal isOpen={isOpen} onOpenChange={onOpenChange} size='3xl'>
                 <ModalContent>
                     {(onClose) => (
                         <>
@@ -170,10 +172,18 @@ const Page = () => {
                                     <div className="col-span-2 font-semibold">Địa chỉ</div>
                                     <div className="col-span-4">{selectedForm?.address}</div>
                                     <div className="col-span-2 font-semibold">Chứng chỉ</div>
-                                    <div className="col-span-4">
+                                    <div className="col-span-4 flex gap-1 overflow-auto">
                                         {selectedForm?.certificates.map((cer) => (
-                                            <div key={cer.id}>
-                                                {cer.certificateName}
+                                            <div
+                                                key={cer.id}
+                                                onClick={() => {
+                                                    setSelectedPdf(cer.certificateUrl!);
+                                                    onOpenCer()
+                                                }}
+                                                className="flex flex-col items-center justify-center w-36 h-36 bg-gray-200 rounded-md shrink-0"
+                                            >
+                                                <FontAwesomeIcon icon={faFilePdf} size="2xl" />
+                                                <p className="text-center text-xs mt-2">{cer.certificateName}</p>
                                             </div>
                                         ))}
                                     </div>
@@ -195,6 +205,27 @@ const Page = () => {
                                         Đóng
                                     </Button>
                                 }
+                            </ModalFooter>
+                        </>
+                    )}
+                </ModalContent>
+            </Modal>
+            <Modal isOpen={isOpenCer} onOpenChange={onOpenChangeCer} size='5xl' className='z-[50] h-[800px] w-[1500px]'>
+                <ModalContent>
+                    {(onClose) => (
+                        <>
+                            <ModalHeader className="flex flex-col gap-1">Chứng chỉ</ModalHeader>
+                            <ModalBody>
+                                <iframe
+                                    src={selectedPdf}
+                                    title="PDF Viewer"
+                                    className="h-full"
+                                ></iframe>
+                            </ModalBody>
+                            <ModalFooter>
+                                <Button color="danger" variant="light" onPress={onClose}>
+                                    Đóng
+                                </Button>
                             </ModalFooter>
                         </>
                     )}

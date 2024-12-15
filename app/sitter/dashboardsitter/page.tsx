@@ -11,7 +11,7 @@ type ServiceData = {
 const TAX_AND_DISCOUNT_RATE = 0.15;
 
 const Page = () => {
-  const [services, setServices] = useState<ServiceData[]>([]);
+  // const [services, setServices] = useState<ServiceData[]>([]);
   const [filteredServices, setFilteredServices] = useState<ServiceData[]>([]);
   const [selectedMonth, setSelectedMonth] = useState<string>("2024-12");
   const [summary, setSummary] = useState({
@@ -35,7 +35,7 @@ const Page = () => {
       { date: "2024-12-15", type: "pet-boarding", amount: 700000 },
     ];
 
-    setServices(data);
+    // setServices(data);
     filterDataByMonth(data, selectedMonth);
   }, [selectedMonth]);
 
@@ -138,9 +138,8 @@ const Page = () => {
               filteredServices.map((service, index) => (
                 <tr
                   key={index}
-                  className={`${
-                    index % 2 === 0 ? "bg-gray-50" : "bg-white"
-                  } border-b border-gray-200`}
+                  className={`${index % 2 === 0 ? "bg-gray-50" : "bg-white"
+                    } border-b border-gray-200`}
                 >
                   <td className="py-3 px-4">{service.date}</td>
                   <td className="py-3 px-4 capitalize">
