@@ -78,18 +78,20 @@ const Page = () => {
             >
                 <TableHeader>
                     <TableColumn key="role">Loại báo cáo</TableColumn>
-                    <TableColumn key="name">Người báo cáo</TableColumn>
-                    <TableColumn key="status">Vấn đề</TableColumn>
                     <TableColumn key="status">Ngày gửi báo cáo</TableColumn>
+                    <TableColumn key="name">Người bị báo cáo</TableColumn>
+                    <TableColumn key="status">Vấn đề</TableColumn>
+                    <TableColumn key="status">Chi tiết</TableColumn>
                     <TableColumn key="status">Hành động</TableColumn>
                 </TableHeader>
                 <TableBody items={items}>
                     {(item) => (
                         <TableRow key={item.id}>
-                            <TableCell><FontAwesomeIcon icon={faFlag} size='xl' className='text-yellow-400' /></TableCell>
-                            <TableCell>{item.id}</TableCell>
-                            <TableCell>{item.id}</TableCell>
-                            <TableCell>{item.id}</TableCell>
+                            <TableCell><FontAwesomeIcon icon={faFlag} size='xl' className={item.reportedUserId ? 'text-red-500' : 'text-yellow-400'} /></TableCell>
+                            <TableCell>{item.userEmail}</TableCell>
+                            <TableCell>{item.reportedUserEmail}</TableCell>
+                            <TableCell>{item.reason}</TableCell>
+                            <TableCell>{item.description}</TableCell>
                             <TableCell>
                                 <Button>Xem chi tiết</Button>
                             </TableCell>
