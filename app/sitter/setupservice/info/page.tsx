@@ -211,6 +211,11 @@ const Info = () => {
         return
       }
 
+      if (sitterData.maximumQuantity < 1 || sitterData.maximumQuantity > 20) {
+        toast.error("Bạn phải chăm sóc tối thiểu 1 bé mèo và tối đa 20 bé mèo")
+        return
+      }
+
       if (removeList && removeList.length > 0) {
         await Promise.all(
           removeList.map(async (item) => {
@@ -490,6 +495,9 @@ const Info = () => {
             className="w-32"
             onChange={handleInputChange}
             endContent="Ngày"
+            min={1}
+            max={7}
+            errorMessage="Tối thiểu 1 ngày và tối đa 7 ngày"
           />
         </div>
 
@@ -501,6 +509,7 @@ const Info = () => {
             value={sitterData?.experience}
             name="experience"
             onChange={handleInputChange}
+            maxLength={500}
           />
         </div>
 
@@ -571,6 +580,7 @@ const Info = () => {
             value={sitterData?.environment}
             name="environment"
             onChange={handleInputChange}
+            maxLength={500}
           />
           <h3 className={styles.h3}>Số lượng mèo bạn có thể chăm sóc</h3>
           <Input
@@ -582,6 +592,9 @@ const Info = () => {
             }
             name="maximumQuantity"
             onChange={handleInputChange}
+            min={1}
+            max={20}
+            errorMessage="Bạn phải chăm sóc tối thiểu 1 bé mèo và tối đa 20 bé mèo"
           />
           <h3 className={styles.h3}>
             Hình ảnh môi trường chăm sóc và chuồng, lồng giành cho bé mèo

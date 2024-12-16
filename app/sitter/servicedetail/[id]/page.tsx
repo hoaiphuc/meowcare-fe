@@ -170,6 +170,15 @@ const ServiceDetail = () => {
   };
 
   const handleAdd = async () => {
+    const invalidServices = childServices.filter(
+      (childService) => !childService.name.trim()
+    );
+
+    if (invalidServices.length > 0) {
+      toast.error("Tên công việc không được để trống. Vui lòng kiểm tra lại!");
+      return;
+    }
+
     if (isPriceValid) {
       return;
     }
@@ -204,6 +213,15 @@ const ServiceDetail = () => {
   };
 
   const handleUpdate = async () => {
+    const invalidServices = childServices.filter(
+      (childService) => !childService.name.trim()
+    );
+
+    if (invalidServices.length > 0) {
+      toast.error("Tên công việc không được để trống. Vui lòng kiểm tra lại!");
+      return;
+    }
+
     setIsLoading(true); // Show a loading indicator
     try {
       // Separate child services by their state
@@ -461,6 +479,7 @@ const ServiceDetail = () => {
                         e.target.value
                       )
                     }
+                    maxLength={80}
                   />
                   <FontAwesomeIcon
                     icon={faTrash}
