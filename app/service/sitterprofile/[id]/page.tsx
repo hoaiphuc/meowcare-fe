@@ -37,6 +37,7 @@ import { useParams } from "next/navigation";
 import {
   CatSitter,
   Certificate,
+  feedbackData,
   Report,
   ReportType,
   Service,
@@ -90,6 +91,7 @@ const Page = () => {
     reason: "",
     description: "",
   });
+  const [feedback, setFeedback] = useState<feedbackData[]>([])
 
   // check user
   useEffect(() => {
@@ -160,6 +162,7 @@ const Page = () => {
           childServiceRes,
           additionServiceRes,
           certificateRes,
+          feedbackRes,
         ] = await Promise.allSettled([
           axiosClient(`sitter-profiles/sitter/${params.id}`),
           axiosClient(
@@ -172,6 +175,7 @@ const Page = () => {
             `services/sitter/${params.id}/type?serviceType=ADDITION_SERVICE&status=ACTIVE`
           ),
           axiosClient(`certificates/user/${params.id}`),
+          axiosClient(`reviews/sitter/${params.id}`),
         ]);
 
         // Handle sitter profile response
@@ -207,6 +211,12 @@ const Page = () => {
           setCertificates(certificateRes.value.data);
         } else {
           console.error("Failed to fetch services:", certificateRes.reason);
+        }
+
+        if (feedbackRes.status === "fulfilled") {
+          setFeedback(feedbackRes.value.data);
+        } else {
+          console.error("Failed to fetch services:", feedbackRes.reason);
         }
       } catch (error) {
         console.error("An unexpected error occurred:", error);
@@ -582,19 +592,32 @@ const Page = () => {
 
         {/* Feedback */}
         <h1 className={styles.h1}>Đánh giá</h1>
-        <div className="grid grid-cols-2 gap-5">
-          <div className="">
-            <div className="flex items-center gap-3 mb-3">
-              <Avatar src="/User-avatar.png" />
-              <h2 className={styles.h2}>Nguyễn Hoài Phúc</h2>
+        {feedback.length > 0 ? (
+          feedback.map((feedback) => (
+            <div className="grid grid-cols-2 gap-5" key={feedback.id}>
+              <div className="">
+                <div className="flex items-center justify-between gap-3 mb-3">
+                  <div className="flex flex-col items-start">
+                    <h2 className={styles.h2}>{feedback.user.fullName}</h2>
+                    <div className="flex gap-2 items-center">
+                      <p>{feedback.bookingOrder.orderType === "OVERNIGHT" ? "Gửi thú cưng" : "Dịch vụ khác"}</p>
+                      <FontAwesomeIcon icon={faCircle} size="2xs" />
+                      <p>{new Date(feedback.bookingOrder.startDate).toLocaleDateString("vi-VN")}</p>
+                    </div>
+                  </div>
+                  <Avatar src={feedback.user.avatar} className="w-12 h-12" />
+                </div>
+                <div className={`${styles.h3} flex gap-2`}>
+                </div>
+                <p className={styles.p}>{feedback.comments}</p>
+              </div>
             </div>
-            <h3 className={styles.h3}>Gửi thú cưng 30/08/2024</h3>
-            <p className={styles.p}>
-              Đức Tấn là một người chăm sóc thú cưng chuyển nghiệp mà tôi yên
-              tâm gửi bé!
-            </p>
+          ))
+        ) : (
+          <div>
+            <p>Hiện không có đánh giá nào</p>
           </div>
-        </div>
+        )}
 
         <hr className={styles.hr} />
 
