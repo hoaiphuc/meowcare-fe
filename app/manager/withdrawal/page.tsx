@@ -103,7 +103,7 @@ const Page = () => {
         bottomContent={
           <div className="flex w-full justify-center">
             {
-              items.length > 10 &&
+              data.length > 10 &&
               <Pagination
                 isCompact
                 showControls

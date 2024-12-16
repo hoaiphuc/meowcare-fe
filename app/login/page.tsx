@@ -3,14 +3,14 @@
 import { faEnvelope, faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Button, Input } from '@nextui-org/react'
-import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { toast } from 'react-toastify'
+import { v4 as uuidv4 } from 'uuid'
 import { Role } from '../constants/types/homeType'
 import axiosClient from '../lib/axiosClient'
-import { v4 as uuidv4 } from 'uuid';
+import Image from 'next/image'
 
 const Login = () => {
     const router = useRouter();
@@ -100,11 +100,8 @@ const Login = () => {
                 </div>
 
                 <div className='flex flex-col justify-center items-center gap-10 px-20'>
+                    <Image alt='' src="/meow.png" width={200} height={200} />
                     <h1 className='text-[40px] font-bold '>Đăng nhập</h1>
-                    <div className='flex gap-10'>
-                        < Image src="/media/fb.png" alt='' width={50} height={50} />
-                        < Image src="/media/gg.webp" alt='' width={50} height={50} />
-                    </div>
                     <Input
                         className=''
                         size='lg'

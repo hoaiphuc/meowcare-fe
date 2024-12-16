@@ -33,7 +33,7 @@ export const navbarManager: SideNavItem[] = [
     icon: <FontAwesomeIcon icon={faRectangleList} className="w-7 h-7" />,
   },
   {
-    title: "Quản lý dịch vụ",
+    title: "Quản lý đặt lịch",
     path: "/manager/bookingorder",
     icon: <FontAwesomeIcon icon={faTasks} className="w-7 h-7 " />,
   },
