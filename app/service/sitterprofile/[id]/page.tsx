@@ -303,16 +303,6 @@ const Page = () => {
               src={sitterProfile?.avatar ?? "/User-avatar.png"}
               className="float-left h-20 w-20"
             />
-            <button
-              onClick={() => handleClick()}
-              className="float-right w-10 h-10 border-none"
-            >
-              <Icon
-                icon="mdi:heart"
-                className={`transition-colors w-10 h-10 ${isClicked ? "text-red-500  " : ""
-                  }`}
-              />
-            </button>
           </div>
           <div className="gap-2 flex flex-col">
             <h1 className="text-[30px] font-semibold">
@@ -337,10 +327,15 @@ const Page = () => {
           <div className="flex gap-3 w-full mt-7">
             <Button
               onClick={() => handleClick()}
-              className="w-full rounded-full text-white bg-[#2E67D1] shadow-sm"
+              className="w-full rounded-full text-white bg-[#2E67D1] shadow-sm "
               isDisabled={user?.id === params.id}
             >
-              Theo dõi
+              <Icon
+                icon="mdi:heart"
+                className={`transition-colors w-10 h-10 ${isClicked ? "text-red-500  " : ""
+                  }`}
+              />
+              <p className="text-[16px]">{isClicked ? "Đang yêu thích" : "Yêu thích"}</p>
             </Button>
           </div>
         </div>

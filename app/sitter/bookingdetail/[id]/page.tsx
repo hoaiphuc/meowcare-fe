@@ -2,16 +2,15 @@
 
 import { Order } from '@/app/constants/types/homeType';
 import axiosClient from '@/app/lib/axiosClient';
+import { faCircleCheck } from '@fortawesome/free-regular-svg-icons';
 import { faHandshake, faTriangleExclamation } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Button, Textarea } from '@nextui-org/react';
 import Link from 'next/link';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import React, { useEffect, useState } from 'react'
-import { toast } from 'react-toastify';
 
 const Page = () => {
-    const router = useRouter();
     const param = useParams();
     const [data, setData] = useState<Order>();
     useEffect(() => {
@@ -29,49 +28,54 @@ const Page = () => {
     }, [param.id])
 
     //denied request
-    const handleDenied = (bookingId: string) => {
-        try {
-            axiosClient.put(`booking-orders/status/${bookingId}?status=CANCELLED`)
-                .then(() => {
-                    toast.success('Bạn đã từ chối')
-                    router.push(`/sitter/managebooking`)
-                })
-                .catch(() => {
-                    toast.error('Có lỗi xảy ra vui lòng thử lại sau')
-                })
-        } catch (error) {
+    // const handleDenied = (bookingId: string) => {
+    //     try {
+    //         axiosClient.put(`booking-orders/status/${bookingId}?status=CANCELLED`)
+    //             .then(() => {
+    //                 toast.success('Bạn đã từ chối')
+    //                 router.push(`/sitter/managebooking`)
+    //             })
+    //             .catch(() => {
+    //                 toast.error('Có lỗi xảy ra vui lòng thử lại sau')
+    //             })
+    //     } catch (error) {
 
-        }
-    }
-    //accept request
-    const handleAccept = (bookingId: string) => {
-        try {
-            axiosClient.put(`booking-orders/status/${bookingId}?status=CONFIRMED`)
-                .then(() => {
-                    toast.success('Bạn đã chấp nhận yêu cầu này, vui lòng chăm sóc theo lịch')
-                    router.push(`/sitter/tracking/${bookingId}`)
-                })
-                .catch(() => {
-                    toast.error('Có lỗi xảy ra vui lòng thử lại sau')
-                })
-        } catch (error) {
-            console.log(error);
+    //     }
+    // }
+    // //accept request
+    // const handleAccept = (bookingId: string) => {
+    //     try {
+    //         axiosClient.put(`booking-orders/status/${bookingId}?status=CONFIRMED`)
+    //             .then(() => {
+    //                 toast.success('Bạn đã chấp nhận yêu cầu này, vui lòng chăm sóc theo lịch')
+    //                 router.push(`/sitter/tracking/${bookingId}`)
+    //             })
+    //             .catch(() => {
+    //                 toast.error('Có lỗi xảy ra vui lòng thử lại sau')
+    //             })
+    //     } catch (error) {
+    //         console.log(error);
 
-        }
-    }
+    //     }
+    // }
 
 
     return (
         <div className='flex justify-center items-center my-5 '>
             {data &&
-                <div key={data.id} className='flex gap-5'>
-                    <div className='flex flex-col gap-5 w-[400px]'>
+                <div key={data.id} className='flex gap-5 '>
+                    <div className='flex flex-col gap-5 w-[400px] '>
                         <div className='bg-white rounded-md shadow-xl flex justify-center items-center'>
-                            <FontAwesomeIcon icon={faTriangleExclamation} size='2xl' className='text-yellow-400' />
-                            <h1 className='text-black p-5 text-2xl font-semibold'>Yêu cầu này chưa được đặt</h1>
+                            {
+                                data.status === "COMPLETED" ?
+                                    <FontAwesomeIcon icon={faCircleCheck} size='2xl' className='text-green-400' />
+                                    :
+                                    <FontAwesomeIcon icon={faTriangleExclamation} size='2xl' className='text-yellow-400' />
+                            }
+                            <h1 className='text-black p-5 text-2xl font-semibold'>{data.status === "COMPLETED" ? "Yêu cầu này đã hoàn thành" : "Yêu cầu này đã bị hủy"}</h1>
                         </div>
-                        <div className='bg-[#FFE3D5] text-black p-5 rounded-md shadow-xl font-medium flex flex-col gap-3'>
-                            <h1>{data.bookingDetailWithPetAndServices[0].service.name}</h1>
+                        <div className='bg-[#FFE3D5] text-black p-5 py-10 rounded-md shadow-xl font-medium flex flex-col gap-3'>
+                            <h1 className='font-semibold text-xl'>{data.orderType === "OVERNIGHT" ? "Gửi thú cưng" : "Dịch vụ"}</h1>
                             <h1>15 tháng 10 - 16 tháng 10</h1>
                             <h1>Giờ bắt đầu: 5:00 sáng</h1>
                             <h1>Giờ kết thúc: 5:00 chiều</h1>
@@ -95,8 +99,6 @@ const Page = () => {
                             </div>
 
                             <h1>Đặt lịch và thanh toán trên Meowcare bắt buộc tuân theo <Link href='/termsofservice' className='underline font-semibold'>điều khoản của Meowcare</Link>.</h1>
-                            <Button className='text-red-500 bg-white font-semibold text-[16px] border-b-red-500' onClick={() => handleDenied(data.id)}>Từ chối</Button>
-                            <Button className='bg-btnbg text-white text-[16px]' onClick={() => handleAccept(data.id)}>Chấp nhận</Button>
                         </div>
                     </div>
                     <div className=' flex flex-col gap-3 w-[850px]'>
