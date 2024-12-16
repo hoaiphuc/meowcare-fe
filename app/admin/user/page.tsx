@@ -77,7 +77,7 @@ const Page = () => {
           console.log(e);
         });
       onOpen();
-    } catch (error) {}
+    } catch (error) { }
   };
 
   const handleInactive = async () => {
@@ -102,7 +102,7 @@ const Page = () => {
       <Table
         aria-label="Example table with client side pagination"
         bottomContent={
-          items.length > 10 && (
+          data.length > 10 && (
             <div className="flex w-full justify-center">
               <Pagination
                 isCompact
