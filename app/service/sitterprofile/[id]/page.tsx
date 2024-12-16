@@ -424,6 +424,7 @@ const Page = () => {
 
           <div className="w-full">
             <h1 className={styles.h1}>Vị trí</h1>
+            <h2>{sitterProfile?.location}</h2>
             <div className="w-[300px] h-[250px] flex">
               <IndividualMap
                 defaultLat={sitterProfile?.latitude}

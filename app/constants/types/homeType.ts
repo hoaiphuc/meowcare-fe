@@ -450,3 +450,34 @@ export type Config = {
   updatedBy: Date;
   updatedAt: Date;
 };
+
+export type Feedback = {
+  id: string;
+  rating: number;
+  comments: string;
+  createdAt: Date;
+  updatedAt: Date;
+  user: {
+    email: string;
+    password: string;
+    fullName: string;
+    avatar: string;
+    phoneNumber: string;
+    dob: Date;
+    gender: string;
+    address: string;
+  };
+  bookingOrder: {
+    sitterId: string;
+    startDate: Date;
+    endDate: Date;
+    numberOfPet: number;
+    name: string;
+    phoneNumber: string;
+    address: string;
+    note: string;
+    isHouseSitting: boolean;
+    orderType: string;
+    paymentMethod: string;
+  };
+};
