@@ -158,6 +158,7 @@ const Page = () => {
                                     className='bg-white rounded-xl'
                                     variant='bordered'
                                     value={feedback.comments}
+                                    maxLength={500}
                                     placeholder={`Đánh giá dịch vụ của ${data.sitter.fullName}`}
                                     onChange={(e) => handleInputChange("comments", e.target.value)}
                                 />

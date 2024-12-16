@@ -78,6 +78,11 @@ const Page = () => {
     onOpen: onCancelOpen,
     onOpenChange: onCancelOpenChange,
   } = useDisclosure();
+  const {
+    isOpen: isFeedbackOpen,
+    onOpen: onFeedbackOpen,
+    onOpenChange: onFeedbackOpenChange,
+  } = useDisclosure();
 
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
@@ -92,6 +97,7 @@ const Page = () => {
     description: "",
   });
   const [feedback, setFeedback] = useState<feedbackData[]>([])
+  const [visibleFeedback, setVisibleFeedback] = useState<feedbackData[]>([]);
 
   // check user
   useEffect(() => {
@@ -215,6 +221,7 @@ const Page = () => {
 
         if (feedbackRes.status === "fulfilled") {
           setFeedback(feedbackRes.value.data);
+          setVisibleFeedback(feedbackRes.value.data.slice(0, 4))
         } else {
           console.error("Failed to fetch services:", feedbackRes.reason);
         }
@@ -592,27 +599,51 @@ const Page = () => {
 
         {/* Feedback */}
         <h1 className={styles.h1}>Đánh giá</h1>
-        {feedback.length > 0 ? (
-          feedback.map((feedback) => (
-            <div className="grid grid-cols-2 gap-5" key={feedback.id}>
-              <div className="">
-                <div className="flex items-center justify-between gap-3 mb-3">
-                  <div className="flex flex-col items-start">
-                    <h2 className={styles.h2}>{feedback.user.fullName}</h2>
-                    <div className="flex gap-2 items-center">
-                      <p>{feedback.bookingOrder.orderType === "OVERNIGHT" ? "Gửi thú cưng" : "Dịch vụ khác"}</p>
-                      <FontAwesomeIcon icon={faCircle} size="2xs" />
-                      <p>{new Date(feedback.bookingOrder.startDate).toLocaleDateString("vi-VN")}</p>
+        {visibleFeedback.length > 0 ? (
+          <>
+            {visibleFeedback.map((feedback) => (
+              <div className="grid grid-cols-2 gap-5" key={feedback.id}>
+                <div className="">
+                  <div className="flex items-center justify-between gap-3 mb-3">
+                    <div className="flex flex-col items-start">
+                      <div className="flex gap-3">
+                        <h2 className={styles.h2}>{feedback.user.fullName}</h2>
+                        <div className="flex items-center">
+                          <h2 className="text-[16px]">{feedback.rating}</h2>
+                          <FontAwesomeIcon icon={faStar} className="text-[#F8B816] size-4" />
+                        </div>
+                      </div>
+                      <div className="flex gap-2 items-center">
+                        {
+                          feedback.bookingOrder.orderType === "OVERNIGHT" ?
+                            <Icon icon="cbi:camera-pet" className="text-maincolor w-5 h-5" />
+                            :
+                            <Icon icon="mdi:home-find-outline" className="text-maincolor w-5 h-5"
+                            />
+                        }
+                        <p>{feedback.bookingOrder.orderType === "OVERNIGHT" ? "Gửi thú cưng" : "Dịch vụ khác"}</p>
+                        <FontAwesomeIcon icon={faCircle} className="w-1 h-1 rounded-full" />
+                        <p>{new Date(feedback.bookingOrder.startDate).toLocaleDateString("vi-VN")}</p>
+                      </div>
                     </div>
+                    <Avatar src={feedback.user.avatar} className="w-12 h-12" />
                   </div>
-                  <Avatar src={feedback.user.avatar} className="w-12 h-12" />
+                  <div className={`${styles.h3} flex gap-2`}>
+                  </div>
+                  <p className={styles.p}>{feedback.comments}</p>
                 </div>
-                <div className={`${styles.h3} flex gap-2`}>
-                </div>
-                <p className={styles.p}>{feedback.comments}</p>
               </div>
-            </div>
-          ))
+            ))
+            }
+            {feedback.length > 4 && (
+              <Button
+                className="mt-5 rounded-full text-white bg-[#2E67D1]"
+                onClick={onFeedbackOpen}
+              >
+                Xem thêm
+              </Button>
+            )}
+          </>
         ) : (
           <div>
             <p>Hiện không có đánh giá nào</p>
@@ -779,6 +810,57 @@ const Page = () => {
                 </Button>
                 <Button color="primary" onPress={handleSendReport}>
                   Gửi báo cáo
+                </Button>
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
+
+      {/* feedback  */}
+      <Modal isOpen={isFeedbackOpen} onOpenChange={onFeedbackOpenChange}>
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalBody>
+                {feedback.map((feedback) => (
+                  <div className="grid grid-cols-2 gap-5" key={feedback.id}>
+                    <div className="">
+                      <div className="flex items-center justify-between gap-3 mb-3">
+                        <div className="flex flex-col items-start">
+                          <div className="flex gap-3">
+                            <h2 className={styles.h2}>{feedback.user.fullName}</h2>
+                            <div className="flex items-center">
+                              <h2 className="text-[16px]">{feedback.rating}</h2>
+                              <FontAwesomeIcon icon={faStar} className="text-[#F8B816] size-4" />
+                            </div>
+                          </div>
+                          <div className="flex gap-2 items-center">
+                            {
+                              feedback.bookingOrder.orderType === "OVERNIGHT" ?
+                                <Icon icon="cbi:camera-pet" className="text-maincolor w-5 h-5" />
+                                :
+                                <Icon icon="mdi:home-find-outline" className="text-maincolor w-5 h-5"
+                                />
+                            }
+                            <p>{feedback.bookingOrder.orderType === "OVERNIGHT" ? "Gửi thú cưng" : "Dịch vụ khác"}</p>
+                            <FontAwesomeIcon icon={faCircle} className="w-1 h-1 rounded-full" />
+                            <p>{new Date(feedback.bookingOrder.startDate).toLocaleDateString("vi-VN")}</p>
+                          </div>
+                        </div>
+                        <Avatar src={feedback.user.avatar} className="w-12 h-12" />
+                      </div>
+                      <div className={`${styles.h3} flex gap-2`}>
+                      </div>
+                      <p className={styles.p}>{feedback.comments}</p>
+                    </div>
+                  </div>
+                ))
+                }
+              </ModalBody>
+              <ModalFooter>
+                <Button color="danger" variant="light" onPress={onClose}>
+                  Đóng
                 </Button>
               </ModalFooter>
             </>
