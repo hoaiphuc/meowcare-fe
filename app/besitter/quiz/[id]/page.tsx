@@ -2,11 +2,11 @@
 
 import { QuizQuestions } from '@/app/constants/types/homeType';
 import axiosClient from '@/app/lib/axiosClient';
-import { Button, Checkbox, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Pagination, useDisclosure } from '@nextui-org/react';
+import { Button, Checkbox, Pagination } from '@nextui-org/react';
 import { useParams, useRouter } from 'next/navigation';
-import React, { useEffect, useMemo, useState } from 'react'
-import styles from './quiz.module.css'
+import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'react-toastify';
+import styles from './quiz.module.css';
 
 interface UserAnswer {
     id: string; // question ID
@@ -30,7 +30,6 @@ const Page = () => {
         questions: []
     });
     const start = (page - 1) * rowsPerPage;
-    const { isOpen, onOpen, onOpenChange } = useDisclosure();
     const [timeLeft, setTimeLeft] = useState(15 * 60);
 
     useEffect(() => {
@@ -89,7 +88,6 @@ const Page = () => {
         try {
             axiosClient.post(`user-quiz-results/submit`, userAnswers)
                 .then((res) => {
-                    onOpen();
                     toast.success('Nộp bài thành công')
                     router.push(`/besitter/result/${res.data.score}`)
                 })
@@ -211,26 +209,6 @@ const Page = () => {
                 />
             </div>
 
-            <Modal isOpen={isOpen} onOpenChange={onOpenChange} size='2xl'>
-                <ModalContent>
-                    {() => (
-                        <>
-                            <ModalHeader className="flex flex-col gap-1">Đơn đăng ký của </ModalHeader>
-                            <ModalBody>
-
-                            </ModalBody>
-                            <ModalFooter>
-                                <Button color="danger" variant="light" >
-                                    Không duyệt
-                                </Button>
-                                <Button color="primary" >
-                                    Duyệt
-                                </Button>
-                            </ModalFooter>
-                        </>
-                    )}
-                </ModalContent>
-            </Modal>
         </div>
     )
 }
