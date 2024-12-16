@@ -46,6 +46,8 @@ import Loading from "@/app/components/Loading";
 import Image from "next/image";
 import Lightbox from "yet-another-react-lightbox";
 import { toast } from "react-toastify";
+import dynamic from "next/dynamic";
+const IndividualMap = dynamic(() => import("@/app/components/IndividualMap"), { ssr: false });
 
 const Page = () => {
   const params = useParams();
@@ -380,7 +382,7 @@ const Page = () => {
                     className={styles.button}
                     isDisabled={user?.id === params.id}
                   >
-                    Đặt lịch
+                    Đặt lịch gửi thú cưng
                   </Button>
                 </div>
               ))}
@@ -408,7 +410,7 @@ const Page = () => {
               className={styles.button}
               isDisabled={user?.id === params.id}
             >
-              Đặt lịch
+              Đặt dịch vụ
             </Button>
           </div>
 
@@ -427,7 +429,12 @@ const Page = () => {
 
           <div className="w-full">
             <h1 className={styles.h1}>Vị trí</h1>
-            <div className="flex justify-center"></div>
+            <div className="w-[300px] h-[250px] flex">
+              <IndividualMap
+                defaultLat={sitterProfile?.latitude}
+                defaultLng={sitterProfile?.longitude}
+              />
+            </div>
           </div>
           <div>
             {/* Chính sách hủy lịch */}
