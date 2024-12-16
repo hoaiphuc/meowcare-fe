@@ -1,16 +1,16 @@
 'use client'
 
+import { showConfirmationDialog } from '@/app/components/confirmationDialog'
 import { Quiz } from '@/app/constants/types/homeType'
 import axiosClient from '@/app/lib/axiosClient'
 import { faCheck, faPen, faPlus, faX, faXmark } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { Button, Checkbox, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Select, SelectItem, Textarea, useDisclosure } from '@nextui-org/react'
+import { Button, Checkbox, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Textarea, useDisclosure } from '@nextui-org/react'
 import { useParams, useRouter } from 'next/navigation'
 import { ChangeEvent, useCallback, useEffect, useState } from 'react'
 import { toast } from 'react-toastify'
+import { v4 as uuidv4 } from 'uuid'
 import styles from './quizupdate.module.css'
-import { v4 as uuidv4 } from 'uuid';
-import { showConfirmationDialog } from '@/app/components/confirmationDialog'
 
 interface Answer {
     id: string;
@@ -191,14 +191,6 @@ const Page = () => {
                 <div className='flex gap-5'>
                     <Button className='flex ' onPress={onOpen}>Tạo câu hỏi</Button>
                     <Button className='flex bg-btnbg text-white' onClick={handleSave}>Lưu</Button>
-                    <Select
-                        labelPlacement='outside-left'
-                        label="Thời gian"
-                        className="max-w-xs"
-                    >
-                        <SelectItem key="1">25 phút</SelectItem>
-                        <SelectItem key="2">30 phút</SelectItem>
-                    </Select>
                 </div>
             </div>
             <div className='w-[945px] gap-5 flex flex-col'>
