@@ -132,6 +132,11 @@ const CreateInfo = () => {
                 return
             }
 
+            if (sitterData.maximumQuantity < 1 || sitterData.maximumQuantity > 20) {
+                toast.error("Bạn phải chăm sóc tối thiểu 1 bé mèo và tối đa 20 bé mèo")
+                return
+            }
+
             const uploadedPictures = await Promise.all(
                 selectPicture.map(async (picture) => {
                     const response = await fetch(picture.imageUrl); // Convert blob URL to Blob
@@ -315,10 +320,10 @@ const CreateInfo = () => {
 
                 <div className='mt-5'>
                     <h2 className={styles.h2}>Giới thiệu</h2>
-                    <Textarea value={sitterData?.bio} name='bio' onChange={handleInputChange} placeholder="Thông tin về bạn hoặc 1 vài sở thích của bạn" />
+                    <Textarea value={sitterData?.bio} name='bio' onChange={handleInputChange} placeholder="Thông tin về bạn hoặc 1 vài sở thích của bạn" maxLength={500} />
                 </div>
 
-                <div className="flex mt-5 gap-3 items-center">
+                <div className="flex mt-5 gap-3 items-start">
                     <h2 className={styles.h2}>Số ngày hoàn tiền (?)</h2>
                     <Input
                         type="number"
@@ -328,12 +333,15 @@ const CreateInfo = () => {
                         className="w-32"
                         onChange={handleInputChange}
                         endContent="Ngày"
+                        min={1}
+                        max={7}
+                        errorMessage="Tối thiểu 1 ngày và tối đa 7 ngày"
                     />
                 </div>
 
                 <div className='mt-5 flex flex-col gap-2'>
                     <h2 className={styles.h2}>Kinh nghiệm</h2>
-                    <Textarea placeholder="Hãy cho mọi người biết về kinh nghiệm chăm sóc mèo của bạn" value={sitterData?.experience} name='experience' onChange={handleInputChange} />
+                    <Textarea placeholder="Hãy cho mọi người biết về kinh nghiệm chăm sóc mèo của bạn" value={sitterData?.experience} name='experience' onChange={handleInputChange} maxLength={500} />
                 </div>
 
                 <div className='mt-5 flex flex-col gap-2'>
@@ -389,9 +397,18 @@ const CreateInfo = () => {
                 <div className='mt-5 flex flex-col gap-2'>
                     <h2 className={styles.h2}>Môi trường và chuồng cho mèo</h2>
                     <h3 className={styles.h3}>Mô tả</h3>
-                    <Textarea placeholder="Hãy cho mọi người biết về môi trường sống và chuồng nuôi" value={sitterData?.environment} name='environment' onChange={handleInputChange} />
+                    <Textarea placeholder="Hãy cho mọi người biết về môi trường sống và chuồng nuôi" value={sitterData?.environment} name='environment' onChange={handleInputChange} maxLength={500} />
                     <h3 className={styles.h3}>Số lượng mèo bạn có thể chăm sóc</h3>
-                    <Input type='number' placeholder="Số lượng mèo có thể chăm sóc" value={sitterData?.maximumQuantity !== undefined ? sitterData.maximumQuantity.toString() : ""} name='maximumQuantity' onChange={handleInputChange} />
+                    <Input
+                        type='number'
+                        placeholder="Số lượng mèo có thể chăm sóc"
+                        value={sitterData?.maximumQuantity !== undefined ? sitterData.maximumQuantity.toString() : ""}
+                        name='maximumQuantity'
+                        onChange={handleInputChange}
+                        min={1}
+                        max={20}
+                        errorMessage="Bạn phải chăm sóc tối thiểu 1 bé mèo và tối đa 20 bé mèo"
+                    />
                     <h3 className={styles.h3}>Hình ảnh môi trường và chuồng, lồng</h3>
                     <div className='flex overflow-x-auto gap-2'>
                         <div className="flex gap-2 flex-shrink-0">

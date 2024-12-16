@@ -6,9 +6,12 @@ import './sitter.scss'
 import CatKnowledge from '@/app/components/beSitterStep/CatKnowledge';
 import { useParams, useRouter } from 'next/navigation';
 import axiosClient from '@/app/lib/axiosClient';
-import { QuizResult, UserLocal } from '@/app/constants/types/homeType';
+import { Certificate, QuizResult, UserLocal } from '@/app/constants/types/homeType';
 import Information from '@/app/components/beSitterStep/Information';
 import Agreement from '@/app/components/beSitterStep/Agreement';
+import { v4 as uuidv4 } from 'uuid';
+import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
+import { storage } from '@/app/utils/firebase';
 
 const Sitter = () => {
     const params = useParams<{ id: string }>();
@@ -51,14 +54,47 @@ const Sitter = () => {
     }, [currentMonth, currentYear, userId])
 
     //send form
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         if (typeof window !== "undefined") {
             const storedFormData = localStorage.getItem("formData");
             const formData = storedFormData ? JSON.parse(storedFormData) : {};
 
+            let updatedCertificates = formData.certificates; // Use existing certificate URLs by default
+
+            // Check if there are certificates with blob URLs
+            const blobCertificates = updatedCertificates.filter((cert: Certificate) => cert.certificateUrl.startsWith("blob:"));
+
+            if (blobCertificates.length > 0) {
+                // Process certificates with blob URLs
+                updatedCertificates = await Promise.all(
+                    updatedCertificates.map(async (certificate: Certificate) => {
+                        if (certificate.certificateUrl.startsWith("blob:")) {
+                            // Generate unique file name
+                            const fileName = `${certificate.certificateName}`;
+                            const storageRef = ref(storage, `certificates/${uuidv4()}/${fileName}`);
+
+                            // Fetch the file blob
+                            const response = await fetch(certificate.certificateUrl);
+                            const fileBlob = await response.blob();
+
+                            // Upload to Firebase
+                            await uploadBytes(storageRef, fileBlob);
+
+                            // Get the download URL
+                            const certificateUrl = await getDownloadURL(storageRef);
+
+                            // Return the updated certificate with the Firebase URL
+                            return { ...certificate, certificateUrl };
+                        }
+                        return certificate; // Keep existing URLs
+                    })
+                );
+            }
+
             const data = {
                 ...formData,
                 userId: userId,
+                certificates: updatedCertificates,
             };
 
             try {
