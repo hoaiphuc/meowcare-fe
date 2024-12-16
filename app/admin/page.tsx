@@ -1,11 +1,24 @@
-'use client';
+"use client";
 
-import { faUsersLine } from '@fortawesome/free-solid-svg-icons';
-import React, { useEffect, useState } from 'react';
-import CardChart from '../components/admin/CardChart';
-import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, BarChart, Bar, PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
-import axiosClient from '../lib/axiosClient';
-import { getFirstDateOfMonth, getLastDateOfMonth } from '../utils/date-util';
+import { faUsersLine } from "@fortawesome/free-solid-svg-icons";
+import React, { useEffect, useState } from "react";
+import CardChart from "../components/admin/CardChart";
+import {
+  LineChart,
+  Line,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+  Tooltip,
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  ResponsiveContainer,
+} from "recharts";
+import axiosClient from "../lib/axiosClient";
+import { getFirstDateOfMonth, getLastDateOfMonth } from "../utils/date-util";
 
 const Page = () => {
   const [totalUser, setTotalUser] = useState<number>();
@@ -18,7 +31,7 @@ const Page = () => {
   const [bookingData, setBookingData] = useState<unknown[]>([]);
   const [discountData, setDiscountData] = useState<unknown[]>([]);
 
-  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
+  const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
 
   // // Data giả lập (có thể thay thế bằng API)
   // const bookingData = [
@@ -29,8 +42,8 @@ const Page = () => {
   // ];
 
   const withdrawalData = [
-    { name: 'Người chăm sóc', value: 3000 },
-    { name: 'Người nuôi mèo', value: 1000 },
+    { name: "Người chăm sóc", value: 3000 },
+    { name: "Người nuôi mèo", value: 1000 },
   ];
 
   // const discountData = [
@@ -51,11 +64,11 @@ const Page = () => {
   useEffect(() => {
     try {
       // Tổng người dùng
-      axiosClient('/users/count')
+      axiosClient("/users/count")
         .then((res: { data: React.SetStateAction<number | undefined> }) => {
           setTotalUser(res.data);
         })
-        .catch(() => { });
+        .catch(() => {});
 
       // Người nuôi mèo
       axiosClient(`users/count/USER`)
@@ -84,18 +97,18 @@ const Page = () => {
         });
 
       // Thống kê rút tiền
-      axiosClient('/withdrawals/total')
+      axiosClient("/withdrawals/total")
         .then((res: { data: React.SetStateAction<number> }) => {
           setTotalWithdrawals(res.data);
         })
-        .catch(() => { });
+        .catch(() => {});
 
       // Tổng số tiền chiết khấu website có được
-      axiosClient('/discounts/total')
+      axiosClient("/discounts/total")
         .then((res: { data: React.SetStateAction<number> }) => {
           setTotalDiscountEarned(res.data);
         })
-        .catch(() => { });
+        .catch(() => {});
     } catch (error) {
       console.log(error);
     }
@@ -118,8 +131,8 @@ const Page = () => {
             },
           });
 
-          console.log('booking ' + res.data);
-          if (typeof res.data === 'number') {
+          console.log("booking " + res.data);
+          if (typeof res.data === "number") {
             monthlyBookingData.push({
               month: `Tháng ${month + 1}`,
               bookings: res.data,
@@ -142,15 +155,18 @@ const Page = () => {
         const endDate = getLastDateOfMonth(year, month);
 
         try {
-          const res = await axiosClient.get(`/transactions/search/total-amount`, {
-            params: {
-              fromTime: startDate.toISOString(),
-              toTime: endDate.toISOString(),
-              transactionType: 'COMMISSION',
-            },
-          });
+          const res = await axiosClient.get(
+            `/transactions/search/total-amount`,
+            {
+              params: {
+                fromTime: startDate.toISOString(),
+                toTime: endDate.toISOString(),
+                transactionType: "COMMISSION",
+              },
+            }
+          );
 
-          if (typeof res.data === 'number') {
+          if (typeof res.data === "number") {
             monthlyDiscountData.push({
               name: `Tháng ${month + 1}`,
               value: res.data,
@@ -194,7 +210,13 @@ const Page = () => {
           date="10/11/2024"
           className="bg-gradient-to-r from-indigo-500 to-blue-500"
         />
-        <CardChart number={manager || 0} title="Quản lý" icon={faUsersLine} date="10/11/2024" className="bg-gradient-to-r from-red-500 to-red-300" />
+        <CardChart
+          number={manager || 0}
+          title="Quản lý"
+          icon={faUsersLine}
+          date="10/11/2024"
+          className="bg-gradient-to-r from-red-500 to-red-300"
+        />
         <CardChart
           number={sitter || 0}
           title="Người chăm sóc mèo"
@@ -203,7 +225,9 @@ const Page = () => {
           className="bg-gradient-to-r from-lime-500 to-lime-300"
         />
         <CardChart
-          number={totalUser && sitter && manager ? totalUser - sitter - manager : 0}
+          number={
+            totalUser && sitter && manager ? totalUser - sitter - manager : 0
+          }
           title="Các chủ mèo"
           icon={faUsersLine}
           date="10/11/2024"
@@ -231,9 +255,21 @@ const Page = () => {
         <div>
           <h2 className="font-semibold text-2xl">Thống kê rút tiền</h2>
           <PieChart width={400} height={400}>
-            <Pie data={withdrawalData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={150} fill="#8884d8" label>
+            <Pie
+              data={withdrawalData}
+              dataKey="value"
+              nameKey="name"
+              cx="50%"
+              cy="50%"
+              outerRadius={150}
+              fill="#8884d8"
+              label
+            >
               {withdrawalData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                <Cell
+                  key={`cell-${index}`}
+                  fill={COLORS[index % COLORS.length]}
+                />
               ))}
             </Pie>
             <Tooltip />
@@ -242,8 +278,15 @@ const Page = () => {
 
         {/* Tổng số tiền chiết khấu */}
         <div>
-          <h2 className="font-semibold text-2xl">Tổng số tiền chiết khấu mà website có được</h2>
-          <BarChart width={1500} height={600} data={discountData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
+          <h2 className="font-semibold text-2xl">
+            Tổng số tiền chiết khấu mà website có được
+          </h2>
+          <BarChart
+            width={1500}
+            height={600}
+            data={discountData}
+            margin={{ top: 5, right: 20, bottom: 5, left: 0 }}
+          >
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="name" />
             <YAxis />
