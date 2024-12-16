@@ -13,15 +13,6 @@ type LayoutProps = {
 };
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
-    // const getUserFromStorage = () => {
-    //     if (typeof window !== "undefined") {
-    //         const storedUser = localStorage.getItem("user");
-    //         return storedUser ? JSON.parse(storedUser) : null;
-    //     }
-    // };
-
-    // const user: UserLocal | null = getUserFromStorage();
-    // if (!user) return <ProfileProtect>{<></>}</ProfileProtect>;
 
     return (
         // <ProfileProtect>

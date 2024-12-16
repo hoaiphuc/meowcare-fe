@@ -157,13 +157,24 @@ const Page = () => {
                               </div>
                             </div>
                           </div>
-                          <Button
-                            as={Link}
-                            href={activity.orderType === "OVERNIGHT" ? `/profile/activity/detail/${activity.id}` : `/profile/activity/detailother/${activity.id}`}
-                            className='bg-btnbg text-white rounded-lg mt-3'
-                          >
-                            Theo dõi lịch
-                          </Button>
+                          {activity.status !== "COMPLETED" &&
+                            activity.status !== "CANCELLED" ?
+                            <Button
+                              as={Link}
+                              href={activity.orderType === "OVERNIGHT" ? `/profile/activity/detail/${activity.id}` : `/profile/activity/detailother/${activity.id}`}
+                              className='bg-btnbg text-white rounded-lg mt-3'
+                            >
+                              Theo dõi lịch
+                            </Button>
+                            :
+                            <Button
+                              as={Link}
+                              href={`/profile/activity/bookingdetail/${activity.id}`}
+                              className='bg-btnbg text-white rounded-lg mt-3'
+                            >
+                              Thông tin đặt lịch
+                            </Button>
+                          }
                         </div>
                         <h2 className={`${statusColors[activity.status] || 'text-black'}`}>
                           {statusLabels[activity.status] || 'Trạng thái không xác định'}

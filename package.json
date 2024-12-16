@@ -20,6 +20,7 @@
     "@mui/material": "^6.0.2",
     "@nextui-org/react": "^2.6.4",
     "@reduxjs/toolkit": "^2.3.0",
+    "@smastrom/react-rating": "^1.5.0",
     "@types/leaflet": "^1.9.12",
     "@zegocloud/zego-uikit-prebuilt": "^2.13.1",
     "axios": "^1.7.7",
