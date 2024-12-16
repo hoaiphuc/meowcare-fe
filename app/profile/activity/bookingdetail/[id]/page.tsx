@@ -12,15 +12,17 @@ import { useEffect, useState } from 'react';
 import '@smastrom/react-rating/style.css';
 import { toast } from 'react-toastify';
 
-type FeedbackInput = Pick<Feedback, 'rating' | 'comments'>;
-
 const Page = () => {
     const param = useParams();
     const [data, setData] = useState<Order>();
-    const [feedback, setFeedback] = useState<FeedbackInput>({
+    const [feedback, setFeedback] = useState<Feedback>({
+        id: "",
         comments: '',
-        rating: 3,
+        rating: 0,
+        userId: "",
+        bookingOrderId: ""
     });
+    const [hasFeedback, setHasFeedback] = useState(false);
 
     useEffect(() => {
         try {
@@ -31,6 +33,26 @@ const Page = () => {
                 .catch((e) => {
                     console.log(e);
                 })
+            axiosClient(`reviews/booking-order/${param.id}`)
+                .then((res) => {
+                    const responseData = res.data[0]; // Extract the first feedback item
+                    if (responseData) {
+                        setFeedback({
+                            id: responseData.id,
+                            comments: responseData.comments,
+                            rating: responseData.rating,
+                            userId: responseData.user.id,
+                            bookingOrderId: responseData.bookingOrder.id,
+                        });
+                        setHasFeedback(true); // Set to true if feedback exists
+                    } else {
+                        setHasFeedback(false); // No feedback found
+                    }
+                })
+                .catch((e) => {
+                    console.error("Error fetching feedback:", e);
+                    setHasFeedback(false); // Handle failure
+                });
         } catch (error) {
             console.log(error);
         }
@@ -45,18 +67,15 @@ const Page = () => {
 
     const handleRatingSubmit = () => {
         if (!feedback) {
-            alert('Please provide feedback before submitting.');
+            alert('Vui lòng đánh giá bằng sao');
             return;
         }
 
         const ratingData = {
             ...feedback,
-            user: data?.user,
-            bookingOrder: {
-                sitterId: data?.sitter.id,
-                isHouseSitting: data?.isHouseSitting,
-                orderType: data?.orderType,
-            }
+            userId: data?.user.id,
+            bookingOrderId: data?.id
+
         };
 
         axiosClient.post('/reviews', ratingData)
@@ -65,6 +84,22 @@ const Page = () => {
             })
             .catch(() => {
                 toast.error("Có lỗi xảy ra, vui lòng thử lại sau")
+            });
+    };
+
+    const handleFeedbackUpdate = () => {
+        if (!feedback) {
+            toast.error("Vui lòng đánh giá bằng sao");
+            return;
+        }
+
+        axiosClient
+            .put(`/reviews/${feedback.id}`, feedback) // Use PUT for update
+            .then(() => {
+                toast.success("Cập nhật đánh giá thành công!");
+            })
+            .catch(() => {
+                toast.error("Có lỗi xảy ra, vui lòng thử lại sau.");
             });
     };
 
@@ -83,12 +118,16 @@ const Page = () => {
                             <h1 className='text-black p-5 text-2xl font-semibold'>{data.status === "COMPLETED" ? "Dịch vụ này đã hoàn thành" : "Yêu cầu này đã bị hủy"}</h1>
                         </div>
                         <div className='bg-[#FFE3D5] text-black p-5 py-10 rounded-md shadow-xl font-medium flex items-start justify-between gap-3'>
-                            <div>
-                                <h1 className='font-semibold text-xl'>{data.orderType === "OVERNIGHT" ? "Gửi thú cưng" : "Dịch vụ"}</h1>
-                                <h1>15 tháng 10 - 16 tháng 10</h1>
-                                <h1>Giờ bắt đầu: 5:00 sáng</h1>
-                                <h1>Giờ kết thúc: 5:00 chiều</h1>
-                                <h1>Bé mèo: {data.bookingDetailWithPetAndServices[0].pet.petName}</h1>
+                            <div className='flex flex-col gap-3'>
+                                <div>
+                                    <h1 className='font-semibold text-xl'>Người chăm sóc</h1>
+                                    <h1>{data.sitter.fullName}</h1>
+                                </div>
+                                <div>
+                                    <h1 className='font-semibold text-xl'>{data.orderType === "OVERNIGHT" ? "Gửi thú cưng" : "Dịch vụ khác"}</h1>
+                                    <h1>15 tháng 10 - 16 tháng 10</h1>
+                                    <h1>Bé mèo: {data.bookingDetailWithPetAndServices[0].pet.petName}</h1>
+                                </div>
                             </div>
 
                             <div className='bg-white rounded-md text-black p-5 w-96'>
@@ -118,17 +157,28 @@ const Page = () => {
                                 <Textarea
                                     className='bg-white rounded-xl'
                                     variant='bordered'
+                                    value={feedback.comments}
                                     placeholder={`Đánh giá dịch vụ của ${data.sitter.fullName}`}
                                     onChange={(e) => handleInputChange("comments", e.target.value)}
                                 />
                                 <div className='flex justify-end mt-3 mb-5'>
-                                    <Button
-                                        className="bg-btnbg rounded-full text-white text-xl"
-                                        onClick={handleRatingSubmit}
-                                    >
-                                        Đánh giá
-                                    </Button>
+                                    {hasFeedback ? (
+                                        <Button
+                                            className="bg-btnbg rounded-full text-white text-xl"
+                                            onClick={handleFeedbackUpdate} // Call update API
+                                        >
+                                            Cập nhật
+                                        </Button>
+                                    ) : (
+                                        <Button
+                                            className="bg-btnbg rounded-full text-white text-xl"
+                                            onClick={handleRatingSubmit} // Call submit API
+                                        >
+                                            Đánh giá
+                                        </Button>
+                                    )}
                                 </div>
+
                             </div>
 
                         </div>

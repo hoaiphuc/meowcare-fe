@@ -455,27 +455,36 @@ export type Feedback = {
   id: string;
   rating: number;
   comments: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+  userId: string;
+  bookingOrderId: string;
+};
+
+export type feedbackData = {
+  id: string;
+  rating: number;
+  comments: string;
   createdAt: Date;
-  updatedAt: Date;
   user: {
-    email: string;
-    password: string;
-    fullName: string;
+    id: string;
     avatar: string;
-    phoneNumber: string;
-    dob: Date;
-    gender: string;
-    address: string;
+    email: string;
+    fullName: string;
+    status: number;
   };
   bookingOrder: {
-    sitterId: string;
+    id: string;
     startDate: Date;
     endDate: Date;
-    numberOfPet: number;
     name: string;
-    phoneNumber: string;
+    phoneNumber: number;
     address: string;
+    paymentStatus: number;
+    createdAt: Date;
+    updatedAt: Date;
     note: string;
+    status: string;
     isHouseSitting: boolean;
     orderType: string;
     paymentMethod: string;

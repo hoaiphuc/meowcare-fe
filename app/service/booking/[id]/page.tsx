@@ -362,8 +362,6 @@ const Page = () => {
     selectedService,
   ]);
 
-  useEffect(() => { }, [dateRange]);
-
   //image upload
   const handleImageClick = () => {
     if (hiddenFileInput.current) {
