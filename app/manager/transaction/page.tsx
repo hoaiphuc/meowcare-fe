@@ -4,12 +4,12 @@ import { Transaction } from '@/app/constants/types/homeType';
 import axiosClient from '@/app/lib/axiosClient';
 import { Pagination, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from '@nextui-org/react';
 import { format } from 'date-fns';
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 const Page = () => {
     const [page, setPage] = useState(1);
     const [data, setData] = useState<Transaction[]>([]);
-    const rowsPerPage = 10;
+    const [pages, setPages] = useState(1);
 
     const statusColors: { [key: string]: string } = {
         PENDING: 'text-[#9E9E9E]', // Chờ duyệt - gray
@@ -25,9 +25,11 @@ const Page = () => {
 
     useEffect(() => {
         try {
-            axiosClient('transactions')
+            axiosClient(`transactions/search/pagination?page=${page}&size=10&sort=createdAt&direction=DESC`)
                 .then((res) => {
-                    setData(res.data)
+                    setData(res.data.content)
+                    setPages(res.data.totalPages)
+
                 })
                 .catch((e) => {
                     console.log(e);
@@ -35,15 +37,7 @@ const Page = () => {
         } catch (error) {
             console.log(error);
         }
-    }, [])
-
-    const pages = Math.ceil(data.length / rowsPerPage);
-    const items = useMemo(() => {
-        const start = (page - 1) * rowsPerPage;
-        const end = start + rowsPerPage;
-
-        return data.slice(start, end);
-    }, [page, data]);
+    }, [page])
 
     return (
         <div className='flex flex-col justify-start w-full mx-10 gap-5 my-3'>
@@ -51,17 +45,21 @@ const Page = () => {
             <Table
                 aria-label="Example table with client side pagination"
                 bottomContent={
-                    <div className="flex w-full justify-center">
-                        <Pagination
-                            isCompact
-                            showControls
-                            showShadow
-                            color="secondary"
-                            page={page}
-                            total={pages}
-                            onChange={(page) => setPage(page)}
-                        />
-                    </div>
+                    page ? (
+                        <div className={pages < 2 ? "hidden" : "flex w-full justify-center"}>
+                            <Pagination
+                                isCompact
+                                showControls
+                                showShadow
+                                color="secondary"
+                                page={page}
+                                total={pages}
+                                onChange={(page) => setPage(page)}
+                            />
+                        </div>
+                    ) : (
+                        <div>???</div>
+                    )
                 }
                 classNames={{
                     wrapper: "min-h-[222px]",
@@ -75,7 +73,7 @@ const Page = () => {
                     <TableColumn key="role">Số tiền</TableColumn>
                     <TableColumn key="status">Trạng thái</TableColumn>
                 </TableHeader>
-                <TableBody items={items}>
+                <TableBody items={data}>
                     {(transaction) => (
                         <TableRow key={transaction.id}>
                             <TableCell>{transaction.fromUserEmail}</TableCell>

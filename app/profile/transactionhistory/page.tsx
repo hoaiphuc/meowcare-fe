@@ -100,7 +100,11 @@ const Page = () => {
                             {transaction.toUserId === userId?.toString() ?
                                 <div className='flex items-center justify-between w-full'>
                                     <div className='flex flex-col'>
-                                        <h1 className={styles.h2}>Tiền nhận được</h1>
+                                        {transaction.transactionType === "TOP_UP" ?
+                                            <h1 className={styles.h2}>Nạp vào ví</h1>
+                                            :
+                                            <h1 className={styles.h2}>Tiền nhận được</h1>
+                                        }
                                         <h3 className={styles.h3}>
                                             {format(new Date(transaction.updatedAt), 'HH:mm | dd/MM/yyyy')}
                                         </h3>

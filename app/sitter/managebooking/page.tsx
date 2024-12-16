@@ -122,7 +122,7 @@ const Page = () => {
               .map((activity) => (
                 <Link
                   href={
-                    activity.status !== "AWAITING_CONFIRM" &&
+                    activity.status !== "COMPLETED" &&
                       activity.status !== "CANCELLED"
                       ? `/sitter/tracking/${activity.id}`
                       : `/sitter/bookingdetail/${activity.id}`
