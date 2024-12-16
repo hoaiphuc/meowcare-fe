@@ -1,5 +1,8 @@
 "use client";
 
+import Loading from "@/app/components/Loading";
+import axiosClient from "@/app/lib/axiosClient";
+import { useAppSelector } from "@/app/lib/hooks";
 import React, { useEffect, useState } from "react";
 
 type ServiceData = {
@@ -22,6 +25,11 @@ const Page = () => {
     discountAndTax: 0,
     netIncome: 0,
   });
+  const [isLoading, setIsLoading] = useState(true);
+  const { userProfile } = useAppSelector((state) => state.user);
+  const [allService, setAllService] = useState<number>()
+  const [overNight, setOverNight] = useState<number>()
+  const [buyService, setBuyService] = useState<number>()
 
   // Dữ liệu giả lập từ API
   useEffect(() => {
@@ -65,6 +73,56 @@ const Page = () => {
     });
   };
 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [allServiceRes, overNightRes, buyServiceRes] =
+          await Promise.allSettled([
+            axiosClient(`booking-orders/count-by-sitter?id=${userProfile?.id}&status=COMPLETED`),
+            axiosClient(`booking-orders/count-by-sitter?id=${userProfile?.id}&status=COMPLETED&orderType=OVERNIGHT`),
+            axiosClient(`booking-orders/count-by-sitter?id=${userProfile?.id}&status=COMPLETED&orderType=BUY_SERVICE`),
+          ]);
+
+        // Handle config services response
+        if (allServiceRes.status === "fulfilled") {
+          setAllService(allServiceRes.value.data.data);
+        } else {
+          console.error(
+            "Failed to fetch config services:",
+            allServiceRes.reason
+          );
+        }
+
+        // Handle sitter profile response
+        if (overNightRes.status === "fulfilled") {
+          setOverNight(overNightRes.value.data.data);
+        } else {
+          console.error(
+            "Failed to fetch sitter profile:",
+            overNightRes.reason
+          );
+        }
+
+        // Handle services response
+        if (buyServiceRes.status === "fulfilled") {
+          setBuyService(buyServiceRes.value.data.data);
+        } else {
+          console.error("Failed to fetch services:", buyServiceRes.reason);
+        }
+      } catch (error) {
+        console.error("An unexpected error occurred:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [userProfile?.id]);
+
+  if (isLoading) {
+    return <Loading />;
+  }
+
   return (
     <div className="max-w-6xl mx-auto p-6 bg-gray-50">
       {/* Chọn tháng */}
@@ -90,14 +148,14 @@ const Page = () => {
         <h2 className="text-xl font-semibold text-gray-800 mb-4">Tổng hợp:</h2>
         <ul className="space-y-3 text-gray-700">
           <li>
-            <strong>Tổng số dịch vụ được đặt:</strong> {summary.totalServices}
+            <strong>Tổng số dịch vụ được đặt:</strong> {allService}
           </li>
           <li>
             <strong>Tổng số dịch vụ gửi thú cưng:</strong>{" "}
-            {summary.petBoardingServices}
+            {overNight}
           </li>
           <li>
-            <strong>Tổng số dịch vụ khác:</strong> {summary.otherServices}
+            <strong>Tổng số dịch vụ khác:</strong> {buyService}
           </li>
           <li>
             <strong>Doanh số:</strong>{" "}

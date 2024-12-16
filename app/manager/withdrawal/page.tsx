@@ -19,7 +19,7 @@ import {
   TableRow
 } from "@nextui-org/react";
 import { format } from "date-fns";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 
 const Page = () => {
@@ -27,19 +27,19 @@ const Page = () => {
   const [data, setData] = useState<RequestWithdrawal[]>([]);
   const rowsPerPage = 10;
 
-  // const statusColors: { [key: string]: string } = {
-  //   PENDING: "text-[#9E9E9E]", // Chờ duyệt - gray
-  //   COMPLETED: "text-[#4CAF50]", // Hoàn thành - green
-  //   FAILED: "text-[#DC3545]", // Đã hủy - Red
-  // };
+  const statusColors: { [key: string]: string } = {
+    "CHỜ THANH TOÁN": "text-[#9E9E9E]", // Chờ duyệt - gray
+    "ĐÃ THANH TOÁN": "text-[#4CAF50]", // Hoàn thành - green
+    "THANH TOÁN THẤT BẠI": "text-[#DC3545]", // Đã hủy - Red
+  };
 
-  // const statusLabels: { [key: string]: string } = {
-  //   PENDING: "Chờ thanh toán",
-  //   COMPLETED: "Giao dịch thành công",
-  //   FAILED: "Giao dịch thất bại",
-  // };
+  const statusLabels: { [key: string]: string } = {
+    "CHỜ THANH TOÁN": "Chờ xử lí",
+    "ĐÃ THANH TOÁN": "Đã xử lí",
+    "THANH TOÁN THẤT BẠI": "Đã từ chối",
+  };
 
-  useEffect(() => {
+  const fetchData = useCallback(() => {
     try {
       axiosClient("request-withdrawal/getAllRequests")
         .then((res) => {
@@ -51,7 +51,11 @@ const Page = () => {
     } catch (error) {
       console.log(error);
     }
-  }, []);
+  }, [])
+
+  useEffect(() => {
+    fetchData()
+  }, [fetchData]);
 
   const pages = Math.ceil(data.length / rowsPerPage);
   const items = useMemo(() => {
@@ -65,6 +69,7 @@ const Page = () => {
     try {
       axiosClient.put(`request-withdrawal/completeRequest/${id}`)
         .then(() => {
+          fetchData()
           toast.success("Bạn đã chấp nhận yêu cầu này")
         })
         .catch(() => {
@@ -75,10 +80,11 @@ const Page = () => {
     }
   }
 
-  const hanldeDeny = (id: string) => {
+  const handleDeny = (id: string) => {
     try {
-      axiosClient(`request-withdrawal/cancelRequest/${id}`)
+      axiosClient.put(`request-withdrawal/cancelRequest/${id}`)
         .then(() => {
+          fetchData()
           toast.success("Bạn đã từ chối yêu cầu này")
         })
         .catch(() => {
@@ -135,19 +141,19 @@ const Page = () => {
               <TableCell>
                 {request.balance.toLocaleString("de-DE")}đ
               </TableCell>
-              <TableCell >
-                {request.processStatus}
+              <TableCell className={statusColors[request.processStatus]}>
+                {statusLabels[request.processStatus]}
               </TableCell>
               <TableCell >
                 <Dropdown>
                   <DropdownTrigger>
-                    <Button variant="bordered">
+                    <Button variant="bordered" isDisabled={request.processStatus !== "CHỜ THANH TOÁN"}>
                       <FontAwesomeIcon icon={faBars} />
                     </Button>
                   </DropdownTrigger>
-                  <DropdownMenu aria-label="Static Actions">
-                    <DropdownItem key="new" onClick={() => handleAccept(request.id)}>Chấp nhận</DropdownItem>
-                    <DropdownItem key="delete" className="text-danger" color="danger" onClick={() => hanldeDeny(request.id)}>
+                  <DropdownMenu aria-label="Static Actions" >
+                    <DropdownItem key="new" onClick={() => handleAccept(request.id)} >Chấp nhận</DropdownItem>
+                    <DropdownItem key="delete" className="text-danger" color="danger" onClick={() => handleDeny(request.id)}>
                       Từ chối
                     </DropdownItem>
                   </DropdownMenu>

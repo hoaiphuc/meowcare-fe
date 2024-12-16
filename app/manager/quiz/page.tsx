@@ -87,6 +87,36 @@ const Page = () => {
         }
     }
 
+    const handleUpdateStatus = async (id: string, isActive: boolean) => {
+        try {
+            const isConfirmed = await showConfirmationDialog({
+                title: 'Bạn có muốn thay đổi trạng thái của bài kiểm tra này không?',
+                confirmButtonText: 'Có',
+                denyButtonText: 'Không',
+                confirmButtonColor: '#00BB00',
+            });
+            if (isConfirmed) {
+                const active = !isActive
+                try {
+                    axiosClient.put(`quizzes/${id}`, { isActive: active })
+                        .then(() => {
+                            fetchQuiz()
+                            toast.success("Đã cập nhật thành công")
+                        })
+                        .catch(() => {
+                            toast.error("Đã có lỗi xảy ra khi cập nhật!")
+                        })
+                } catch (error) {
+                    console.log(error);
+                }
+            } else {
+                return
+            }
+        } catch (error) {
+
+        }
+    }
+
     return (
         <div className='flex flex-col justify-start w-full mx-10 gap-5 my-3'>
             <div className='flex justify-between items-center'>
@@ -97,7 +127,7 @@ const Page = () => {
                 </Button> */}
                 <Button onClick={onOpen} className='bg-btnbg text-white'>
                     <FontAwesomeIcon icon={faPlus} />
-                    Quản lý bài kiểm tra
+                    Tạo bài kiểm tra
                 </Button>
             </div>
             <Table
@@ -148,6 +178,7 @@ const Page = () => {
                                     </DropdownTrigger>
                                     <DropdownMenu aria-label="Example with disabled actions">
                                         <DropdownItem key="edit" onClick={() => window.location.href = `/manager/quiz/quizupdate/${item.id}`}>Cập nhật</DropdownItem>
+                                        <DropdownItem key="update" className="text-primary" color="primary" onClick={() => handleUpdateStatus(item.id, item.isActive)}>{item.isActive ? "Tắt hoạt động" : "Mở hoạt động"}</DropdownItem>
                                         <DropdownItem key="delete" className="text-danger" color="danger" onClick={() => handleDelete(item.id)}>
                                             Xóa
                                         </DropdownItem>
