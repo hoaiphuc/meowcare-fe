@@ -1,11 +1,14 @@
 'use client'
 
-import { Order } from '@/app/constants/types/homeType';
+import { Feedback, Order } from '@/app/constants/types/homeType';
 import axiosClient from '@/app/lib/axiosClient';
 import { faCircleCheck } from '@fortawesome/free-regular-svg-icons';
 import { faHandshake, faTriangleExclamation } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Button, Textarea } from '@nextui-org/react';
+import { Rating } from '@smastrom/react-rating';
+import '@smastrom/react-rating/style.css';
+import { formatDate } from 'date-fns';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import React, { useEffect, useState } from 'react'
@@ -13,52 +16,42 @@ import React, { useEffect, useState } from 'react'
 const Page = () => {
     const param = useParams();
     const [data, setData] = useState<Order>();
+    const [feedback, setFeedback] = useState<Feedback>()
+
     useEffect(() => {
         try {
             axiosClient(`booking-orders/${param.id}`)
                 .then((res) => {
-                    setData(res.data)
+                    const data = res.data
+                    setData({
+                        ...data,
+                        startDate: new Date(data.startDate),
+                        endDate: new Date(data.endDate),
+                    })
                 })
                 .catch((e) => {
                     console.log(e);
                 })
+            axiosClient(`reviews/booking-order/${param.id}`)
+                .then((res) => {
+                    const responseData = res.data[0]; // Extract the first feedback item
+                    if (responseData) {
+                        setFeedback({
+                            id: responseData.id,
+                            comments: responseData.comments,
+                            rating: responseData.rating,
+                            userId: responseData.user.id,
+                            bookingOrderId: responseData.bookingOrder.id,
+                        });
+                    }
+                })
+                .catch((e) => {
+                    console.error("Error fetching feedback:", e);
+                });
         } catch (error) {
             console.log(error);
         }
     }, [param.id])
-
-    //denied request
-    // const handleDenied = (bookingId: string) => {
-    //     try {
-    //         axiosClient.put(`booking-orders/status/${bookingId}?status=CANCELLED`)
-    //             .then(() => {
-    //                 toast.success('Bạn đã từ chối')
-    //                 router.push(`/sitter/managebooking`)
-    //             })
-    //             .catch(() => {
-    //                 toast.error('Có lỗi xảy ra vui lòng thử lại sau')
-    //             })
-    //     } catch (error) {
-
-    //     }
-    // }
-    // //accept request
-    // const handleAccept = (bookingId: string) => {
-    //     try {
-    //         axiosClient.put(`booking-orders/status/${bookingId}?status=CONFIRMED`)
-    //             .then(() => {
-    //                 toast.success('Bạn đã chấp nhận yêu cầu này, vui lòng chăm sóc theo lịch')
-    //                 router.push(`/sitter/tracking/${bookingId}`)
-    //             })
-    //             .catch(() => {
-    //                 toast.error('Có lỗi xảy ra vui lòng thử lại sau')
-    //             })
-    //     } catch (error) {
-    //         console.log(error);
-
-    //     }
-    // }
-
 
     return (
         <div className='flex justify-center items-center my-5 '>
@@ -76,9 +69,10 @@ const Page = () => {
                         </div>
                         <div className='bg-[#FFE3D5] text-black p-5 py-10 rounded-md shadow-xl font-medium flex flex-col gap-3'>
                             <h1 className='font-semibold text-xl'>{data.orderType === "OVERNIGHT" ? "Gửi thú cưng" : "Dịch vụ"}</h1>
-                            <h1>15 tháng 10 - 16 tháng 10</h1>
-                            <h1>Giờ bắt đầu: 5:00 sáng</h1>
-                            <h1>Giờ kết thúc: 5:00 chiều</h1>
+                            <h1>
+                                {formatDate(data.startDate.toISOString(), "dd/MM/yyyy")}
+                                {data.endDate ? ` - ${formatDate(data.endDate.toISOString(), "dd/MM/yyyy")}` : ""}
+                            </h1>
                             <h1>Bé mèo: {data.bookingDetailWithPetAndServices[0].pet.petName}</h1>
 
                             <div className='bg-white rounded-md text-black p-5 my-5'>
@@ -103,21 +97,18 @@ const Page = () => {
                     </div>
                     <div className=' flex flex-col gap-3 w-[850px]'>
                         <div className=' bg-white shadow-xl rounded-md p-5 flex flex-col gap-5'>
-                            <h1 className='text-xl font-semibold'>Chào nhau</h1>
+                            <h1 className='text-xl font-semibold'>Cơ hội</h1>
                             <div className='flex gap-5 items-center text-black'>
                                 <FontAwesomeIcon icon={faHandshake} size='2xl' className='text-[#4BA3C1]' />
-                                <p>Hãy gửi một lời chào đển {data.user.fullName}. Lên lịch và có một cuộc gặp mặt nhau thông qua tin nhắn.</p>
+                                <p>Có cơ hội hãy hợp tác với {data.user.fullName} nhé</p>
                             </div>
-                            <Button className='rounded-full text-black bg-[#f1f1f3] font-semibold w-36'>Đến tin nhắn</Button>
-
                         </div>
                         <div className='bg-white w-full h-full shadow-2xl rounded-md p-5'>
-                            <h1 className='font-semibold text-2xl my-3'>Tin nhắn</h1>
+                            <h1 className='font-semibold text-2xl my-3'>{feedback ? "Đánh giá" : "Chưa có đánh giá"}</h1>
                             <div className='bg-from-[#d8ab95] bg-gradient-to-r from-[#fab1a0] to-blue-[#FFE3D5] p-3 rounded-xl'>
-                                <Textarea className='bg-white rounded-xl' variant='bordered' placeholder={`Gửi một tin nhắn mới cho ${data.user.fullName}`} />
-                                <div className='flex justify-end mt-3 mb-5'>
-                                    <Button className='bg-btnbg rounded-full text-white text-xl'>Gửi</Button>
-                                </div>
+                                <Rating readOnly value={feedback?.rating ? feedback?.rating : 0} />
+
+                                <Textarea isReadOnly value={feedback?.comments} className='bg-white rounded-xl' variant='bordered' placeholder="Chưa có đánh giá cho dịch vụ này" />
                             </div>
                             <div className='text-black my-5 flex justify-center items-center'>
                                 <h1 >
