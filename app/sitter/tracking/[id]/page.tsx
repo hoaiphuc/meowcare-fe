@@ -15,6 +15,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'react-toastify';
 import { v4 as uuidv4 } from 'uuid';
 import styles from "./tracking.module.css"
+import { showConfirmationDialog } from '@/app/components/confirmationDialog';
 
 interface TaskEvident {
     id?: string,
@@ -35,6 +36,7 @@ const Tracking = () => {
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
     const { isOpen: isOpenUpdate, onOpen: onOpenUpdate, onOpenChange: onOpenChangeUpdate } = useDisclosure();
     const { isOpen: isOpenCat, onOpen: onOpenCat, onOpenChange: onOpenChangeCat } = useDisclosure();
+    const { isOpen: isOpenConfirm, onOpen: onOpenConfirm, onOpenChange: onOpenChangeConfirm } = useDisclosure();
     const [selectedTask, setSelectedTask] = useState<Task>();
     const hiddenFileInput = useRef<HTMLInputElement>(null);
     const hiddenFileVideoInput = useRef<HTMLInputElement>(null);
@@ -527,20 +529,20 @@ const Tracking = () => {
 
 
     //complete booking
-    const completeBooking = () => {
-        try {
-            axiosClient.put(`booking-orders/status/${param.id}?status=COMPLETED`)
-                .then(() => {
-                    toast.success("Bạn đã hoàn thành dịch vụ này")
-                    router.push("/sitter/managebooking")
-                })
-                .catch((e) => {
-                    console.log(e);
-                })
-        } catch (error) {
+    // const completeBooking = () => {
+    //     try {
+    //         axiosClient.put(`booking-orders/status/${param.id}?status=COMPLETED`)
+    //             .then(() => {
+    //                 toast.success("Bạn đã hoàn thành dịch vụ này")
+    //                 router.push("/sitter/managebooking")
+    //             })
+    //             .catch((e) => {
+    //                 console.log(e);
+    //             })
+    //     } catch (error) {
 
-        }
-    }
+    //     }
+    // }
 
     const cancelBooking = () => {
         try {
@@ -554,6 +556,36 @@ const Tracking = () => {
                 })
         } catch (error) {
 
+        }
+    }
+
+    const handleConfirm = async () => {
+        try {
+            axiosClient.put(`booking-orders/status/${param.id}?status=COMPLETED`)
+                .then(() => {
+                    toast.success('Bạn đã chấp nhận yêu cầu này, vui lòng chăm sóc theo lịch')
+                    router.push(`sitter/managebooking`)
+                })
+                .catch(async (e) => {
+                    if (e.response.data.status === 2013) {
+                        const isConfirmed = await showConfirmationDialog({
+                            title: "Bạn không đủ tiền trả cho phí giao dịch, bạn có muốn nạp ngay bây giờ không?",
+                            confirmButtonText: "Có, chắc chắn",
+                            denyButtonText: "Không",
+                            confirmButtonColor: "#00BB00",
+                        });
+                        if (isConfirmed) {
+                            router.push("/profile/wallet")
+                            return;
+                        } else {
+                            return;
+                        }
+
+                    }
+                    toast.error('Có lỗi xảy ra vui lòng thử lại sau')
+                })
+        } catch (error) {
+            console.log(error);
         }
     }
 
@@ -580,7 +612,7 @@ const Tracking = () => {
                                             <h2>Ngày bắt đầu: {DateFormat(dataOrder.startDate)}</h2>
                                             <h2>Ghi chú: {dataOrder.note}</h2>
                                             {dataOrder.status === "IN_PROGRESS" ?
-                                                <Button className='w-full bg-maincolor text-white my-10' radius='sm' onClick={() => completeBooking()}>Hoàn thành dịch vụ</Button>
+                                                <Button className='w-full bg-maincolor text-white my-10' radius='sm' onClick={onOpenConfirm}>Hoàn thành dịch vụ</Button>
                                                 :
                                                 <Button className='w-full bg-red-600 text-white my-10' onClick={() => cancelBooking()}>Hủy dịch vụ</Button>
                                             }
@@ -1011,6 +1043,27 @@ const Tracking = () => {
                                 <Button color="danger" variant="light" onClick={() => { onClose(), setIsUpdateMode(false), setAddList([]), setRemoveList([]) }}>
                                     Trở lại
                                 </Button>
+                            </ModalFooter>
+                        </>
+                    )}
+                </ModalContent>
+            </Modal>
+
+            {/* Confirm modal  */}
+            <Modal isOpen={isOpenConfirm} onOpenChange={onOpenChangeConfirm} isDismissable={false} isKeyboardDismissDisabled={true} size='3xl' hideCloseButton>
+                <ModalContent>
+                    {(onClose) => (
+                        <>
+                            <ModalHeader className="flex flex-col gap-1">Xác nhận hoàn thành dịch vụ</ModalHeader>
+                            <ModalBody>
+
+
+                            </ModalBody>
+                            <ModalFooter>
+                                <Button color="danger" variant="light" onClick={onClose}>
+                                    Trở lại
+                                </Button>
+                                <Button onClick={handleConfirm} className='bg-maincolor text-white'>Xác nhận hoàn thành</Button>
                             </ModalFooter>
                         </>
                     )}

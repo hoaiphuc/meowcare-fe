@@ -5,3 +5,31 @@
 .p {
   @apply text-xl;
 }
+
+.h2 {
+  @apply text-xl font-bold;
+}
+
+.input {
+  @apply w-full h-12 border-black;
+}
+
+.h3 {
+  @apply text-[14px] font-bold text-secondary;
+}
+
+.h4 {
+  @apply text-[10px] font-bold text-secondary;
+}
+
+.money {
+  @apply pl-3 border border-black;
+}
+
+.paymentHeading1 {
+  @apply text-[20px] font-semibold;
+}
+
+.paymentHeading2 {
+  @apply text-[14px];
+}

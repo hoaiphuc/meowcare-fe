@@ -8,13 +8,14 @@ import { storage } from '@/app/utils/firebase';
 import { faCamera, faCheck, faClipboardCheck, faPaw, faVideo } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Accordion, AccordionItem, Avatar, Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Tab, Tabs, useDisclosure } from '@nextui-org/react';
-import { formatDate } from 'date-fns';
+import { format, formatDate } from 'date-fns';
 import { getDownloadURL, ref, uploadBytes, uploadBytesResumable } from 'firebase/storage';
 import { useParams, useRouter } from 'next/navigation';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'react-toastify';
 import { v4 as uuidv4 } from 'uuid';
 import styles from "./trackingother.module.css";
+import { showConfirmationDialog } from '@/app/components/confirmationDialog';
 
 interface TaskEvident {
     id?: string,
@@ -42,6 +43,7 @@ const TrackingOther = () => {
     const [removeList, setRemoveList] = useState<TaskEvident[]>([]);
     const [addList, setAddList] = useState<TaskEvident[]>([]);
     const [description, setDescription] = useState("");
+    const { isOpen: isOpenConfirm, onOpen: onOpenConfirm, onOpenChange: onOpenChangeConfirm } = useDisclosure();
 
     const statusColors: { [key: number]: string } = {
         0: 'text-[#9E9E9E]',
@@ -346,18 +348,47 @@ const TrackingOther = () => {
 
 
     //complete booking
-    const completeBooking = () => {
+    // const completeBooking = () => {
+    //     try {
+    //         axiosClient.put(`booking-orders/status/${param.id}?status=COMPLETED`)
+    //             .then(() => {
+    //                 toast.success("Bạn đã hoàn thành dịch vụ này")
+    //                 router.push("/sitter/managebooking")
+    //             })
+    //             .catch((e) => {
+    //                 console.log(e);
+    //             })
+    //     } catch (error) {
+
+    //     }
+    // }
+    const handleConfirm = async () => {
         try {
             axiosClient.put(`booking-orders/status/${param.id}?status=COMPLETED`)
                 .then(() => {
-                    toast.success("Bạn đã hoàn thành dịch vụ này")
-                    router.push("/sitter/managebooking")
+                    toast.success('Bạn đã chấp nhận yêu cầu này, vui lòng chăm sóc theo lịch')
+                    router.push(`sitter/managebooking`)
                 })
-                .catch((e) => {
-                    console.log(e);
+                .catch(async (e) => {
+                    if (e.response.data.status === 2013) {
+                        const isConfirmed = await showConfirmationDialog({
+                            title: "Bạn không đủ tiền trả cho phí giao dịch, bạn có muốn nạp ngay bây giờ không?",
+                            confirmButtonText: "Có, chắc chắn",
+                            denyButtonText: "Không",
+                            confirmButtonColor: "#00BB00",
+                        });
+                        if (isConfirmed) {
+                            router.push("/profile/wallet")
+                            return;
+                        } else {
+                            return;
+                        }
+
+                    }
+                    toast.error('Có lỗi xảy ra vui lòng thử lại sau')
                 })
         } catch (error) {
-
+            console.log(error);
         }
     }
 
@@ -409,7 +440,7 @@ const TrackingOther = () => {
                                             <h2>Ngày bắt đầu: {DateFormat(dataOrder.startDate)}</h2>
                                             <h2>Ghi chú: {dataOrder.note}</h2>
                                             {dataOrder.status === "IN_PROGRESS" ?
-                                                <Button className='w-full bg-maincolor text-white my-10' radius='sm' onClick={() => completeBooking()}>Hoàn thành dịch vụ</Button>
+                                                <Button className='w-full bg-maincolor text-white my-10' radius='sm' onClick={onOpenConfirm}>Hoàn thành dịch vụ</Button>
                                                 :
                                                 <Button className='w-full bg-red-600 text-white my-10' onClick={() => cancelBooking()}>Hủy dịch vụ</Button>
                                             }
@@ -812,6 +843,45 @@ const TrackingOther = () => {
                                 <Button color="danger" variant="light" onClick={() => { onClose(), setIsUpdateMode(false), setAddList([]), setRemoveList([]) }}>
                                     Trở lại
                                 </Button>
+                            </ModalFooter>
+                        </>
+                    )}
+                </ModalContent>
+            </Modal>
+            {/* Confirm modal  */}
+            <Modal isOpen={isOpenConfirm} onOpenChange={onOpenChangeConfirm} isDismissable={false} isKeyboardDismissDisabled={true} size='3xl' hideCloseButton>
+                <ModalContent>
+                    {(onClose) => (
+                        <>
+                            <ModalHeader className="flex items-center justify-center font-semibold text-2xl">
+                                <h1>Xác nhận hoàn thành dịch vụ</h1>
+                            </ModalHeader>
+                            <ModalBody>
+                                {dataOrder &&
+                                    <div className="flex items-start justify-start flex-col w-full">
+                                        <h2 className={styles.h2}>Thông tin đặt lịch của bạn</h2>
+                                        <div className="grid grid-cols-2 w-80">
+                                            <h3 className={styles.h3}>Dịch vụ</h3>{" "}
+                                            <h3 className={styles.h3}>Gửi thú cưng</h3>
+                                            <h3 className={styles.h3}>Ngày gửi</h3>{" "}
+                                            <h3 className={styles.h3}>
+                                                {format(new Date(dataOrder.startDate), "dd/MM/yyyy")}
+                                            </h3>
+                                            <h3 className={styles.h3}>Ngày Nhận</h3>{" "}
+                                            <h3 className={styles.h3}>
+                                                {format(new Date(dataOrder.startDate), "dd/MM/yyyy")}
+                                            </h3>
+                                            <h3 className={styles.h3}>Người chăm sóc</h3>{" "}
+                                            <h3 className={styles.h3}>{dataOrder?.sitter?.fullName}</h3>
+                                        </div>
+                                    </div>
+                                }
+                            </ModalBody>
+                            <ModalFooter>
+                                <Button color="danger" variant="light" onClick={onClose}>
+                                    Trở lại
+                                </Button>
+                                <Button onClick={handleConfirm} className='bg-maincolor text-white'>Xác nhận hoàn thành</Button>
                             </ModalFooter>
                         </>
                     )}
