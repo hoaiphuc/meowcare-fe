@@ -1,5 +1,6 @@
 "use client";
 
+import Loading from "@/app/components/Loading";
 import {
   CatSitter,
   Certificate,
@@ -13,8 +14,9 @@ import { storage } from "@/app/utils/firebase";
 import {
   faCamera,
   faCheck,
+  faCircleQuestion,
   faFilePdf,
-  faXmark,
+  faXmark
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -30,6 +32,7 @@ import {
   ModalFooter,
   ModalHeader,
   Textarea,
+  Tooltip,
   useDisclosure
 } from "@nextui-org/react";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
@@ -40,7 +43,6 @@ import React, { useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import { v4 as uuidv4 } from "uuid";
 import styles from "./info.module.css";
-import Loading from "@/app/components/Loading";
 
 const MapComponent = dynamic(() => import("@/app/components/MapPick"), {
   ssr: false,
@@ -486,7 +488,7 @@ const Info = () => {
         </div>
 
         <div className="flex mt-5 gap-3 items-center">
-          <h2 className={styles.h2}>Số ngày hoàn tiền (?)</h2>
+          <h2 className={styles.h2}>Số ngày hoàn tiền <Tooltip content="Số ngày khách hàng có thể hủy dịch vụ"><FontAwesomeIcon icon={faCircleQuestion} size="2xs" /></Tooltip></h2>
           <Input
             type="number"
             variant="bordered"
@@ -652,58 +654,62 @@ const Info = () => {
         <div>
           <h2 className={styles.h2}>Chứng chỉ</h2>
           <div className="flex overflow-x-auto gap-2">
-            <button
-              className="flex flex-col justify-center items-center p-3 bg-pink-100 border border-pink-300 rounded-md text-center w-36 h-36"
-              onClick={handleCertificateClick}
-            >
-              <FontAwesomeIcon
-                icon={faFilePdf}
-                className="text-maincolor"
-                size="2xl"
-              />
-              <p>Thêm chứng chỉ</p>
-            </button>
-            <input
-              type="file"
-              accept="application/pdf"
-              ref={hiddenFileInput}
-              onChange={handleImageUpdateChange}
-              style={{ display: "none" }}
-              multiple
-            />
-            {certificates.map((certificate, index) => (
-              <div key={index} className="relative w-36 h-36 flex-shrink-0">
-                {certificate.certificateType === "IMAGE" ? (
-                  <Avatar
-                    src={certificate.certificateUrl}
-                    alt={`Certificate ${index + 1}`}
-                    className="w-full h-full object-cover rounded-md"
-                  />
-                ) : (
-                  <div className="flex flex-col items-center justify-center w-full h-full bg-gray-200 rounded-md">
-                    <FontAwesomeIcon icon={faFilePdf} size="2xl" />
-                    <p className="text-center text-xs mt-2">
-                      {certificate.certificateName}
-                    </p>
-                    <button
-                      className="text-maincolor underline mt-2"
-                      onClick={() => {
-                        setSelectedPdf(certificate.certificateUrl!);
-                        onOpen();
-                      }}
-                    >
-                      Xem chứng chỉ
-                    </button>
-                  </div>
-                )}
+            <div className="flex gap-2 flex-shrink-0">
+              {certificates.length < 5 &&
                 <button
-                  onClick={() => handleRemoveUpdateCertificate(certificate)}
-                  className="absolute top-0 right-0 p-1 rounded-full w-8 h-8 bg-black bg-opacity-50 text-white"
+                  className="flex flex-col justify-center items-center p-3 bg-pink-100 border border-pink-300 rounded-md text-center w-36 h-36"
+                  onClick={handleCertificateClick}
                 >
-                  ✕
+                  <FontAwesomeIcon
+                    icon={faFilePdf}
+                    className="text-maincolor"
+                    size="2xl"
+                  />
+                  <p>Thêm chứng chỉ</p>
                 </button>
-              </div>
-            ))}
+              }
+              <input
+                type="file"
+                accept="application/pdf"
+                ref={hiddenFileInput}
+                onChange={handleImageUpdateChange}
+                style={{ display: "none" }}
+                multiple
+              />
+              {certificates.map((certificate, index) => (
+                <div key={index} className="relative w-36 h-36">
+                  {certificate.certificateType === "IMAGE" ? (
+                    <Avatar
+                      src={certificate.certificateUrl}
+                      alt={`Certificate ${index + 1}`}
+                      className="w-full h-full object-cover rounded-md"
+                    />
+                  ) : (
+                    <div className="flex flex-col items-center justify-center w-full h-full bg-gray-200 rounded-md">
+                      <FontAwesomeIcon icon={faFilePdf} size="2xl" />
+                      <p className="text-center text-xs mt-2">
+                        {certificate.certificateName}
+                      </p>
+                      <button
+                        className="text-maincolor underline mt-2"
+                        onClick={() => {
+                          setSelectedPdf(certificate.certificateUrl!);
+                          onOpen();
+                        }}
+                      >
+                        Xem chứng chỉ
+                      </button>
+                    </div>
+                  )}
+                  <button
+                    onClick={() => handleRemoveUpdateCertificate(certificate)}
+                    className="absolute top-0 right-0 p-1 rounded-full w-8 h-8 bg-black bg-opacity-50 text-white"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 

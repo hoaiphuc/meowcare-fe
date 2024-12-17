@@ -29,22 +29,7 @@ const Navbar = () => {
 
     // get notifications
     // const currentDate = new Date();
-    const notifications = useNotifications(user?.id);
-    const notificationItems = notifications.length > 0
-        ? notifications.map((notification) => ({
-            key: notification.id,
-            message: notification.message,
-            isRead: notification.isRead,
-            createAt: notification.createdAt,
-        }))
-        : [
-            {
-                key: 'no-notification',
-                message: 'Hiện tại chưa có thông báo nào',
-                isRead: true,
-                createAt: new Date(),
-            },
-        ];
+    const { notifications, fetchNotifications, hasMore, loading } = useNotifications(user?.id);
 
     useEffect(() => {
         const fetchUser = async () => {
@@ -151,20 +136,43 @@ const Navbar = () => {
                                 <DropdownTrigger>
                                     <FontAwesomeIcon icon={faBell} size='2xl' className='cursor-pointer' />
                                 </DropdownTrigger>
-                                <DropdownMenu aria-label="User Actions" variant="flat" items={notificationItems} className='overflow-auto h-96'>
-                                    {(notification) => (
-                                        <DropdownItem key={notification.key} className='w-96 h-20'>
-                                            <div className='flex text-wrap justify-between gap-5 overflow-auto'>
-                                                <div>
-                                                    {/* <p>{notification.message}</p>
-                                                    <p>{differenceInMinutes(currentDate, new Date(notification.createAt))}</p> */}
-                                                </div>
-                                                <div>
-                                                    {notification.isRead ? "" : <FontAwesomeIcon icon={faCircle} className='text-blue-600' />}
-                                                </div>
-                                            </div>
-                                        </DropdownItem>
-                                    )}
+                                <DropdownMenu aria-label="Notifications" variant="flat" className='max-h-96 overflow-y-auto' closeOnSelect={false}>
+                                    <>
+                                        {notifications.length > 0 ? (
+                                            notifications.map((notification) => (
+                                                <DropdownItem key={notification.id} className="w-96 h-20">
+                                                    <div className="flex justify-between">
+                                                        <p>{notification.message}</p>
+                                                        {!notification.isRead && (
+                                                            <FontAwesomeIcon icon={faCircle} className="text-blue-600" />
+                                                        )}
+                                                    </div>
+                                                </DropdownItem>
+                                            ))
+                                        ) : (
+                                            <DropdownItem className="text-center">
+                                                Hiện không có thông báo nào
+                                            </DropdownItem>
+                                        )}
+                                        {loading && (
+                                            <DropdownItem className="text-center">Đang tải...</DropdownItem>
+                                        )}
+                                        {hasMore && (
+                                            <DropdownItem
+                                                onClick={() => fetchNotifications(true)}
+                                                className="text-center"
+                                            >
+                                                <button className="text-blue-600 underline w-full">
+                                                    Xem thêm
+                                                </button>
+                                            </DropdownItem>
+                                        )}
+                                        {!hasMore && !loading && (
+                                            <DropdownItem className="text-center">
+
+                                            </DropdownItem>
+                                        )}
+                                    </>
                                 </DropdownMenu>
                             </Dropdown>
                             <Dropdown placement="bottom-start">

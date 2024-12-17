@@ -1,21 +1,21 @@
 'use client'
 
-import React, { useRef, useState } from 'react'
-import styles from './createinfo.module.css'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { useRouter } from 'next/navigation';
-import dynamic from 'next/dynamic';
-import { CatSitter, Certificate, ProfilePicture, UserLocal } from '@/app/constants/types/homeType';
-import { faCamera, faCheck, faFilePdf, faXmark } from '@fortawesome/free-solid-svg-icons';
-import { v4 as uuidv4 } from 'uuid';
-import { Autocomplete, AutocompleteItem, Avatar, Button, Chip, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Textarea, useDisclosure } from '@nextui-org/react';
-import { storage } from '@/app/utils/firebase';
-import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
-import CatSitterSkill from '@/app/lib/CatSitterSkill.json'
-import axiosClient from '@/app/lib/axiosClient';
-import useGeoapify from '@/app/hooks/useGeoapify';
-import { toast } from 'react-toastify';
 import Loading from '@/app/components/Loading';
+import { CatSitter, Certificate, ProfilePicture, UserLocal } from '@/app/constants/types/homeType';
+import useGeoapify from '@/app/hooks/useGeoapify';
+import CatSitterSkill from '@/app/lib/CatSitterSkill.json';
+import axiosClient from '@/app/lib/axiosClient';
+import { storage } from '@/app/utils/firebase';
+import { faCamera, faCheck, faCircleQuestion, faFilePdf, faXmark } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Autocomplete, AutocompleteItem, Avatar, Button, Chip, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Textarea, Tooltip, useDisclosure } from '@nextui-org/react';
+import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
+import dynamic from 'next/dynamic';
+import { useRouter } from 'next/navigation';
+import React, { useRef, useState } from 'react';
+import { toast } from 'react-toastify';
+import { v4 as uuidv4 } from 'uuid';
+import styles from './createinfo.module.css';
 
 const MapComponent = dynamic(() => import('@/app/components/MapPick'), {
     ssr: false,
@@ -324,7 +324,7 @@ const CreateInfo = () => {
                 </div>
 
                 <div className="flex mt-5 gap-3 items-start">
-                    <h2 className={styles.h2}>Số ngày hoàn tiền (?)</h2>
+                    <h2 className={styles.h2}>Số ngày hoàn tiền <Tooltip content="Số ngày khách hàng có thể hủy dịch vụ"><FontAwesomeIcon icon={faCircleQuestion} size="2xs" /></Tooltip></h2>
                     <Input
                         type="number"
                         variant="bordered"

@@ -88,7 +88,7 @@ const Information = () => {
                 <div className='flex flex-col justify-center items-start gap-6'>
                     {/* <h2>Họ và tên</h2> */}
                     <Input placeholder="Nhập họ và tên" isRequired label="Họ và tên" labelPlacement='outside' variant="bordered" className='input' name="fullName" value={formData.fullName} onChange={handleInputChange} />
-                    <Input placeholder="Nhập họ và tên" isRequired label="Email" labelPlacement='outside' variant="bordered" className='input' name="email" value={formData.email} onChange={handleInputChange} />
+                    <Input placeholder="Nhập email" isRequired label="Email" labelPlacement='outside' variant="bordered" className='input' name="email" value={formData.email} onChange={handleInputChange} />
                     <Input placeholder="Nhập số điện thoại" isRequired label="Số điện thoại" labelPlacement='outside' variant="bordered" className='input' name="phoneNumber" value={formData.phoneNumber} onChange={handleInputChange} />
                     <Input placeholder="Nhập địa chỉ của bạn" isRequired label="Địa chỉ của bạn" labelPlacement='outside' variant="bordered" className='input' name="address" value={formData.address} onChange={handleInputChange} />
 
