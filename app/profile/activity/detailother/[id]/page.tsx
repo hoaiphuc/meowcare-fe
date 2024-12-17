@@ -173,8 +173,8 @@ const DetailOther = () => {
                                             />
                                         }
                                     >
-                                        <div key={task.id} className="flex gap-2 items-center justify-between">
-                                            <div>
+                                        <div key={task.id} className="flex gap-2 items-center justify-between mb-2">
+                                            <div className='flex items-start gap-2'>
                                                 {task.haveEvidence && (
                                                     <FontAwesomeIcon icon={faCheck} className="text-green-500" />
                                                 )}

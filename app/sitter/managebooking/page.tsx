@@ -124,7 +124,7 @@ const Page = () => {
                   href={
                     activity.status !== "COMPLETED" &&
                       activity.status !== "CANCELLED"
-                      ? `/sitter/tracking/${activity.id}`
+                      ? (activity.orderType === "OVERNIGHT" ? `/sitter/tracking/${activity.id}` : `/sitter/trackingother/${activity.id}`)
                       : `/sitter/bookingdetail/${activity.id}`
                   }
                   key={activity.id}
@@ -147,7 +147,7 @@ const Page = () => {
                   <div className="flex">
                     <div className="font-semibold">
                       {activity.orderType === "OVERNIGHT"
-                        ? "Chăm sóc mèo tại nhà: "
+                        ? "Gửi thú cưng: "
                         : "Dịch vụ khác: "}
                     </div>
                     <div className="flex items-center justify-center gap-2 ml-2">
@@ -200,7 +200,7 @@ const Page = () => {
               />
             </div>
           ) : (
-            <div>???</div>
+            <div></div>
           )}
         </div>
       </div>
