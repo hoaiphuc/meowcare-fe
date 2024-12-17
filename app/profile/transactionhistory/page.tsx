@@ -20,6 +20,7 @@ const Page = () => {
         startDate: parseDate(format(defaultStartDate, 'yyyy-MM-dd')), // Format to 'YYYY-MM-DD'
         endDate: parseDate(format(defaultEndDate, 'yyyy-MM-dd')), // Format to 'YYYY-MM-DD'
     });
+
     // const [dateRange, setDateRange] = useState<{ startDate: DateValue; endDate: DateValue }>({
     //     startDate: {
     //         year: defaultStartDate.getFullYear(),

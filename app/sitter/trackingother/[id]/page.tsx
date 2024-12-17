@@ -41,6 +41,7 @@ const TrackingOther = () => {
     const [isUpdateMode, setIsUpdateMode] = useState(false)
     const [removeList, setRemoveList] = useState<TaskEvident[]>([]);
     const [addList, setAddList] = useState<TaskEvident[]>([]);
+    const [description, setDescription] = useState("");
 
     const statusColors: { [key: number]: string } = {
         0: 'text-[#9E9E9E]',
@@ -120,6 +121,7 @@ const TrackingOther = () => {
         } catch (error) {
         }
         setSelectedTask(task);
+        setDescription(task.description)
         onOpen();
         console.log(task)
     }
@@ -136,6 +138,7 @@ const TrackingOther = () => {
 
         }
         setSelectedTask(task);
+        setDescription(task.description)
         onOpenUpdate();
         console.log(task)
     }
@@ -185,6 +188,14 @@ const TrackingOther = () => {
 
     const handleAdd = async () => {
         try {
+            if (description && description !== selectedTask?.description) {
+                await axiosClient.put(`tasks/${selectedTask?.id}`, { description })
+                    .then()
+                    .catch((e) => {
+                        console.log(e);
+                    })
+            }
+
             let uploadedEvidences: TaskEvident[] = [];
 
             if (selectTaskEvidence && selectTaskEvidence.length > 0) {
@@ -275,6 +286,15 @@ const TrackingOther = () => {
 
     const handleUpdate = async () => {
         try {
+
+            if (description && description !== selectedTask?.description) {
+                await axiosClient.put(`tasks/${selectedTask?.id}`, { description })
+                    .then()
+                    .catch((e) => {
+                        console.log(e);
+                    })
+            }
+
             // Handle removal of evidences
             if (removeList.length > 0) {
                 await Promise.all(
@@ -521,6 +541,8 @@ const TrackingOther = () => {
                                                 <div className="mb-4">
                                                     <label className="block mb-2 font-bold">Ghi chú từ người chăm sóc:</label>
                                                     <textarea
+                                                        value={description}
+                                                        onChange={(e) => setDescription(e.target.value)}
                                                         placeholder="Hãy ghi chú thông tin về mèo cưng cho chủ mèo yên tâm"
                                                         className="w-full p-2 border rounded-md border-gray-300 resize-none h-20"
                                                     ></textarea>
@@ -660,6 +682,9 @@ const TrackingOther = () => {
                                                 <div className="mb-4">
                                                     <label className="block mb-2 font-bold">Ghi chú từ người chăm sóc:</label>
                                                     <textarea
+                                                        value={description}
+                                                        disabled={!isUpdateMode}
+                                                        onChange={(e) => setDescription(e.target.value)}
                                                         placeholder="Hãy ghi chú thông tin về mèo cưng cho chủ mèo yên tâm"
                                                         className="w-full p-2 border rounded-md border-gray-300 resize-none h-20"
                                                     ></textarea>
