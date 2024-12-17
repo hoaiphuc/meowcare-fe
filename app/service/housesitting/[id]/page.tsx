@@ -200,6 +200,12 @@ const HouseSitting = () => {
             toast.error("Vui lòng chọn 1 bé mèo");
             return;
         }
+
+        if (phoneNumber.length !== 10) {
+            toast.error("Số điện thoại không hợp lệ")
+            return;
+        }
+
         onOpen();
     }
 
@@ -259,6 +265,10 @@ const HouseSitting = () => {
                             })
                     })
                     .catch((e) => {
+                        if (e.response.data.status === 2014) {
+                            toast.error("Bé mèo của bạn đang trong dịch vụ")
+                            onOpenChange()
+                        }
                         console.log(e);
                     })
             } catch (error) {
@@ -270,7 +280,12 @@ const HouseSitting = () => {
                     router.push("/payment-result?resultCode=0")
                     toast.success("Đã đặt lịch thành công, bạn có thể xem nó ở phần hoạt động")
                 })
-                .catch(() => {
+                .catch((e) => {
+                    if (e.response.data.message === "Sitter is busy") {
+                        toast.error("Người chăm sóc này đang bận, vui lòng chọn người khác")
+                        onOpenChange()
+                        return
+                    }
                     router.push("/payment-result?resultCode=1")
                     toast.error("Có lỗi xảy ra, vui lòng thử lại sau")
                 })

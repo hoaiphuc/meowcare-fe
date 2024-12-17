@@ -2,7 +2,7 @@
 
 import Chat from '@/app/components/Chat';
 import DateFormat from '@/app/components/DateFormat';
-import { CareSchedules, Order, PetProfile, Task } from '@/app/constants/types/homeType';
+import { Order, PetProfile, Task } from '@/app/constants/types/homeType';
 import axiosClient from '@/app/lib/axiosClient';
 import { storage } from '@/app/utils/firebase';
 import { faCamera, faCheck, faClipboardCheck, faPaw, faVideo } from '@fortawesome/free-solid-svg-icons';
@@ -10,11 +10,11 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Accordion, AccordionItem, Avatar, Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Tab, Tabs, useDisclosure } from '@nextui-org/react';
 import { formatDate } from 'date-fns';
 import { getDownloadURL, ref, uploadBytes, uploadBytesResumable } from 'firebase/storage';
-import { useParams, useRouter } from 'next/navigation'
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import { useParams, useRouter } from 'next/navigation';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'react-toastify';
 import { v4 as uuidv4 } from 'uuid';
-import styles from "./tracking.module.css"
+import styles from "./trackingother.module.css";
 
 interface TaskEvident {
     id?: string,
@@ -24,14 +24,11 @@ interface TaskEvident {
     evidenceType: string
 }
 
-const Tracking = () => {
+const TrackingOther = () => {
     const param = useParams();
     const router = useRouter();
-    const [data, setData] = useState<CareSchedules>();
+    const [data, setData] = useState<Task[]>([]);
     const [dataOrder, setDataOrder] = useState<Order>()
-    const [dateList, setDateList] = useState<Date[]>([]);
-    const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-    const [filteredTasks, setFilteredTasks] = useState<Task[]>([]);
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
     const { isOpen: isOpenUpdate, onOpen: onOpenUpdate, onOpenChange: onOpenChangeUpdate } = useDisclosure();
     const { isOpen: isOpenCat, onOpen: onOpenCat, onOpenChange: onOpenChangeCat } = useDisclosure();
@@ -59,31 +56,19 @@ const Tracking = () => {
         3: 'Chưa hoàn thành',
     };
 
-    // Function to generate dates between two dates inclusive
-    const generateDateRange = (startDate: Date, endDate: Date): Date[] => {
-        const dates: Date[] = [];
-        const currentDate = new Date(startDate);
-
-        while (currentDate <= endDate) {
-            dates.push(new Date(currentDate));
-            currentDate.setDate(currentDate.getDate() + 1);
-        }
-
-        return dates;
-    };
     const fetchTask = useCallback(() => {
         axiosClient(`care-schedules/booking/${param.id}`)
             .then((res) => {
-                const scheduleData = res.data;
-                setData(scheduleData);
+                console.log(res.data.tasks);
+                const scheduleData = res.data.tasks;
+                const tasksArray = scheduleData.map((task: Task) => ({
+                    ...task,
+                    startTime: new Date(task.startTime),
+                    endTime: new Date(task.endTime),
+                }));
 
-                // Parse startTime and endTime
-                const startDate = new Date(scheduleData.startTime);
-                const endDate = new Date(scheduleData.endTime);
+                setData(tasksArray);
 
-                // Generate list of dates
-                const dates = generateDateRange(startDate, endDate);
-                setDateList(dates);
             })
             .catch((e) => {
                 console.log(e);
@@ -103,24 +88,6 @@ const Tracking = () => {
             console.log(error);
         }
     }, [fetchTask, param.id])
-
-    // Handle date click
-    const handleDateClick = (date: Date) => {
-        setSelectedDate(date);
-        if (data && data.tasks) {
-            // Filter tasks that have the selected date
-            const tasksForDate = data.tasks.filter((task: Task) => {
-                const taskDate = new Date(task.startTime);
-                return (
-                    taskDate.getFullYear() === date.getFullYear() &&
-                    taskDate.getMonth() === date.getMonth() &&
-                    taskDate.getDate() === date.getDate()
-                );
-            });
-            tasksForDate.sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime());
-            setFilteredTasks(tasksForDate);
-        }
-    };
 
     const TaskTimeRange = ({
         startTimeStr,
@@ -221,98 +188,43 @@ const Tracking = () => {
             let uploadedEvidences: TaskEvident[] = [];
 
             if (selectTaskEvidence && selectTaskEvidence.length > 0) {
-                const uploadPromises = selectTaskEvidence.map((evident) => {
-                    const file = evident.file;
-
-                    if ((evident.evidenceType === "PHOTO" || evident.evidenceType === "VIDEO") && file) {
-                        // Determine the folder and create a storage reference
+                const uploadPromises = selectTaskEvidence.map(async (evident) => {
+                    if (evident.file) {
                         const folderName = evident.evidenceType === "PHOTO" ? "imagesTask" : "videosTask";
-                        const storageRef = ref(storage, `${folderName}/${uuidv4()}_${file.name}`);
+                        const storageRef = ref(storage, `${folderName}/${uuidv4()}_${evident.file.name}`);
 
-                        // Upload the file
-                        const uploadTask = uploadBytesResumable(storageRef, file);
-
-                        // Return a promise that resolves with the download URL when upload is complete
-                        return new Promise<TaskEvident>((resolve, reject) => {
-                            uploadTask.on(
-                                'state_changed',
-                                null, // No progress callback
-                                (error) => {
-                                    reject(error);
-                                },
-                                async () => {
-                                    try {
-                                        const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-                                        if (evident.evidenceType === "PHOTO") {
-                                            resolve({
-                                                evidenceType: "PHOTO",
-                                                photoUrl: downloadURL,
-                                            });
-                                        } else if (evident.evidenceType === "VIDEO") {
-                                            resolve({
-                                                evidenceType: "VIDEO",
-                                                videoUrl: downloadURL,
-                                            });
-                                        }
-                                    } catch (error) {
-                                        reject(error);
-                                    }
-                                }
-                            );
-
-                        });
-                    } else {
-                        // Skip if evidenceType or file is not valid
-                        return Promise.resolve(evident);
+                        const snapshot = await uploadBytesResumable(storageRef, evident.file);
+                        const downloadURL = await getDownloadURL(snapshot.ref);
+                        return await ({
+                            evidenceType: evident.evidenceType,
+                            photoUrl: evident.evidenceType === "PHOTO" ? downloadURL : undefined,
+                            videoUrl: evident.evidenceType === "VIDEO" ? downloadURL : undefined,
+                        } as TaskEvident);
                     }
+                    return Promise.resolve(null);
                 });
 
-                // Wait for all uploads to complete
-                uploadedEvidences = await Promise.all(uploadPromises);
+                uploadedEvidences = (await Promise.all(uploadPromises)) as TaskEvident[]; // Cast to TaskEvident[]
             }
 
-            // Proceed to update the task evidence regardless of whether files were uploaded
-            axiosClient
-                .post(`task-evidences/list?taskId=${selectedTask?.id}`, uploadedEvidences)
-                .then((res) => {
-                    // Update the haveEvidence property for the selected task
-                    const updatedTasks = data?.tasks?.map(task => {
-                        if (task.id === selectedTask?.id) {
-                            return { ...task, haveEvidence: res.data.length > 0 ? true : false }; // Or false, based on your needs
-                        }
-                        return task;
-                    }) || [];
+            // Send uploaded data to the server
+            await axiosClient.post(`task-evidences/list?taskId=${selectedTask?.id}`, uploadedEvidences);
 
-                    // Update data and filteredTasks state
-                    setData(prevData => {
-                        if (prevData) {
-                            return {
-                                ...prevData,
-                                tasks: updatedTasks || [] // Ensure tasks is not undefined
-                            };
-                        }
-                        return prevData;
-                    });
-                    setFilteredTasks(updatedTasks.filter(task => {
-                        const taskDate = new Date(task.startTime);
-                        return (
-                            taskDate.getFullYear() === selectedDate?.getFullYear() &&
-                            taskDate.getMonth() === selectedDate?.getMonth() &&
-                            taskDate.getDate() === selectedDate?.getDate()
-                        );
-                    }));
+            // Update the specific task in the 'data' array
+            const updatedTasks = data.map((task) =>
+                task.id === selectedTask?.id ? { ...task, haveEvidence: true } : task
+            );
 
-                    onOpenChange();
-                    toast.success("Cập nhật hoạt động thành công");
-                })
-                .catch(() => {
-                    toast.error("Có lỗi xảy ra, vui lòng thử lại");
-                });
+            setData(updatedTasks);
+            onOpenChange();
+            toast.success("Cập nhật hoạt động thành công");
         } catch (error) {
             console.error(error);
             toast.error("Có lỗi xảy ra, vui lòng thử lại");
         }
     };
+
+
 
     // update evidence
     const handleRemoveUpdate = (evident: TaskEvident) => {
@@ -362,149 +274,55 @@ const Tracking = () => {
     };
 
     const handleUpdate = async () => {
-        console.log(removeList);
-        console.log(addList);
         try {
-            // Handle removal asynchronously using Promise.all
-            if (removeList && removeList.length > 0) {
+            // Handle removal of evidences
+            if (removeList.length > 0) {
                 await Promise.all(
-                    removeList.map(async (item) => {
-                        try {
-                            if (item.id) {
-                                await axiosClient.delete(`task-evidences/${item.id}`);
-                            } else {
-                                return;
-                            }
-                        } catch (error) {
-                            toast.error("Lỗi khi gỡ ảnh");
+                    removeList.map(async (evident) => {
+                        if (evident.id) {
+                            await axiosClient.delete(`task-evidences/${evident.id}`);
                         }
                     })
                 );
-                setRemoveList([]);
             }
 
-            // Handle addition asynchronously using a loop and async-await
-            if (addList && addList.length > 0) {
-                for (const item of addList) {
-                    if (item.file) {
-                        try {
-                            const storageRef = ref(storage, `petProfiles/${uuidv4()}_${item.evidenceType}`);
+            // Upload new files
+            const uploadPromises = addList.map((evident) => {
+                if (evident.file) {
+                    const folderName = evident.evidenceType === "PHOTO" ? "imagesTask" : "videosTask";
+                    const storageRef = ref(storage, `${folderName}/${uuidv4()}_${evident.file.name}`);
 
-                            // Upload the file
-                            await uploadBytes(storageRef, item.file);
-
-                            // Get the download URL
-                            const profilePictureUrl = await getDownloadURL(storageRef);
-
-                            // Prepare item data with the profile picture URL
-                            const addItem = {
-                                ...item,
-                                photoUrl: profilePictureUrl,
-                            };
-
-                            await axiosClient.post(`task-evidences?taskId=${selectedTask?.id}`, addItem);
-                        } catch (error) {
-                            toast.error("Lỗi khi thêm ảnh");
-                        }
-                    }
-                }
-                setAddList([]);
-            }
-
-            // Update the local state instead of fetching
-            const hasEvidence = (addList.length > 0 || selectTaskEvidence.length > removeList.length);
-            setData((prevData) => {
-                if (prevData) {
-                    const updatedTasks = prevData.tasks.map(task => {
-                        if (task.id === selectedTask?.id) {
-                            return {
-                                ...task,
-                                haveEvidence: hasEvidence,
-                            };
-                        }
-                        return task;
+                    return uploadBytes(storageRef, evident.file).then(async (snapshot) => {
+                        const downloadURL = await getDownloadURL(snapshot.ref);
+                        return {
+                            evidenceType: evident.evidenceType,
+                            photoUrl: evident.evidenceType === "PHOTO" ? downloadURL : undefined,
+                            videoUrl: evident.evidenceType === "VIDEO" ? downloadURL : undefined,
+                        } as TaskEvident; // Explicit type casting
                     });
-                    return {
-                        ...prevData,
-                        tasks: updatedTasks,
-                    };
                 }
-                return prevData;
+                return Promise.resolve(null);
             });
 
-            // Update filteredTasks based on the current selected date
-            if (selectedDate) {
-                setFilteredTasks((prevFilteredTasks) => {
-                    const updatedFilteredTasks = prevFilteredTasks.map(task => {
-                        if (task.id === selectedTask?.id) {
-                            return {
-                                ...task,
-                                haveEvidence: hasEvidence,
-                            };
-                        }
-                        return task;
-                    });
-                    return updatedFilteredTasks;
-                });
-            }
+            const newEvidences = (await Promise.all(uploadPromises)) as TaskEvident[]; // Explicit type cast
 
-            // Provide user feedback and close the modal
+            // Send new evidence to the server
+            await axiosClient.post(`task-evidences/list?taskId=${selectedTask?.id}`, newEvidences);
+
+            // Update the specific task in 'data'
+            const updatedTasks = data.map((task) =>
+                task.id === selectedTask?.id ? { ...task, haveEvidence: true } : task
+            );
+
+            setData(updatedTasks);
             toast.success("Cập nhật thành công");
             setIsUpdateMode(false);
             onOpenChangeUpdate();
         } catch (error) {
             console.error(error);
-            toast.error("Có lỗi xảy ra, vui lòng thử lại sau");
+            toast.error("Có lỗi xảy ra, vui lòng thử lại");
         }
     };
-    // State for grouped tasks
-    const [groupedTasks, setGroupedTasks] = useState<{ timeRangeKey: string; tasks: Task[] }[]>([]);
-    const formatTime = (date: Date) => {
-        const adjustedDate = new Date(date);
-        adjustedDate.setSeconds(0, 0); // Zero out seconds and milliseconds
-        return adjustedDate.toLocaleTimeString([], {
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: false,
-        });
-    };
-
-    // Group tasks when filteredTasks change
-    useEffect(() => {
-        if (filteredTasks.length > 0) {
-            const groupsMap = filteredTasks.reduce((acc, task) => {
-                const startTimeKey = formatTime(new Date(task.startTime));
-                const endTimeKey = formatTime(new Date(task.endTime));
-                const timeRangeKey = `${startTimeKey} - ${endTimeKey}`;
-
-                if (!acc[timeRangeKey]) {
-                    acc[timeRangeKey] = [];
-                }
-                acc[timeRangeKey].push(task);
-                return acc;
-            }, {} as { [key: string]: Task[] });
-
-            // Convert the groupsMap to an array and sort it
-            const groupsArray = Object.keys(groupsMap)
-                .map((timeRangeKey) => ({
-                    timeRangeKey,
-                    tasks: groupsMap[timeRangeKey],
-                }))
-                .sort((a, b) => {
-                    const [aStartTime] = a.timeRangeKey.split(' - ');
-                    const [bStartTime] = b.timeRangeKey.split(' - ');
-
-                    const aDate = new Date(`1970-01-01T${aStartTime}:00`);
-                    const bDate = new Date(`1970-01-01T${bStartTime}:00`);
-
-                    return aDate.getTime() - bDate.getTime();
-                });
-
-            setGroupedTasks(groupsArray);
-        } else {
-            setGroupedTasks([]);
-        }
-    }, [filteredTasks]);
 
 
     //complete booking
@@ -537,6 +355,16 @@ const Tracking = () => {
 
         }
     }
+
+    const formatTime = (date: Date) => {
+        const adjustedDate = new Date(date);
+        adjustedDate.setSeconds(0, 0); // Zero out seconds and milliseconds
+        return adjustedDate.toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false,
+        });
+    };
 
     return (
         <div className='flex justify-center items-start my-10 gap-3'>
@@ -587,91 +415,63 @@ const Tracking = () => {
 
             {/* tracking */}
             <div className='bg-white w-[900px] p-10 shadow-lg rounded-md'>
-                <h1 className='text-3xl font-semibold mb-5'>Theo dõi lịch chăm sóc</h1>
-                {dateList.length > 0 ? (
-                    <div className='flex gap-3 flex-wrap'>
-                        {dateList.map((date) => (
-                            <Button
-                                key={date.toISOString()}
-                                onClick={() => handleDateClick(date)}
-                                variant={selectedDate === date ? 'solid' : 'bordered'}
-                                className={selectedDate === date ? 'bg-maincolor text-white' : ''}
+                {data.length > 0 ? (
+                    <Accordion selectionMode="multiple">
+                        {data.map((task) => (
+                            <AccordionItem
+                                key={task.id}
+                                aria-label="task"
+                                className="mt-2"
+                                title={
+                                    <TaskTimeRange
+                                        startTimeStr={formatTime(new Date(task.startTime))}
+                                        endTimeStr={formatTime(new Date(task.endTime))}
+                                        status={task.status}
+                                    />
+                                }
                             >
-                                {formatDate(date.toLocaleDateString(), 'dd/MM/yyyy')}
-                            </Button>
+                                <div key={task.id} className="flex gap-2 items-center justify-between">
+                                    <div className='flex items-start gap-2'>
+                                        {task.haveEvidence && (
+                                            <FontAwesomeIcon icon={faCheck} className="text-green-500" />
+                                        )}
+                                        <h3 className={task.haveEvidence ? 'text-green-500' : ''}>
+                                            {task.name}
+                                        </h3>
+                                    </div>
+                                    <div className='flex gap-1'>
+                                        <Button
+                                            className="bg-gradient-to-r from-maincolor to-[#db6eb3] text-white"
+                                            onClick={() => { setSelectedCat(task.petProfile), onOpenCat() }}
+                                        >
+                                            <FontAwesomeIcon icon={faPaw} />
+                                            Xem mèo
+                                        </Button>
+                                        {task.haveEvidence ? (
+                                            <Button
+                                                className="bg-gradient-to-r from-btnbg to-[#5f91ec] text-white px-7"
+                                                onClick={() => handleOpenUpdate(task)}
+                                            >
+                                                <FontAwesomeIcon icon={faClipboardCheck} />
+                                                Xem hoạt động
+                                            </Button>
+                                        ) : (
+                                            <Button
+                                                className="bg-gradient-to-r from-btnbg to-[#5f91ec] text-white px-7"
+                                                onClick={() => handleOpenEvidenceTask(task)}
+                                            >
+                                                <FontAwesomeIcon icon={faClipboardCheck} />
+                                                Cập nhật hoạt động
+                                            </Button>
+                                        )}
+                                    </div>
+                                </div>
+                            </AccordionItem>
                         ))}
-                    </div>
-                ) : (
-                    <p>Đang tải</p>
-                )}
-
-
-                {groupedTasks.length > 0 ? (
-                    <Accordion key={selectedDate?.toISOString()} selectionMode="multiple">
-                        {groupedTasks.map((group) => {
-                            const { timeRangeKey, tasks } = group;
-                            const [startTimeStr, endTimeStr] = timeRangeKey.split(' - ');
-
-                            return (
-                                <AccordionItem
-                                    key={timeRangeKey}
-                                    aria-label={timeRangeKey}
-                                    className="mt-2"
-                                    title={
-                                        <TaskTimeRange
-                                            startTimeStr={startTimeStr}
-                                            endTimeStr={endTimeStr}
-                                            status={tasks[0].status}
-                                        />
-                                    }
-                                >
-                                    {tasks.map((task) => (
-                                        <div key={task.id} className="flex gap-2 items-center justify-between">
-                                            <div className='flex items-start gap-2'>
-                                                {task.haveEvidence && (
-                                                    <FontAwesomeIcon icon={faCheck} className="text-green-500" />
-                                                )}
-                                                <h3 className={task.haveEvidence ? 'text-green-500' : ''}>
-                                                    {task.name}
-                                                </h3>
-                                            </div>
-
-                                            <div className='flex gap-1'>
-                                                <Button
-                                                    className="bg-gradient-to-r from-maincolor to-[#db6eb3] text-white"
-                                                    onClick={() => { setSelectedCat(task.petProfile), onOpenCat() }}
-                                                >
-                                                    <FontAwesomeIcon icon={faPaw} />
-                                                    Xem mèo
-                                                </Button>
-                                                {task.haveEvidence ? (
-                                                    <Button
-                                                        className="bg-gradient-to-r from-btnbg to-[#5f91ec] text-white px-7"
-                                                        onClick={() => handleOpenUpdate(task)}
-                                                    >
-                                                        <FontAwesomeIcon icon={faClipboardCheck} />
-                                                        Xem hoạt động
-                                                    </Button>
-                                                ) : (
-                                                    <Button
-                                                        className="bg-gradient-to-r from-btnbg to-[#5f91ec] text-white px-7"
-                                                        onClick={() => handleOpenEvidenceTask(task)}
-                                                    >
-                                                        <FontAwesomeIcon icon={faClipboardCheck} />
-                                                        Cập nhật hoạt động
-                                                    </Button>
-                                                )}
-                                            </div>
-
-                                        </div>
-                                    ))}
-                                </AccordionItem>
-                            );
-                        })}
                     </Accordion>
                 ) : (
                     <div className='flex items-center justify-center my-7'>
-                        <p className='font-semibold'>Vui lòng chọn ngày để xem lịch</p>
+                        <p className='font-semibold'>Đang tải... nếu quá lâu có thể làm mới trang</p>
                     </div>
 
                 )}
@@ -996,4 +796,4 @@ const Tracking = () => {
     )
 }
 
-export default Tracking
+export default TrackingOther
