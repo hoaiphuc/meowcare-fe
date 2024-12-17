@@ -414,8 +414,8 @@ const Page = () => {
                                                     <label className="block mb-2 font-bold">Ghi chú từ người chăm sóc:</label>
                                                     <Textarea
                                                         isReadOnly
+                                                        value={selectedTask.description}
                                                         placeholder="Hãy ghi chú thông tin về mèo cưng cho chủ mèo yên tâm"
-                                                        // className="w-full p-2 border rounded-md border-gray-300 resize-none h-20"
                                                         variant='bordered'
                                                     ></Textarea>
                                                 </div>
