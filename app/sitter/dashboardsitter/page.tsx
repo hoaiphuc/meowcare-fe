@@ -1,91 +1,50 @@
 "use client";
 
 import Loading from "@/app/components/Loading";
+import { Orders } from "@/app/constants/types/homeType";
 import axiosClient from "@/app/lib/axiosClient";
 import { useAppSelector } from "@/app/lib/hooks";
-import React, { useEffect, useState } from "react";
-
-type ServiceData = {
-  date: string;
-  type: "pet-boarding" | "other";
-  amount: number;
-};
-
-const TAX_AND_DISCOUNT_RATE = 0.15;
+import { Pagination } from "@nextui-org/react";
+import { formatDate } from "date-fns";
+import React, { useEffect, useMemo, useState } from "react";
 
 const Page = () => {
-  // const [services, setServices] = useState<ServiceData[]>([]);
-  const [filteredServices, setFilteredServices] = useState<ServiceData[]>([]);
   const [selectedMonth, setSelectedMonth] = useState<string>("2024-12");
-  const [summary, setSummary] = useState({
-    totalServices: 0,
-    petBoardingServices: 0,
-    otherServices: 0,
-    grossRevenue: 0,
-    discountAndTax: 0,
-    netIncome: 0,
-  });
   const [isLoading, setIsLoading] = useState(true);
   const { userProfile } = useAppSelector((state) => state.user);
-  const [allService, setAllService] = useState<number>()
-  const [overNight, setOverNight] = useState<number>()
-  const [buyService, setBuyService] = useState<number>()
-
-  // Dữ liệu giả lập từ API
-  useEffect(() => {
-    const data: ServiceData[] = [
-      { date: "2024-11-01", type: "pet-boarding", amount: 400000 },
-      { date: "2024-11-10", type: "other", amount: 150000 },
-      { date: "2024-12-01", type: "pet-boarding", amount: 500000 },
-      { date: "2024-12-03", type: "pet-boarding", amount: 300000 },
-      { date: "2024-12-05", type: "other", amount: 200000 },
-      { date: "2024-12-10", type: "other", amount: 150000 },
-      { date: "2024-12-15", type: "pet-boarding", amount: 700000 },
-    ];
-
-    // setServices(data);
-    filterDataByMonth(data, selectedMonth);
-  }, [selectedMonth]);
-
-  // Lọc dữ liệu theo tháng
-  const filterDataByMonth = (data: ServiceData[], month: string) => {
-    const filtered = data.filter((service) => service.date.startsWith(month));
-    setFilteredServices(filtered);
-
-    const totalServices = filtered.length;
-    const petBoardingServices = filtered.filter(
-      (item) => item.type === "pet-boarding"
-    ).length;
-    const otherServices = filtered.filter(
-      (item) => item.type === "other"
-    ).length;
-    const grossRevenue = filtered.reduce((sum, item) => sum + item.amount, 0);
-    const discountAndTax = grossRevenue * TAX_AND_DISCOUNT_RATE;
-    const netIncome = grossRevenue - discountAndTax;
-
-    setSummary({
-      totalServices,
-      petBoardingServices,
-      otherServices,
-      grossRevenue,
-      discountAndTax,
-      netIncome,
-    });
-  };
-
+  const [allService, setAllService] = useState<number>(0)
+  const [overNight, setOverNight] = useState<number>(0)
+  const [buyService, setBuyService] = useState<number>(0)
+  const [totalMoney, setTotalMoney] = useState<number>(0)
+  const [commission, setCommission] = useState<number>(0)
+  const [booking, setBooking] = useState<Orders>()
+  const [page, setPage] = useState(1)
+  const [pages, setPages] = useState(1)
   useEffect(() => {
     const fetchData = async () => {
+
+      if (!userProfile?.id) {
+        // If userProfile.id is undefined, exit early
+        console.warn("UserProfile ID is undefined. Skipping API calls.");
+        return;
+      }
+
       try {
-        const [allServiceRes, overNightRes, buyServiceRes] =
+        const [allServiceRes, overNightRes, buyServiceRes, totalMoneyRes, commissionRes, bookingRes] =
           await Promise.allSettled([
             axiosClient(`booking-orders/count-by-sitter?id=${userProfile?.id}&status=COMPLETED`),
             axiosClient(`booking-orders/count-by-sitter?id=${userProfile?.id}&status=COMPLETED&orderType=OVERNIGHT`),
             axiosClient(`booking-orders/count-by-sitter?id=${userProfile?.id}&status=COMPLETED&orderType=BUY_SERVICE`),
+            axiosClient(`transactions/search/total-amount?userId=${userProfile?.id}&status=COMPLETED&transactionType=PAYMENT`),
+            axiosClient(`transactions/search/total-amount?userId=${userProfile?.id}&transactionType=COMMISSION`),
+            axiosClient(`booking-orders/sitter/status?sitterId=${userProfile?.id}&status=COMPLETED&page=0&size=10&prop=createdAt&direction=DESC`),
           ]);
 
         // Handle config services response
         if (allServiceRes.status === "fulfilled") {
-          setAllService(allServiceRes.value.data.data);
+          setAllService(allServiceRes.value.data || 0);
+          console.log();
+
         } else {
           console.error(
             "Failed to fetch config services:",
@@ -95,7 +54,7 @@ const Page = () => {
 
         // Handle sitter profile response
         if (overNightRes.status === "fulfilled") {
-          setOverNight(overNightRes.value.data.data);
+          setOverNight(overNightRes.value.data || 0);
         } else {
           console.error(
             "Failed to fetch sitter profile:",
@@ -105,10 +64,30 @@ const Page = () => {
 
         // Handle services response
         if (buyServiceRes.status === "fulfilled") {
-          setBuyService(buyServiceRes.value.data.data);
+          setBuyService(buyServiceRes.value.data.data || 0);
         } else {
           console.error("Failed to fetch services:", buyServiceRes.reason);
         }
+
+        if (totalMoneyRes.status === "fulfilled") {
+          setTotalMoney(totalMoneyRes.value.data || 0);
+        } else {
+          console.error("Failed to fetch services:", totalMoneyRes.reason);
+        }
+
+        if (commissionRes.status === "fulfilled") {
+          setCommission(commissionRes.value.data || 0);
+        } else {
+          console.error("Failed to fetch services:", commissionRes.reason);
+        }
+
+        if (bookingRes.status === "fulfilled") {
+          setBooking(bookingRes.value.data);
+          setPages(bookingRes.value.data.totalPages)
+        } else {
+          console.error("Failed to fetch services:", bookingRes.reason);
+        }
+
       } catch (error) {
         console.error("An unexpected error occurred:", error);
       } finally {
@@ -118,6 +97,11 @@ const Page = () => {
 
     fetchData();
   }, [userProfile?.id]);
+
+  const netIncome = useMemo(() => {
+    const money = totalMoney - commission
+    return money
+  }, [commission, totalMoney])
 
   if (isLoading) {
     return <Loading />;
@@ -148,31 +132,31 @@ const Page = () => {
         <h2 className="text-xl font-semibold text-gray-800 mb-4">Tổng hợp:</h2>
         <ul className="space-y-3 text-gray-700">
           <li>
-            <strong>Tổng số dịch vụ được đặt:</strong> {allService}
+            <strong>Tổng số dịch vụ được đặt:</strong> {allService.toLocaleString()}
           </li>
           <li>
             <strong>Tổng số dịch vụ gửi thú cưng:</strong>{" "}
-            {overNight}
+            {overNight.toLocaleString()}
           </li>
           <li>
-            <strong>Tổng số dịch vụ khác:</strong> {buyService}
+            <strong>Tổng số dịch vụ khác:</strong> {buyService.toLocaleString()}
           </li>
           <li>
             <strong>Doanh số:</strong>{" "}
             <span className="text-green-600 font-bold">
-              {summary.grossRevenue.toLocaleString()} VND
+              {totalMoney.toLocaleString("de")} VND
             </span>
           </li>
           <li>
             <strong>Chiết khấu + thuế:</strong>{" "}
             <span className="text-red-500 font-bold">
-              {summary.discountAndTax.toLocaleString()} VND
+              {commission.toLocaleString("de")} VND
             </span>
           </li>
           <li>
             <strong>Thu nhập ròng:</strong>{" "}
             <span className="text-blue-600 font-bold">
-              {summary.netIncome.toLocaleString()} VND
+              {netIncome.toLocaleString("de")} VND
             </span>
           </li>
         </ul>
@@ -186,27 +170,29 @@ const Page = () => {
         <table className="w-full border-collapse border border-gray-200 rounded-lg overflow-hidden">
           <thead>
             <tr className="bg-gradient-to-r from-indigo-500 to-blue-500 text-white">
-              <th className="py-3 px-4 text-left">Ngày</th>
+              <th className="py-3 px-4 text-left">Ngày bắt đầu</th>
+              <th className="py-3 px-4 text-left">Ngày kết thúc</th>
               <th className="py-3 px-4 text-left">Loại dịch vụ</th>
               <th className="py-3 px-4 text-right">Số tiền (VND)</th>
             </tr>
           </thead>
           <tbody>
-            {filteredServices.length > 0 ? (
-              filteredServices.map((service, index) => (
+            {booking?.content ? (
+              booking.content.map((booking, index) => (
                 <tr
                   key={index}
                   className={`${index % 2 === 0 ? "bg-gray-50" : "bg-white"
                     } border-b border-gray-200`}
                 >
-                  <td className="py-3 px-4">{service.date}</td>
+                  <td className="py-3 px-4">{formatDate(new Date(booking.startDate), "dd/MM/yyyy")}</td>
+                  <td className="py-3 px-4">{booking.endDate ? formatDate(new Date(booking.endDate), "dd/MM/yyyy") : formatDate(new Date(booking.startDate), "dd/MM/yyyy")}</td>
                   <td className="py-3 px-4 capitalize">
-                    {service.type === "pet-boarding"
+                    {booking.orderType === "OVERNIGHT"
                       ? "Gửi Thú Cưng"
                       : "Dịch Vụ Khác"}
                   </td>
                   <td className="py-3 px-4 text-right">
-                    {service.amount.toLocaleString()}
+                    {/* {service.amount.toLocaleString()} */}
                   </td>
                 </tr>
               ))
@@ -218,6 +204,19 @@ const Page = () => {
               </tr>
             )}
           </tbody>
+          {pages > 10 && (
+            <div className="flex w-full justify-center">
+              <Pagination
+                isCompact
+                showControls
+                showShadow
+                color="secondary"
+                page={page}
+                total={pages}
+                onChange={(page) => setPage(page)}
+              />
+            </div>
+          )}
         </table>
       </div>
     </div>
