@@ -167,7 +167,7 @@ const Page = () => {
                               Theo dõi lịch
                             </Button>
                           }
-                          {(activity.status === "CANCELLED" || activity.status === "CONFIRM") &&
+                          {(activity.status === "CANCELLED" || activity.status === "CONFIRM" || activity.status === "COMPLETED") &&
                             <Button
                               as={Link}
                               href={`/profile/activity/bookingdetail/${activity.id}`}
