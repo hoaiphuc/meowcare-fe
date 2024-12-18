@@ -67,7 +67,7 @@ const Page = () => {
             axiosClient(`transactions/search/pagination?userId=${userId}&fromTime=${startDate}&toTime=${endDate}&status=COMPLETED&page=${page}&size=6&sort=updatedAt&direction=DESC`)
                 .then((res) => {
                     setTransactions(res.data)
-                    setPages(res.data.totalPages)
+                    setPages(res.data.page.totalPages)
                 })
                 .catch(() => { })
         } catch (error) {
@@ -148,21 +148,18 @@ const Page = () => {
                             <hr className='my-3' />
                         </div>
                     ))}
-                    {page ? (
-                        <div className={pages < 2 ? "hidden" : "flex w-full justify-center"}>
-                            <Pagination
-                                isCompact
-                                showControls
-                                showShadow
-                                color="secondary"
-                                page={page}
-                                total={pages}
-                                onChange={(page) => setPage(page)}
-                            />
-                        </div>
-                    ) : (
-                        <div>???</div>
-                    )}
+                    <div className={pages < 2 ? "hidden" : "flex w-full justify-center"}>
+                        <Pagination
+                            isCompact
+                            showControls
+                            showShadow
+                            color="secondary"
+                            page={page}
+                            total={pages}
+                            onChange={(page) => setPage(page)}
+                        />
+                    </div>
+
                 </div>
                 :
                 <div className='flex justify-center items-center w-full text-2xl mt-36'>Hiện tại chưa có giao dịch nào</div>
