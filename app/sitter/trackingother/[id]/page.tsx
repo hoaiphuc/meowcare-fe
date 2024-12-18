@@ -366,8 +366,8 @@ const TrackingOther = () => {
         try {
             axiosClient.put(`booking-orders/status/${param.id}?status=COMPLETED`)
                 .then(() => {
-                    toast.success('Bạn đã chấp nhận yêu cầu này, vui lòng chăm sóc theo lịch')
-                    router.push(`sitter/managebooking`)
+                    toast.success('Bạn đã hoàn thành')
+                    router.push(`/sitter/managebooking`)
                 })
                 .catch(async (e) => {
                     if (e.response.data.status === 2013) {
