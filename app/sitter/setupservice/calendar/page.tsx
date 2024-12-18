@@ -1,10 +1,13 @@
 'use client'
+
 import { useEffect, useState } from 'react';
 import styles from './calendar.module.css';
 import { Button } from '@nextui-org/react';
+import axiosClient from '@/app/lib/axiosClient';
+import { UserLocal } from '@/app/constants/types/homeType';
 
 const Calendar = () => {
-    // const [unavailable, setUnavailable] = useState()
+    // const [unavailableDates, setUnavailableDates] = useState<Date[]>([]);
     const [daysOfWeek, setDaysOfWeek] = useState([
         { key: "monday", name: "Thứ 2", isAvailable: true },
         { key: "tuesday", name: "Thứ 3", isAvailable: true },
@@ -14,35 +17,49 @@ const Calendar = () => {
         { key: "saturday", name: "Thứ 7", isAvailable: true },
         { key: "sunday", name: "Chủ nhật", isAvailable: true },
     ]);
-
-    const [next15Days, setNext15Days] = useState<Date[]>([]);
+    const [next15Days, setNext15Days] = useState<{ date: Date; isAvailable: boolean }[]>([]);
+    const getUserFromStorage = () => {
+        if (typeof window !== "undefined") {
+            const storedUser = localStorage.getItem("user");
+            return storedUser ? JSON.parse(storedUser) : null;
+        }
+    };
+    const user: UserLocal | null = getUserFromStorage();
+    const userId = user?.id;
 
     useEffect(() => {
         const today = new Date();
         const days = [];
-        for (let i = 0; i <= 15; i++) {
+        for (let i = 0; i <= 13; i++) {
             const date = new Date();
             date.setDate(today.getDate() + i);
-            days.push(date);
+            days.push({ date, isAvailable: true });
         }
         setNext15Days(days);
     }, []);
 
-    const handleDate = (id: string) => {
-        setDaysOfWeek((prevDays) =>
-            prevDays.map((day) =>
-                day.key === id ? { ...day, isAvailable: !day.isAvailable } : day
+    useEffect(() => {
+        try {
+            axiosClient(`sitter-unavailable-dates/sitter/${userId}`)
+        } catch (error) {
+
+        }
+    }, [userId])
+
+    const toggleDateAvailability = (index: number) => {
+        setNext15Days((prevDays) =>
+            prevDays.map((day, i) =>
+                i === index ? { ...day, isAvailable: !day.isAvailable } : day
             )
         );
     };
 
-    // const handleClick = () => {
-    //     setUnavailable()
-    // }
-
     const handleUpdate = () => {
         try {
-
+            const unavailable = next15Days.filter((day) => !day.isAvailable).map((day) => day.date);
+            // setUnavailableDates(unavailable);
+            console.log("Unavailable Dates:", unavailable);
+            // axiosClient("sitter-unavailable-dates", unavailableDates)
         } catch (error) {
 
         }
@@ -61,7 +78,13 @@ const Calendar = () => {
                             <div
                                 className={`w-[130px] h-[70px] cursor-pointer ${day.isAvailable ? 'bg-green-500' : 'bg-red-500'}`}
                                 key={day.key}
-                                onClick={() => handleDate(day.key)}
+                                onClick={() =>
+                                    setDaysOfWeek((prevDays) =>
+                                        prevDays.map((d) =>
+                                            d.key === day.key ? { ...d, isAvailable: !d.isAvailable } : d
+                                        )
+                                    )
+                                }
                             >
                                 <div
                                     className={`w-[130px] h-[70px]  flex items-center justify-center text-white `}
@@ -72,13 +95,14 @@ const Calendar = () => {
                         ))}
                     </div>
                     <div className="flex flex-wrap">
-                        {next15Days.map((date, index) => (
+                        {next15Days.map((day, index) => (
                             <div
                                 key={index}
-                                className="bg-blue-500 w-[130px] h-[70px] flex justify-center items-center"
+                                className={` w-[130px] h-[70px] flex justify-center items-center cursor-pointer ${day.isAvailable ? 'bg-green-500' : 'bg-red-500'}`}
+                                onClick={() => toggleDateAvailability(index)}
                             >
                                 <p className="text-white font-semibold">
-                                    {date.toLocaleDateString('vi-VN', {
+                                    {day.date.toLocaleDateString('vi-VN', {
                                         day: '2-digit',
                                         month: '2-digit',
                                     })}
