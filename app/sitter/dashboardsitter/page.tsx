@@ -42,7 +42,7 @@ const Page = () => {
 
         // Handle config services response
         if (allServiceRes.status === "fulfilled") {
-          setAllService(allServiceRes.value.data.count || 0);
+          setAllService(allServiceRes.value.data || 0);
 
         } else {
           console.error(
@@ -53,7 +53,7 @@ const Page = () => {
 
         // Handle sitter profile response
         if (overNightRes.status === "fulfilled") {
-          setOverNight(overNightRes.value.data.count || 0);
+          setOverNight(overNightRes.value.data);
         } else {
           console.error(
             "Failed to fetch sitter profile:",
@@ -63,19 +63,19 @@ const Page = () => {
 
         // Handle services response
         if (buyServiceRes.status === "fulfilled") {
-          setBuyService(buyServiceRes.value.data.count || 0);
+          setBuyService(buyServiceRes.value.data || 0);
         } else {
           console.error("Failed to fetch services:", buyServiceRes.reason);
         }
 
         if (totalMoneyRes.status === "fulfilled") {
-          setTotalMoney(totalMoneyRes.value.data.count || 0);
+          setTotalMoney(totalMoneyRes.value.data || 0);
         } else {
           console.error("Failed to fetch services:", totalMoneyRes.reason);
         }
 
         if (commissionRes.status === "fulfilled") {
-          setCommission(commissionRes.value.data.count || 0);
+          setCommission(commissionRes.value.data || 0);
         } else {
           console.error("Failed to fetch services:", commissionRes.reason);
         }
@@ -131,25 +131,28 @@ const Page = () => {
         <h2 className="text-xl font-semibold text-gray-800 mb-4">Tổng hợp:</h2>
         <ul className="space-y-3 text-gray-700">
           <li>
-            <strong>Tổng số dịch vụ được đặt:</strong> {allService.toString()}
+            <strong>Tổng số dịch vụ được đặt:</strong>{" "}
+            {typeof allService === "number" ? allService.toLocaleString() : 0}
           </li>
           <li>
             <strong>Tổng số dịch vụ gửi thú cưng:</strong>{" "}
-            {overNight.toLocaleString()}
+            {typeof overNight === "number" ? overNight.toLocaleString() : 0}
           </li>
           <li>
-            <strong>Tổng số dịch vụ khác:</strong> {buyService.toLocaleString()}
+            <strong>Tổng số dịch vụ khác:</strong>{" "}
+            {typeof buyService === "number" ? buyService.toLocaleString() : 0}
+
           </li>
           <li>
             <strong>Doanh số:</strong>{" "}
             <span className="text-green-600 font-bold">
-              {totalMoney.toLocaleString("de")} VND
+              {typeof totalMoney === "number" ? totalMoney.toLocaleString("de") : 0} VND
             </span>
           </li>
           <li>
             <strong>Chiết khấu + thuế:</strong>{" "}
             <span className="text-red-500 font-bold">
-              {commission.toLocaleString("de")} VND
+              {typeof commission === "number" ? commission.toLocaleString() : 0} VND
             </span>
           </li>
           <li>
