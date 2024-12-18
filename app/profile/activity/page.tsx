@@ -10,6 +10,7 @@ import Link from 'next/link'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faMinus } from '@fortawesome/free-solid-svg-icons'
 import { formatDate } from 'date-fns'
+import { toast } from 'react-toastify'
 
 const Page = () => {
   const [data, setData] = useState<Orders>();
@@ -157,8 +158,7 @@ const Page = () => {
                               </div>
                             </div>
                           </div>
-                          {activity.status !== "COMPLETED" &&
-                            activity.status !== "CANCELLED" ?
+                          {(activity.status === "COMPLETED" || activity.status === "IN_PROGRESS" || activity.status === "CONFIRMED") &&
                             <Button
                               as={Link}
                               href={activity.orderType === "OVERNIGHT" ? `/profile/activity/detail/${activity.id}` : `/profile/activity/detailother/${activity.id}`}
@@ -166,13 +166,25 @@ const Page = () => {
                             >
                               Theo dõi lịch
                             </Button>
-                            :
+                          }
+                          {(activity.status === "CANCELLED" || activity.status === "CONFIRM") &&
                             <Button
                               as={Link}
                               href={`/profile/activity/bookingdetail/${activity.id}`}
                               className='bg-btnbg text-white rounded-lg mt-3'
                             >
                               Thông tin đặt lịch
+                            </Button>
+                          }
+
+                          {(activity.status === "AWAITING_PAYMENT") &&
+                            <Button
+                              // as={Link}
+                              // href={`/`}
+                              onClick={() => toast.error("Tính năng đang phát triển")}
+                              className='bg-yellow-500 text-white rounded-lg mt-3'
+                            >
+                              Thanh toán lại
                             </Button>
                           }
                         </div>

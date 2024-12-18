@@ -42,8 +42,7 @@ const Page = () => {
 
         // Handle config services response
         if (allServiceRes.status === "fulfilled") {
-          setAllService(allServiceRes.value.data || 0);
-          console.log();
+          setAllService(allServiceRes.value.data.count || 0);
 
         } else {
           console.error(
@@ -54,7 +53,7 @@ const Page = () => {
 
         // Handle sitter profile response
         if (overNightRes.status === "fulfilled") {
-          setOverNight(overNightRes.value.data || 0);
+          setOverNight(overNightRes.value.data.count || 0);
         } else {
           console.error(
             "Failed to fetch sitter profile:",
@@ -64,19 +63,19 @@ const Page = () => {
 
         // Handle services response
         if (buyServiceRes.status === "fulfilled") {
-          setBuyService(buyServiceRes.value.data.data || 0);
+          setBuyService(buyServiceRes.value.data.count || 0);
         } else {
           console.error("Failed to fetch services:", buyServiceRes.reason);
         }
 
         if (totalMoneyRes.status === "fulfilled") {
-          setTotalMoney(totalMoneyRes.value.data || 0);
+          setTotalMoney(totalMoneyRes.value.data.count || 0);
         } else {
           console.error("Failed to fetch services:", totalMoneyRes.reason);
         }
 
         if (commissionRes.status === "fulfilled") {
-          setCommission(commissionRes.value.data || 0);
+          setCommission(commissionRes.value.data.count || 0);
         } else {
           console.error("Failed to fetch services:", commissionRes.reason);
         }
@@ -132,7 +131,7 @@ const Page = () => {
         <h2 className="text-xl font-semibold text-gray-800 mb-4">Tổng hợp:</h2>
         <ul className="space-y-3 text-gray-700">
           <li>
-            <strong>Tổng số dịch vụ được đặt:</strong> {allService.toLocaleString()}
+            <strong>Tổng số dịch vụ được đặt:</strong> {allService.toString()}
           </li>
           <li>
             <strong>Tổng số dịch vụ gửi thú cưng:</strong>{" "}

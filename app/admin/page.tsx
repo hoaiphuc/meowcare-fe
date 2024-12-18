@@ -2,21 +2,18 @@
 
 import { faUsersLine } from "@fortawesome/free-solid-svg-icons";
 import React, { useEffect, useState } from "react";
-import CardChart from "../components/admin/CardChart";
 import {
-  LineChart,
-  Line,
-  CartesianGrid,
-  XAxis,
-  YAxis,
-  Tooltip,
-  BarChart,
   Bar,
-  PieChart,
-  Pie,
-  Cell,
+  BarChart,
+  CartesianGrid,
+  Line,
+  LineChart,
   ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis
 } from "recharts";
+import CardChart from "../components/admin/CardChart";
 import axiosClient from "../lib/axiosClient";
 import { getFirstDateOfMonth, getLastDateOfMonth } from "../utils/date-util";
 
@@ -25,41 +22,8 @@ const Page = () => {
   const [catOwner, setCatOwner] = useState<number>();
   const [manager, setManager] = useState<number>();
   const [sitter, setSitter] = useState<number>();
-  // const [totalBookings, setTotalBookings] = useState<number>(0);
-  const [totalWithdrawals, setTotalWithdrawals] = useState<number>(0);
-  const [totalDiscountEarned, setTotalDiscountEarned] = useState<number>(0);
   const [bookingData, setBookingData] = useState<unknown[]>([]);
   const [discountData, setDiscountData] = useState<unknown[]>([]);
-
-  const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
-
-  // // Data giả lập (có thể thay thế bằng API)
-  // const bookingData = [
-  //   { month: 'Tháng 1', bookings: 150 },
-  //   { month: 'Tháng 2', bookings: 200 },
-  //   { month: 'Tháng 3', bookings: 180 },
-  //   { month: 'Tháng 4', bookings: 220 },
-  // ];
-
-  const withdrawalData = [
-    { name: "Người chăm sóc", value: 3000 },
-    { name: "Người nuôi mèo", value: 1000 },
-  ];
-
-  // const discountData = [
-  //   { name: 'Tháng 1', value: 100000 },
-  //   { name: 'Tháng 2', value: 500000 },
-  //   { name: 'Tháng 3', value: 300000 },
-  //   { name: 'Tháng 4', value: 240000 },
-  //   { name: 'Tháng 5', value: 400000 },
-  //   { name: 'Tháng 6', value: 100000 },
-  //   { name: 'Tháng 7', value: 50000 },
-  //   { name: 'Tháng 8', value: 100000 },
-  //   { name: 'Tháng 9', value: 200000 },
-  //   { name: 'Tháng 10', value: 500000 },
-  //   { name: 'Tháng 11', value: 300000 },
-  //   { name: 'Tháng 12', value: 200000 },
-  // ];
 
   useEffect(() => {
     try {
@@ -68,7 +32,7 @@ const Page = () => {
         .then((res: { data: React.SetStateAction<number | undefined> }) => {
           setTotalUser(res.data);
         })
-        .catch(() => {});
+        .catch(() => { });
 
       // Người nuôi mèo
       axiosClient(`users/count/USER`)
@@ -95,20 +59,6 @@ const Page = () => {
         .catch((e: unknown) => {
           console.log(e);
         });
-
-      // Thống kê rút tiền
-      axiosClient("/withdrawals/total")
-        .then((res: { data: React.SetStateAction<number> }) => {
-          setTotalWithdrawals(res.data);
-        })
-        .catch(() => {});
-
-      // Tổng số tiền chiết khấu website có được
-      axiosClient("/discounts/total")
-        .then((res: { data: React.SetStateAction<number> }) => {
-          setTotalDiscountEarned(res.data);
-        })
-        .catch(() => {});
     } catch (error) {
       console.log(error);
     }
@@ -142,7 +92,6 @@ const Page = () => {
           console.log(e);
         }
       }
-
       setBookingData(monthlyBookingData);
     };
 
@@ -189,16 +138,6 @@ const Page = () => {
     fetchDiscountData();
   }, []);
 
-  // Tính số lượng chủ mèo
-  const catOwners = totalUser && sitter ? totalUser - sitter : 0;
-
-  useEffect(() => {
-    console.log(catOwner);
-    console.log(catOwners);
-    // console.log(totalBookings);
-    console.log(totalWithdrawals);
-    console.log(totalDiscountEarned);
-  }, []);
   return (
     <div className="flex flex-col w-full m-10 gap-10">
       {/* Tổng quan */}
@@ -226,7 +165,7 @@ const Page = () => {
         />
         <CardChart
           number={
-            totalUser && sitter && manager ? totalUser - sitter - manager : 0
+            catOwner || 0
           }
           title="Các chủ mèo"
           icon={faUsersLine}
@@ -249,31 +188,6 @@ const Page = () => {
               <Tooltip />
             </LineChart>
           </ResponsiveContainer>
-        </div>
-
-        {/* Thống kê rút tiền */}
-        <div>
-          <h2 className="font-semibold text-2xl">Thống kê rút tiền</h2>
-          <PieChart width={400} height={400}>
-            <Pie
-              data={withdrawalData}
-              dataKey="value"
-              nameKey="name"
-              cx="50%"
-              cy="50%"
-              outerRadius={150}
-              fill="#8884d8"
-              label
-            >
-              {withdrawalData.map((entry, index) => (
-                <Cell
-                  key={`cell-${index}`}
-                  fill={COLORS[index % COLORS.length]}
-                />
-              ))}
-            </Pie>
-            <Tooltip />
-          </PieChart>
         </div>
 
         {/* Tổng số tiền chiết khấu */}

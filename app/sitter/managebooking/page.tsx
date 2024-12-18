@@ -154,7 +154,7 @@ const Page = () => {
                       {activity.startDate && activity.endDate ?
                         (
                           <>
-                            {new Date(activity.startDate).toLocaleDateString()}{" "}
+                            {new Date(activity.startDate).toLocaleString()}{" "}
                             <FontAwesomeIcon icon={faMinus} />{" "}
                             {new Date(activity.endDate).toLocaleDateString()}
                           </>

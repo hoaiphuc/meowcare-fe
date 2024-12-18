@@ -662,7 +662,7 @@ const Page = () => {
                       <h2 className={styles.h2}>Tổng giá dịch vụ</h2>
                       {selectedPetNames.map((name, index) => (
                         <div key={index} className="grid grid-cols-5 w-full">
-                          <div className={`${styles.money}`}>Tên bé mèo</div>
+                          <div className={`${styles.money}`}>{index + 1}</div>
                           <div
                             className={`${styles.money} col-span-2 font-semibold`}
                           >
