@@ -377,7 +377,7 @@ const Service = () => {
                     className="text-text size-1 self-center px-1"
                   />
                   {/* <p className=' text-[14px] font-normal'>{catSitter.reviews} Đánh giá</p> */}
-                  <p className="text-[14px] font-normal">20 Đánh giá</p>
+                  <p className="text-[14px] font-normal">không có đánh giá</p>
                 </div>
                 <p className="text-[14px] my-2 line-clamp-1">{catSitter.bio}</p>
                 <div className="flex font-semibold text-[#66625F]">
