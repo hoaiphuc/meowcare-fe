@@ -63,13 +63,13 @@ const Calendar = () => {
         }
     }, [userId]);
 
-  const toggleDateAvailability = (index: number) => {
-    setNext15Days((prevDays) =>
-      prevDays.map((day, i) =>
-        i === index ? { ...day, isAvailable: !day.isAvailable } : day
-      )
-    );
-  };
+    const toggleDateAvailability = (index: number) => {
+        setNext15Days((prevDays) =>
+            prevDays.map((day, i) =>
+                i === index ? { ...day, isAvailable: !day.isAvailable } : day
+            )
+        );
+    };
 
     const handleUpdate = () => {
         try {
@@ -92,86 +92,86 @@ const Calendar = () => {
                     }
                     toast.error("Cập nhật thất bại")
                 })
-        } catch (error) {
-
-  return (
-    <div className="flex items-center justify-center my-10">
-      <div className="w-[1000px] flex flex-col bg-white shadow-lg rounded-lg p-8">
-        <div className="mb-10 text-center">
-          <h1 className="text-3xl font-bold text-purple-700">
-            Thời gian nhận đặt lịch
-          </h1>
-          <h2 className="text-lg text-gray-600 mt-2">
-            Hãy chọn những ngày bạn không muốn nhận việc
-          </h2>
-        </div>
-        {/* Ghi chú */}
-        <div className="flex justify-center items-center mb-6 space-x-4">
-          <div className="flex items-center">
-            <div className="w-6 h-6 bg-green-500 rounded-full mr-2"></div>
-            <span className="text-gray-600">: Ngày hoạt động</span>
-          </div>
-          <div className="flex items-center">
-            <div className="w-6 h-6 bg-red-500 rounded-full mr-2"></div>
-            <span className="text-gray-600">: Ngày không hoạt động</span>
-          </div>
-        </div>
+        } catch (error) { }
+    }
 
     return (
-        <div className="flex items-center justify-center my-5 ">
-            <div className=' w-[1000px] flex flex-col'>
-                <div>
-                    <div className='mb-10'>
-                        <h1 className={styles.h1}>Thời gian nhận đặt lịch</h1>
-                        <h2>Hãy bỏ chọn những ngày bạn không muốn nhận việc</h2>
+        <div className="flex items-center justify-center my-10">
+            <div className="w-[1000px] flex flex-col bg-white shadow-lg rounded-lg p-8">
+                <div className="mb-10 text-center">
+                    <h1 className="text-3xl font-bold text-purple-700">
+                        Thời gian nhận đặt lịch
+                    </h1>
+                    <h2 className="text-lg text-gray-600 mt-2">
+                        Hãy chọn những ngày bạn không muốn nhận việc
+                    </h2>
+                </div>
+                {/* Ghi chú */}
+                <div className="flex justify-center items-center mb-6 space-x-4">
+                    <div className="flex items-center">
+                        <div className="w-6 h-6 bg-green-500 rounded-full mr-2"></div>
+                        <span className="text-gray-600">: Ngày hoạt động</span>
                     </div>
-                    <div className="flex mb-5">
-                        {daysOfWeek.map((day) => (
-                            <div
-                                className={`w-[130px] h-[70px] cursor-pointer ${day.isAvailable ? 'bg-green-500' : 'bg-red-500'}`}
-                                key={day.key}
-                                onClick={() =>
-                                    setDaysOfWeek((prevDays) =>
-                                        prevDays.map((d) =>
-                                            d.key === day.key ? { ...d, isAvailable: !d.isAvailable } : d
-                                        )
-                                    )
-                                }
-                            >
-                                <div
-                                    className={`w-[130px] h-[70px]  flex items-center justify-center text-white `}
-                                >
-                                    {day.name}
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                    <div className="flex flex-wrap">
-                        {next15Days.map((day, index) => (
-                            <div
-                                key={index}
-                                className={` w-[130px] h-[70px] flex justify-center items-center cursor-pointer ${day.isAvailable ? 'bg-green-500' : 'bg-red-500'}`}
-                                onClick={() => toggleDateAvailability(index)}
-                            >
-                                <p className="text-white font-semibold">
-                                    {day.date.toLocaleDateString('vi-VN', {
-                                        day: '2-digit',
-                                        month: '2-digit',
-                                    })}
-                                </p>
-                            </div>
-                        ))}
+                    <div className="flex items-center">
+                        <div className="w-6 h-6 bg-red-500 rounded-full mr-2"></div>
+                        <span className="text-gray-600">: Ngày không hoạt động</span>
                     </div>
                 </div>
-                <div className='flex justify-end mt-5'>
-                    <Button onClick={handleUpdate} className='bg-cyan-500 text-white'>Cập nhật</Button>
+
+                <div className="flex items-center justify-center my-5 ">
+                    <div className=' w-[1000px] flex flex-col'>
+                        <div>
+                            <div className='mb-10'>
+                                <h1 className={styles.h1}>Thời gian nhận đặt lịch</h1>
+                                <h2>Hãy bỏ chọn những ngày bạn không muốn nhận việc</h2>
+                            </div>
+                            <div className="flex mb-5">
+                                {daysOfWeek.map((day) => (
+                                    <div
+                                        className={`w-[130px] h-[70px] cursor-pointer ${day.isAvailable ? 'bg-green-500' : 'bg-red-500'}`}
+                                        key={day.key}
+                                        onClick={() =>
+                                            setDaysOfWeek((prevDays) =>
+                                                prevDays.map((d) =>
+                                                    d.key === day.key ? { ...d, isAvailable: !d.isAvailable } : d
+                                                )
+                                            )
+                                        }
+                                    >
+                                        <div
+                                            className={`w-[130px] h-[70px]  flex items-center justify-center text-white `}
+                                        >
+                                            {day.name}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                            <div className="flex flex-wrap">
+                                {next15Days.map((day, index) => (
+                                    <div
+                                        key={index}
+                                        className={` w-[130px] h-[70px] flex justify-center items-center cursor-pointer ${day.isAvailable ? 'bg-green-500' : 'bg-red-500'}`}
+                                        onClick={() => toggleDateAvailability(index)}
+                                    >
+                                        <p className="text-white font-semibold">
+                                            {day.date.toLocaleDateString('vi-VN', {
+                                                day: '2-digit',
+                                                month: '2-digit',
+                                            })}
+                                        </p>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                        <div className='flex justify-end mt-5'>
+                            <Button onClick={handleUpdate} className='bg-cyan-500 text-white'>Cập nhật</Button>
+                        </div>
+                    </div>
+
                 </div>
             </div>
-
         </div>
-      </div>
-    </div>
-  );
+    );
 };
 
 export default Calendar;
