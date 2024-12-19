@@ -22,37 +22,27 @@ const Calendar = () => {
 
     useEffect(() => {
         const today = new Date();
-        const groupedDates: { month: string; dates: { date: Date; isAvailable: boolean }[] }[] = [];
+        const groupedDates = [];
 
         for (let i = 0; i < 3; i++) {
-            const monthOffset = today.getMonth() + i;
-            const year = today.getFullYear() + Math.floor(monthOffset / 12);
-            const month = monthOffset % 12;
-
-            const startOfMonth = new Date(year, month, 1);
-            const endOfMonth = new Date(year, month + 1, 0);
+            const currentDate = new Date(today.getFullYear(), today.getMonth() + i, 1);
+            const month = currentDate.toLocaleDateString("vi-VN", { month: "long", year: "numeric" });
 
             const dates = [];
-            for (let d = startOfMonth; d <= endOfMonth; d.setDate(d.getDate() + 1)) {
+            for (
+                let d = new Date(currentDate);
+                d.getMonth() === currentDate.getMonth();
+                d.setDate(d.getDate() + 1)
+            ) {
                 dates.push({ date: new Date(d), isAvailable: true });
             }
 
-            groupedDates.push({
-                month: startOfMonth.toLocaleDateString("vi-VN", { month: "long", year: "numeric" }),
-                dates,
-            });
+            groupedDates.push({ month, dates });
         }
 
-        console.log("Initialized Dates By Month:", groupedDates); // Debugging
         setDatesByMonth(groupedDates);
 
-        // Ensure the first displayed month is the current month
-        setCurrentMonthIndex(0);
     }, []);
-
-
-
-
 
     useEffect(() => {
         if (userId) {
