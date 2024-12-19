@@ -48,7 +48,9 @@ import Image from "next/image";
 import Lightbox from "yet-another-react-lightbox";
 import { toast } from "react-toastify";
 import dynamic from "next/dynamic";
-const IndividualMap = dynamic(() => import("@/app/components/IndividualMap"), { ssr: false });
+const IndividualMap = dynamic(() => import("@/app/components/IndividualMap"), {
+  ssr: false,
+});
 
 const Page = () => {
   const params = useParams();
@@ -96,7 +98,7 @@ const Page = () => {
     reason: "",
     description: "",
   });
-  const [feedback, setFeedback] = useState<feedbackData[]>([])
+  const [feedback, setFeedback] = useState<feedbackData[]>([]);
   const [visibleFeedback, setVisibleFeedback] = useState<feedbackData[]>([]);
 
   // check user
@@ -221,7 +223,7 @@ const Page = () => {
 
         if (feedbackRes.status === "fulfilled") {
           setFeedback(feedbackRes.value.data);
-          setVisibleFeedback(feedbackRes.value.data.slice(0, 4))
+          setVisibleFeedback(feedbackRes.value.data.slice(0, 4));
         } else {
           console.error("Failed to fetch services:", feedbackRes.reason);
         }
@@ -261,7 +263,7 @@ const Page = () => {
       ...prev,
       [field]: value,
     }));
-  }
+  };
 
   const handleSendReport = () => {
     if (!user || !sitterProfile) {
@@ -290,13 +292,14 @@ const Page = () => {
         userId: user.id, // Current user ID
         reportedUserId: sitterProfile.sitterId, // ID of the sitter being reported
       };
-      axiosClient.post("reports", finalReport)
+      axiosClient
+        .post("reports", finalReport)
         .then(() => {
-          toast.success("Báo cáo người dùng này thành công")
+          toast.success("Báo cáo người dùng này thành công");
         })
         .catch(() => {
-          toast.error("Đã xảy ra lỗi vui lòng thử lại sau")
-        })
+          toast.error("Đã xảy ra lỗi vui lòng thử lại sau");
+        });
       setReport({
         id: "",
         userId: "",
@@ -305,11 +308,9 @@ const Page = () => {
         reason: "",
         description: "",
       });
-      onReportOpenChange()
-    } catch (error) {
-
-    }
-  }
+      onReportOpenChange();
+    } catch (error) {}
+  };
 
   return (
     <div className="flex flex-cols-2 my-10 gap-10 justify-center">
@@ -349,10 +350,13 @@ const Page = () => {
             >
               <Icon
                 icon="mdi:heart"
-                className={`transition-colors w-10 h-10 ${isClicked ? "text-red-500  " : ""
-                  }`}
+                className={`transition-colors w-10 h-10 ${
+                  isClicked ? "text-red-500  " : ""
+                }`}
               />
-              <p className="text-[16px]">{isClicked ? "Đang yêu thích" : "Yêu thích"}</p>
+              <p className="text-[16px]">
+                {isClicked ? "Đang yêu thích" : "Yêu thích"}
+              </p>
             </Button>
           </div>
         </div>
@@ -451,12 +455,15 @@ const Page = () => {
           </div>
           <div>
             {/* Chính sách hủy lịch */}
-            <div
-              className="flex text-xl gap-3 items-center py-5 "
-            >
+            <div className="flex text-xl gap-3 items-center py-5 ">
               <Icon icon="mdi:calendar-remove" />
               <p>Chính sách hủy lịch: </p>
-              <p onClick={onCancelOpen} className="cursor-pointer font-semibold underline">{sitterProfile?.fullRefundDay} ngày</p>
+              <p
+                onClick={onCancelOpen}
+                className="cursor-pointer font-semibold underline"
+              >
+                {sitterProfile?.fullRefundDay} ngày
+              </p>
             </div>
 
             {/* Modal Chính sách hủy lịch */}
@@ -475,16 +482,18 @@ const Page = () => {
                     <ModalBody>
                       <ul className="list-disc pl-5 space-y-2 text-gray-700">
                         <li>
-                          Hủy lịch <b>trước {sitterProfile?.fullRefundDay} ngày</b> so với ngày bắt đầu dịch vụ sẽ{" "}
-                          <b>không mất phí</b>.
+                          Hủy lịch{" "}
+                          <b>trước {sitterProfile?.fullRefundDay} ngày</b> so
+                          với ngày bắt đầu dịch vụ sẽ <b>không mất phí</b>.
                         </li>
                         <li>
-                          Hủy lịch trong <b> ngày trước ngày bắt đầu</b> sẽ bị tính
-                          phí <b>50%</b>.
+                          Hủy lịch trong <b> ngày trước ngày bắt đầu</b> sẽ bị
+                          tính phí <b>50%</b>.
                         </li>
                         <li>
                           Hủy lịch <b>vào ngày bắt đầu</b> hoặc{" "}
-                          <b>sau khi dịch vụ diễn ra</b> sẽ bị tính phí <b>100%</b>.
+                          <b>sau khi dịch vụ diễn ra</b> sẽ bị tính phí{" "}
+                          <b>100%</b>.
                         </li>
                       </ul>
                     </ModalBody>
@@ -601,40 +610,58 @@ const Page = () => {
         <h1 className={styles.h1}>Đánh giá</h1>
         {visibleFeedback.length > 0 ? (
           <>
-            {visibleFeedback.map((feedback) => (
-              <div className="grid grid-cols-2 gap-5" key={feedback.id}>
-                <div className="">
+            <div className="grid grid-cols-2 gap-6">
+              {visibleFeedback.map((feedback) => (
+                <div
+                  className="border rounded-lg p-4 shadow-md bg-white"
+                  key={feedback.id}
+                >
                   <div className="flex items-center justify-between gap-3 mb-3">
                     <div className="flex flex-col items-start">
-                      <div className="flex gap-3">
+                      <div className="flex gap-3 items-center">
                         <h2 className={styles.h2}>{feedback.user.fullName}</h2>
                         <div className="flex items-center">
                           <h2 className="text-[16px]">{feedback.rating}</h2>
-                          <FontAwesomeIcon icon={faStar} className="text-[#F8B816] size-4" />
+                          <FontAwesomeIcon
+                            icon={faStar}
+                            className="text-[#F8B816] size-4"
+                          />
                         </div>
                       </div>
-                      <div className="flex gap-2 items-center">
-                        {
-                          feedback.bookingOrder.orderType === "OVERNIGHT" ?
-                            <Icon icon="cbi:camera-pet" className="text-maincolor w-5 h-5" />
-                            :
-                            <Icon icon="mdi:home-find-outline" className="text-maincolor w-5 h-5"
-                            />
-                        }
-                        <p>{feedback.bookingOrder.orderType === "OVERNIGHT" ? "Gửi thú cưng" : "Dịch vụ khác"}</p>
-                        <FontAwesomeIcon icon={faCircle} className="w-1 h-1 rounded-full" />
-                        <p>{new Date(feedback.bookingOrder.startDate).toLocaleDateString("vi-VN")}</p>
+                      <div className="flex gap-2 items-center mt-1">
+                        {feedback.bookingOrder.orderType === "OVERNIGHT" ? (
+                          <Icon
+                            icon="cbi:camera-pet"
+                            className="text-maincolor w-5 h-5"
+                          />
+                        ) : (
+                          <Icon
+                            icon="mdi:home-find-outline"
+                            className="text-maincolor w-5 h-5"
+                          />
+                        )}
+                        <p>
+                          {feedback.bookingOrder.orderType === "OVERNIGHT"
+                            ? "Gửi thú cưng"
+                            : "Dịch vụ khác"}
+                        </p>
+                        <FontAwesomeIcon
+                          icon={faCircle}
+                          className="w-1 h-1 rounded-full"
+                        />
+                        <p>
+                          {new Date(
+                            feedback.bookingOrder.startDate
+                          ).toLocaleDateString("vi-VN")}
+                        </p>
                       </div>
                     </div>
                     <Avatar src={feedback.user.avatar} className="w-12 h-12" />
                   </div>
-                  <div className={`${styles.h3} flex gap-2`}>
-                  </div>
                   <p className={styles.p}>{feedback.comments}</p>
                 </div>
-              </div>
-            ))
-            }
+              ))}
+            </div>
             {feedback.length > 4 && (
               <Button
                 className="mt-5 rounded-full text-white bg-[#2E67D1]"
@@ -793,16 +820,28 @@ const Page = () => {
                   className=""
                   aria-label="report"
                   placeholder="Chọn loại report"
-                  onChange={(event) => handleReportDetailChange("reportTypeId", event.target.value)}
+                  onChange={(event) =>
+                    handleReportDetailChange("reportTypeId", event.target.value)
+                  }
                 >
                   {reportType.map((type: ReportType) => (
                     <SelectItem key={type.id}>{type.name}</SelectItem>
                   ))}
                 </Select>
                 <h1>Lí do</h1>
-                <Input value={report?.reason} onChange={(e) => handleReportDetailChange("reason", e.target.value)} />
+                <Input
+                  value={report?.reason}
+                  onChange={(e) =>
+                    handleReportDetailChange("reason", e.target.value)
+                  }
+                />
                 <h1>Nội dung vi phạm</h1>
-                <Textarea value={report?.description} onChange={(e) => handleReportDetailChange("description", e.target.value)} />
+                <Textarea
+                  value={report?.description}
+                  onChange={(e) =>
+                    handleReportDetailChange("description", e.target.value)
+                  }
+                />
               </ModalBody>
               <ModalFooter>
                 <Button color="danger" variant="light" onPress={onClose}>
@@ -829,34 +868,55 @@ const Page = () => {
                       <div className="flex items-center justify-between gap-3 mb-3">
                         <div className="flex flex-col items-start">
                           <div className="flex gap-3">
-                            <h2 className={styles.h2}>{feedback.user.fullName}</h2>
+                            <h2 className={styles.h2}>
+                              {feedback.user.fullName}
+                            </h2>
                             <div className="flex items-center">
                               <h2 className="text-[16px]">{feedback.rating}</h2>
-                              <FontAwesomeIcon icon={faStar} className="text-[#F8B816] size-4" />
+                              <FontAwesomeIcon
+                                icon={faStar}
+                                className="text-[#F8B816] size-4"
+                              />
                             </div>
                           </div>
                           <div className="flex gap-2 items-center">
-                            {
-                              feedback.bookingOrder.orderType === "OVERNIGHT" ?
-                                <Icon icon="cbi:camera-pet" className="text-maincolor w-5 h-5" />
-                                :
-                                <Icon icon="mdi:home-find-outline" className="text-maincolor w-5 h-5"
-                                />
-                            }
-                            <p>{feedback.bookingOrder.orderType === "OVERNIGHT" ? "Gửi thú cưng" : "Dịch vụ khác"}</p>
-                            <FontAwesomeIcon icon={faCircle} className="w-1 h-1 rounded-full" />
-                            <p>{new Date(feedback.bookingOrder.startDate).toLocaleDateString("vi-VN")}</p>
+                            {feedback.bookingOrder.orderType === "OVERNIGHT" ? (
+                              <Icon
+                                icon="cbi:camera-pet"
+                                className="text-maincolor w-5 h-5"
+                              />
+                            ) : (
+                              <Icon
+                                icon="mdi:home-find-outline"
+                                className="text-maincolor w-5 h-5"
+                              />
+                            )}
+                            <p>
+                              {feedback.bookingOrder.orderType === "OVERNIGHT"
+                                ? "Gửi thú cưng"
+                                : "Dịch vụ khác"}
+                            </p>
+                            <FontAwesomeIcon
+                              icon={faCircle}
+                              className="w-1 h-1 rounded-full"
+                            />
+                            <p>
+                              {new Date(
+                                feedback.bookingOrder.startDate
+                              ).toLocaleDateString("vi-VN")}
+                            </p>
                           </div>
                         </div>
-                        <Avatar src={feedback.user.avatar} className="w-12 h-12" />
+                        <Avatar
+                          src={feedback.user.avatar}
+                          className="w-12 h-12"
+                        />
                       </div>
-                      <div className={`${styles.h3} flex gap-2`}>
-                      </div>
+                      <div className={`${styles.h3} flex gap-2`}></div>
                       <p className={styles.p}>{feedback.comments}</p>
                     </div>
                   </div>
-                ))
-                }
+                ))}
               </ModalBody>
               <ModalFooter>
                 <Button color="danger" variant="light" onPress={onClose}>
