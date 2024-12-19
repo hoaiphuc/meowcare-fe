@@ -32,7 +32,7 @@ const Page = () => {
         const start = (page - 1) * rowsPerPage;
         const end = start + rowsPerPage;
 
-        return data.slice(start, end);
+        return data.reverse().slice(start, end);
     }, [page, data]);
 
     return (
@@ -60,6 +60,7 @@ const Page = () => {
             <Table
                 aria-label="Example table with client side pagination"
                 bottomContent={
+                    pages > 2 &&
                     <div className="flex w-full justify-center">
                         <Pagination
                             isCompact
