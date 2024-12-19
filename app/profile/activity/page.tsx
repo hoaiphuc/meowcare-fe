@@ -68,7 +68,7 @@ const Page = () => {
 
         const res = await axiosClient(url);
         setData(res.data);
-        setPages(res.data.totalPages);
+        setPages(res.data.page.totalPages);
         setIsLoading(false)
       } catch (error) {
         setIsLoading(false)

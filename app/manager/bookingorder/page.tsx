@@ -57,7 +57,7 @@ const Page = () => {
       axiosClient(`booking-orders/pagination?page=${page}&size=10&sort=createdAt&direction=DESC`)
         .then((res) => {
           setData(res.data.content);
-          setPages(res.data.totalPages)
+          setPages(res.data.page.totalPages)
         })
         .catch((e) => {
           console.log(e);

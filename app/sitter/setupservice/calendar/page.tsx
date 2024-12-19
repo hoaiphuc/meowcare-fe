@@ -4,10 +4,11 @@ import { useEffect, useState } from 'react';
 import styles from './calendar.module.css';
 import { Button } from '@nextui-org/react';
 import axiosClient from '@/app/lib/axiosClient';
-import { UserLocal } from '@/app/constants/types/homeType';
+import { UnavailableDate, UserLocal } from '@/app/constants/types/homeType';
+import { toast } from 'react-toastify';
 
 const Calendar = () => {
-    // const [unavailableDates, setUnavailableDates] = useState<Date[]>([]);
+    // const [unavailableDates, setUnavailableDates] = useState<UnavailableDate[]>([]);
     const [daysOfWeek, setDaysOfWeek] = useState([
         { key: "monday", name: "Thứ 2", isAvailable: true },
         { key: "tuesday", name: "Thứ 3", isAvailable: true },
@@ -39,12 +40,29 @@ const Calendar = () => {
     }, []);
 
     useEffect(() => {
-        try {
+        if (userId) {
             axiosClient(`sitter-unavailable-dates/sitter/${userId}`)
-        } catch (error) {
+                .then((res) => {
+                    const fetchedUnavailableDates = res.data;
+                    // setUnavailableDates(fetchedUnavailableDates);
 
+                    // Update next15Days based on fetched unavailable dates
+                    setNext15Days((prevDays) =>
+                        prevDays.map((day) => {
+                            const isUnavailable = fetchedUnavailableDates.some(
+                                (unavailableDate: UnavailableDate) =>
+                                    new Date(unavailableDate.startDate).toDateString() === day.date.toDateString()
+                            );
+                            return { ...day, isAvailable: !isUnavailable };
+                        })
+                    );
+                })
+                .catch((error) => {
+                    console.error("Error fetching unavailable dates:", error);
+                });
         }
-    }, [userId])
+    }, [userId]);
+
 
     const toggleDateAvailability = (index: number) => {
         setNext15Days((prevDays) =>
@@ -56,10 +74,25 @@ const Calendar = () => {
 
     const handleUpdate = () => {
         try {
-            const unavailable = next15Days.filter((day) => !day.isAvailable).map((day) => day.date);
-            // setUnavailableDates(unavailable);
-            console.log("Unavailable Dates:", unavailable);
-            // axiosClient("sitter-unavailable-dates", unavailableDates)
+            const unavailable = next15Days
+                .filter((day) => !day.isAvailable)
+                .map((day) => ({
+                    startDate: day.date.toISOString(),
+                    endDate: day.date.toISOString(),
+                    dayOfWeek: '',
+                    isRecurring: false,
+                }));
+            axiosClient.post("sitter-unavailable-dates", unavailable)
+                .then(() => {
+                    toast.success("Cập nhật thành công")
+                })
+                .catch((e) => {
+                    if (e.response.data.status === 2001) {
+                        toast.error("Bạn phải tạo hồ sơ trước chọn ngày bận")
+                        return;
+                    }
+                    toast.error("Cập nhật thất bại")
+                })
         } catch (error) {
 
         }
@@ -111,8 +144,9 @@ const Calendar = () => {
                         ))}
                     </div>
                 </div>
-
-                <Button onClick={handleUpdate}>Cập nhật</Button>
+                <div className='flex justify-end mt-5'>
+                    <Button onClick={handleUpdate} className='bg-cyan-500 text-white'>Cập nhật</Button>
+                </div>
             </div>
         </div>
     );
