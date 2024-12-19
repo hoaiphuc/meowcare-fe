@@ -8,7 +8,7 @@ import { UnavailableDate, UserLocal } from '@/app/constants/types/homeType';
 import { toast } from 'react-toastify';
 
 const Calendar = () => {
-    // const [unavailableDates, setUnavailableDates] = useState<UnavailableDate[]>([]);
+    const [previousUnavailableDates, setPreviousUnavailableDates] = useState<UnavailableDate[]>([]);
     const [daysOfWeek, setDaysOfWeek] = useState([
         { key: "monday", name: "Thứ 2", isAvailable: true },
         { key: "tuesday", name: "Thứ 3", isAvailable: true },
@@ -44,9 +44,7 @@ const Calendar = () => {
             axiosClient(`sitter-unavailable-dates/sitter/${userId}`)
                 .then((res) => {
                     const fetchedUnavailableDates = res.data;
-                    // setUnavailableDates(fetchedUnavailableDates);
-
-                    // Update next15Days based on fetched unavailable dates
+                    setPreviousUnavailableDates(fetchedUnavailableDates)
                     setNext15Days((prevDays) =>
                         prevDays.map((day) => {
                             const isUnavailable = fetchedUnavailableDates.some(
@@ -71,29 +69,58 @@ const Calendar = () => {
         );
     };
 
-    const handleUpdate = () => {
+    const handleUpdate = async () => {
         try {
-            const unavailable = next15Days
-                .filter((day) => !day.isAvailable)
-                .map((day) => ({
+            // Prepare arrays for `POST` and `DELETE` operations
+            const toAdd = next15Days.filter(
+                (day) => !day.isAvailable && !previousUnavailableDates.some((prev) =>
+                    new Date(prev.startDate).toDateString() === day.date.toDateString()
+                )
+            );
+
+            const toDelete = previousUnavailableDates.filter((prev) =>
+                !next15Days.some(
+                    (day) =>
+                        !day.isAvailable && new Date(prev.startDate).toDateString() === day.date.toDateString()
+                )
+            );
+
+            // Create promises for DELETE requests
+            const deletePromises = toDelete.map((date) =>
+                axiosClient.delete(`sitter-unavailable-dates/${date.id}`)
+            );
+
+            // Create promises for POST requests
+            const addPromises = toAdd.map((day) =>
+                axiosClient.post("sitter-unavailable-dates", {
                     startDate: day.date.toISOString(),
                     endDate: day.date.toISOString(),
                     dayOfWeek: '',
                     isRecurring: false,
-                }));
-            axiosClient.post("sitter-unavailable-dates", unavailable)
-                .then(() => {
-                    toast.success("Cập nhật thành công")
                 })
-                .catch((e) => {
-                    if (e.response.data.status === 2001) {
-                        toast.error("Bạn phải tạo hồ sơ trước chọn ngày bận")
-                        return;
-                    }
-                    toast.error("Cập nhật thất bại")
-                })
-        } catch (error) { }
-    }
+            );
+
+            // Wait for all promises to complete
+            const results = await Promise.allSettled([...deletePromises, ...addPromises]);
+
+            // Analyze results
+            const successCount = results.filter((result) => result.status === "fulfilled").length;
+            const failureCount = results.filter((result) => result.status === "rejected").length;
+
+            // Show toast messages
+            if (failureCount === 0) {
+                toast.success("Cập nhật thành công");
+            } else if (successCount > 0) {
+                toast.warning(`${successCount} yêu cầu thành công, ${failureCount} yêu cầu thất bại`);
+            } else {
+                toast.error("Cập nhật thất bại hoàn toàn");
+            }
+        } catch (error) {
+            console.error("An unexpected error occurred during update:", error);
+            toast.error("Cập nhật thất bại");
+        }
+    };
+
 
     return (
         <div className="flex items-center justify-center my-10">

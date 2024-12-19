@@ -52,6 +52,11 @@ const IndividualMap = dynamic(() => import("@/app/components/IndividualMap"), {
   ssr: false,
 });
 
+interface Skill {
+  id: number;
+  skill: string;
+}
+
 const Page = () => {
   const params = useParams();
   const [sitterProfile, setSitterProfile] = useState<CatSitter | undefined>();
@@ -61,7 +66,7 @@ const Page = () => {
   const [services, setServices] = useState<Service[]>([]);
   const [additionServices, setAdditionServices] = useState<Service[]>([]);
   const [childService, setChildService] = useState<Service[]>([]);
-  const [skills, setSkills] = useState([]);
+  const [skills, setSkills] = useState<Skill[]>([]);
   const [certificates, setCertificates] = useState<Certificate[]>([]);
   const [selectedPdf, setSelectedPdf] = useState<string>();
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
@@ -135,8 +140,13 @@ const Page = () => {
     try {
       axiosClient(`sitter-profiles/sitter/${params.id}`)
         .then((res) => {
-          const skill = res.data.skill.split(",").map((s: string) => s.trim());
-          setSkills(skill);
+          if (res.data.skill) {
+            const existingSkills = res.data.skill.split(";").map((skill: string, index: number) => ({
+              id: index, // Assuming skills do not have unique IDs; use index as fallback
+              skill,
+            }));
+            setSkills(existingSkills);
+          }
           setSitterProfile(res.data);
         })
         .catch((e) => {
@@ -309,7 +319,7 @@ const Page = () => {
         description: "",
       });
       onReportOpenChange();
-    } catch (error) {}
+    } catch (error) { }
   };
 
   return (
@@ -350,9 +360,8 @@ const Page = () => {
             >
               <Icon
                 icon="mdi:heart"
-                className={`transition-colors w-10 h-10 ${
-                  isClicked ? "text-red-500  " : ""
-                }`}
+                className={`transition-colors w-10 h-10 ${isClicked ? "text-red-500  " : ""
+                  }`}
               />
               <p className="text-[16px]">
                 {isClicked ? "Đang yêu thích" : "Yêu thích"}
@@ -681,16 +690,20 @@ const Page = () => {
 
         <h1 className={styles.h1}>Thông tin về người chăm sóc</h1>
         <h2 className="text-[18px] my-3 font-semibold">Kỹ năng</h2>
-        <div className="grid grid-cols-3 gap-3">
-          {skills.map((skill, index) => (
-            <h3
-              className="border items-center flex justify-center p-3 rounded-full border-[#666666] text-[12px]"
-              key={index}
-            >
-              {skill}
-            </h3>
-          ))}
-        </div>
+        {skills.length > 0 ?
+          <div className="grid grid-cols-3 gap-3">
+            {skills.map((item, index) => (
+              <h3
+                className="border items-center flex justify-center p-3 rounded-full border-[#666666] text-[12px]"
+                key={index}
+              >
+                {item.skill}
+              </h3>
+            ))}
+          </div>
+          :
+          <div className="text-secondary">Hiện người chăm sóc chưa cung cấp</div>
+        }
 
         <h1 className="mt-10 text-xl font-semibold">
           An toàn, tin cậy & môi trường

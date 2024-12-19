@@ -99,6 +99,8 @@ const Page = () => {
 
   const netIncome = useMemo(() => {
     const money = totalMoney - commission
+    return isNaN(money) || !isFinite(money) ? 0 : money;
+
     return money
   }, [commission, totalMoney])
 
@@ -158,7 +160,7 @@ const Page = () => {
           <li>
             <strong>Thu nhập ròng:</strong>{" "}
             <span className="text-blue-600 font-bold">
-              {netIncome.toLocaleString("de")} VND
+              {typeof netIncome === "number" ? netIncome.toLocaleString() : 0} VND
             </span>
           </li>
         </ul>
