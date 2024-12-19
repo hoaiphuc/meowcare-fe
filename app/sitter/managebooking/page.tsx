@@ -132,7 +132,7 @@ const Page = () => {
                 >
                   <div className="flex justify-between ">
                     <div className="flex gap-3">
-                      <Avatar src="" className="w-14 h-14 " />
+                      <Avatar src={activity.user.avatar} className="w-14 h-14 " />
                       <div className="">
                         <h1 className="font-bold">{activity.user.fullName}</h1>
                         <h1 className="text-secondary">{activity.address}</h1>

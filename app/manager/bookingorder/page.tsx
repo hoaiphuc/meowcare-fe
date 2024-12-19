@@ -77,7 +77,7 @@ const Page = () => {
       <Table
         aria-label="Example table with client side pagination"
         bottomContent={
-          pages > 10 &&
+          pages > 1 &&
           <div className="flex w-full justify-center">
             <Pagination
               isCompact

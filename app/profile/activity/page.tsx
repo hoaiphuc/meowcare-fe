@@ -222,7 +222,7 @@ const Page = () => {
                               href={`/profile/activity/bookingdetail/${activity.id}`}
                               className="bg-btnbg text-white rounded-lg mt-3"
                             >
-                              Đánh giá
+                              Xem chi tiết
                             </Button>
                           )}
 

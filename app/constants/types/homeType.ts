@@ -96,6 +96,7 @@ export type CatSitter = {
   profilePictures: [ProfilePicture];
   fullRefundDay: number;
   mainServicePrice: number;
+  numberOfReview: number;
 };
 
 export type ProfilePicture = {

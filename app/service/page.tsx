@@ -19,7 +19,7 @@ import {
   faStar,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Icon } from "@iconify/react";
+// import { Icon } from "@iconify/react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
@@ -29,6 +29,7 @@ import axiosClient from "../lib/axiosClient";
 import styles from "./service.module.css";
 const Map = dynamic(() => import("../components/Map"), { ssr: false });
 import { getLocalTimeZone, today } from "@internationalized/date";
+import ComponentLoading from "../components/ComponentLoading";
 
 interface CatSitterData {
   content: [CatSitter];
@@ -44,6 +45,7 @@ const Service = () => {
   const [selectedService, setSelectedService] = useState<string>("");
   const [catSitters, setCatSitters] = useState<CatSitterData>();
   const [price, setPrice] = useState<number[]>([20000, 2000000]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   //search location
   const [address, setAddress] = useState<string>("");
   const [query, setQuery] = useState<string>("");
@@ -51,8 +53,8 @@ const Service = () => {
   const [showSuggestions, setShowSuggestions] = useState<boolean>(false);
   const [lat, setLat] = useState<number>();
   const [lng, setLng] = useState<number>();
-  const [startTime, setStartTime] = useState<string | null>(null); // Store start time
-  const [endTime, setEndTime] = useState<string | null>(null); // Store end time
+  const [startTime, setStartTime] = useState<string | null>(""); // Store start time
+  const [endTime, setEndTime] = useState<string | null>(""); // Store end time
   const getUserFromStorage = () => {
     if (typeof window !== "undefined") {
       const storedUser = localStorage.getItem("user");
@@ -120,10 +122,12 @@ const Service = () => {
     { id: "ADDITION_SERVICE", serviceName: "Dịch vụ khác" },
   ];
 
-  const [selectedCatNumber, setSelectedCatNumber] = useState<string | null>(
-    null
-  );
-  const options = ["1", "2", "3+"];
+  const [selectedCatNumber, setSelectedCatNumber] = useState<number>();
+  const options = [
+    { id: 1, name: "1" },
+    { id: 2, name: "2" },
+    { id: 3, name: "3+" }
+  ];
 
   // Handle service change
   const handleServiceChange = (serviceId: string) => {
@@ -131,12 +135,12 @@ const Service = () => {
   };
 
   //fake favorites button
-  const [isClicked, setIsClicked] = useState(false);
+  // const [isClicked, setIsClicked] = useState(false);
 
-  // Function to handle click
-  const handleClick = () => {
-    setIsClicked(!isClicked); // Toggle the state
-  };
+  // // Function to handle click
+  // const handleClick = () => {
+  //   setIsClicked(!isClicked); // Toggle the state
+  // };
 
   //change price range
   const handleInputChange = (index: number, value: string) => {
@@ -147,17 +151,21 @@ const Service = () => {
 
   //get cat sitters   
   useEffect(() => {
+    setIsLoading(true)
     try {
       axiosClient(
         `sitter-profiles/search?latitude=${lat ?? 10.8231}&longitude=${lng ?? 106.6297}&page=1&size=10&sort=distance&direction=DESC`
       )
         .then((res) => {
           setCatSitters(res.data);
+          setIsLoading(false)
         })
         .catch((e) => {
+          setIsLoading(false)
           console.log(e);
         });
     } catch (error) {
+      setIsLoading(false)
       console.log(error);
     }
   }, [lat, lng]);
@@ -180,16 +188,19 @@ const Service = () => {
   };
 
   const handleSearch = async () => {
+    setIsLoading(true); // Show loading
     try {
-      const response = await fetch(
-        `https://api.geoapify.com/v1/geocode/search?text=${encodeURIComponent(
-          address
-        )}&apiKey=7eaa555d1d1f4dbe9b2792ee9c726f10`
-      );
-      const data = await response.json();
-      if (data && data.features && data.features[0]) {
-        setLat(data.features[0].geometry.coordinates[1]);
-        setLng(data.features[0].geometry.coordinates[0]);
+      if (address) {
+        const response = await fetch(
+          `https://api.geoapify.com/v1/geocode/search?text=${encodeURIComponent(
+            address
+          )}&apiKey=7eaa555d1d1f4dbe9b2792ee9c726f10`
+        );
+        const data = await response.json();
+        if (data && data.features && data.features[0]) {
+          setLat(data.features[0].geometry.coordinates[1]);
+          setLng(data.features[0].geometry.coordinates[0]);
+        }
       }
 
       axiosClient(
@@ -204,6 +215,8 @@ const Service = () => {
         });
     } catch (error) {
       console.error("Error fetching geocoding data:", error);
+    } finally {
+      setIsLoading(false); // Hide loading
     }
   };
 
@@ -267,12 +280,12 @@ const Service = () => {
           <div className={styles.optionsContainer}>
             {options.map((option) => (
               <div
-                key={option}
-                className={`${styles.option} ${selectedCatNumber === option ? `${styles.selected}` : ""
+                key={option.id}
+                className={`${styles.option} ${selectedCatNumber === option.id ? `${styles.selected}` : ""
                   }`}
-                onClick={() => setSelectedCatNumber(option)}
+                onClick={() => setSelectedCatNumber(option.id)}
               >
-                {option}
+                {option.name}
               </div>
             ))}
           </div>
@@ -338,7 +351,8 @@ const Service = () => {
       </div>
 
       {/* 2 */}
-      <div className="flex flex-col justify-start items-start w-[909px]  rounded-xl text-black bg-[#FFF6ED] h-[900px] overflow-auto scrollbar-hide px-4">
+      <div className="relative flex flex-col justify-start items-start w-[909px] rounded-xl text-black bg-[#FFF6ED] h-[900px] overflow-auto scrollbar-hide px-4">
+        {isLoading && <ComponentLoading />}
         {catSitters && catSitters.content.length > 0 ? (
           catSitters.content.map((catSitter, index) => (
             <div
@@ -360,7 +374,7 @@ const Service = () => {
                         <span className="font-bold">{index + 1}. </span>
                         {catSitter.fullName}
                       </p>
-                      <button
+                      {/* <button
                         onClick={(e) => {
                           e.stopPropagation();
                           handleClick();
@@ -371,12 +385,12 @@ const Service = () => {
                           className={`transition-colors size-3 ${isClicked ? "text-red-500" : ""
                             }`}
                         />
-                      </button>
+                      </button> */}
                     </div>
-                    <p className="text-xs line-clamp-1">{catSitter.bio}</p>
-                    <p className="text-xs">Địa chỉ: {catSitter.location}</p>
+                    {/* <p className="text-xs line-clamp-1">{catSitter.bio}</p> */}
+                    <p className="text-[15px] ml-1">Địa chỉ: {catSitter.location}</p>
                   </div>
-                  <div className="ml-auto flex flex-col text-right">
+                  <div className="ml-auto flex flex-col text-right min-w-20">
                     <p className="text-xs font-semibold text-right">
                       Giá mỗi ngày
                     </p>
@@ -398,7 +412,7 @@ const Service = () => {
                     className="text-text size-1 self-center px-1"
                   />
                   {/* <p className=' text-[14px] font-normal'>{catSitter.reviews} Đánh giá</p> */}
-                  <p className="text-[14px] font-normal">không có đánh giá</p>
+                  <p className="text-[14px] font-normal">{catSitter.numberOfReview ? catSitter.numberOfReview : "không có"} đánh giá</p>
                 </div>
                 <p className="text-[14px] my-2 line-clamp-1">{catSitter.bio}</p>
                 <div className="flex font-semibold text-[#66625F]">
