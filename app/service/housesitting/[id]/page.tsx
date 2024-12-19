@@ -45,6 +45,7 @@ const HouseSitting = () => {
     const [userData, setUserData] = useState<UserType>()
     const { isOpen: isOpenAdd, onOpen: onOpenAdd, onOpenChange: onOpenChangeAdd } = useDisclosure();
     const [userId, setUserId] = useState<string | null>(null);
+    const [selectedSlots, setSelectedSlots] = useState<string[]>([]);
     //image data
     const [selectedImage, setSelectedImage] = useState<File | null>(null);
     const [previewImage, setPreviewImage] = useState<string | null>(null);
@@ -314,38 +315,6 @@ const HouseSitting = () => {
         return totalPerNight * selectedPet.length;
     }, [selectedPet.length, selectedServices]);
 
-    //select service
-    // const handleInputServiceChange = (id: string, field: string, value: TimeInputValue | string, duration: number) => {
-    //     if (field === "startTime") {
-    //         // Check if `value` is of type `TimeInputValue`
-    //         if (typeof value === "object" && "hour" in value && "minute" in value) {
-    //             const startHour = value.hour;
-    //             const startMinute = value.minute;
-    //             const startTimeInMinutes = startHour * 60 + startMinute;
-
-    //             const endTimeInMinutes = duration ? startTimeInMinutes + duration : startTimeInMinutes;
-
-    //             // Convert minutes back to hours and minutes
-    //             const endHour = Math.floor(endTimeInMinutes / 60) % 24;
-    //             const endMinute = endTimeInMinutes % 60;
-
-    //             const formattedTime = `${startHour.toString().padStart(2, "0")}:${startMinute.toString().padStart(2, "0")}`;
-    //             const formattedEndTime = `${endHour.toString().padStart(2, "0")}:${endMinute.toString().padStart(2, "0")}`;
-    //             setSelectedServices((prev) =>
-    //                 prev.map((service) =>
-    //                     service.id === id
-    //                         ? { ...service, startTime: formattedTime, endTime: formattedEndTime }
-    //                         : service
-    //                 )
-    //             );
-    //             return;
-    //         } else {
-    //             toast.error("Invalid time value");
-    //             return;
-    //         }
-    //     }
-    // };
-
     const removeService = (id: string) => {
         setSelectedServices((prev) => prev.filter((service) => service.id != id))
     };
@@ -539,7 +508,11 @@ const HouseSitting = () => {
                                             value={selectedService.selectedSlot}
                                             onChange={(e) => {
                                                 const selectedSlotId = e.target.value;
-                                                console.log("Selected Slot ID:", selectedSlotId);
+
+                                                setSelectedSlots((prevSlots) => {
+                                                    const updatedSlots = prevSlots.filter((slot) => slot !== selectedService.selectedSlot);
+                                                    return [...updatedSlots, selectedSlotId];
+                                                });
 
                                                 setSelectedServices((prevServices) =>
                                                     prevServices.map((service) =>
@@ -555,35 +528,40 @@ const HouseSitting = () => {
                                             }}
                                         >
                                             {selectedService.slots && selectedService.slots.length > 0 ? (
-                                                selectedService.slots.map((slot) => (
-                                                    <SelectItem
-                                                        key={slot.id}
-                                                        value={slot.id}
-                                                        textValue={`${new Date(slot.startTime).toLocaleTimeString([], {
-                                                            hour: "2-digit",
-                                                            minute: "2-digit",
-                                                            hour12: false,
-                                                        })} - ${new Date(slot.endTime).toLocaleTimeString([], {
-                                                            hour: "2-digit",
-                                                            minute: "2-digit",
-                                                            hour12: false,
-                                                        })}`}
-                                                    >
-                                                        <h1 className="gap-2 flex justify-center items-center">
-                                                            {new Date(slot.startTime).toLocaleTimeString([], {
+                                                selectedService.slots.map((slot) => {
+                                                    const isDisabled = selectedSlots.includes(slot.id);
+
+                                                    return (
+                                                        <SelectItem
+                                                            key={slot.id}
+                                                            value={slot.id}
+                                                            isDisabled={isDisabled} // Disable if already selected
+                                                            textValue={`${new Date(slot.startTime).toLocaleTimeString([], {
                                                                 hour: "2-digit",
                                                                 minute: "2-digit",
                                                                 hour12: false,
-                                                            })}
-                                                            <FontAwesomeIcon icon={faMinus} />
-                                                            {new Date(slot.endTime).toLocaleTimeString([], {
+                                                            })} - ${new Date(slot.endTime).toLocaleTimeString([], {
                                                                 hour: "2-digit",
                                                                 minute: "2-digit",
                                                                 hour12: false,
-                                                            })}
-                                                        </h1>
-                                                    </SelectItem>
-                                                ))
+                                                            })}`}
+                                                        >
+                                                            <h1 className="gap-2 flex justify-center items-center">
+                                                                {new Date(slot.startTime).toLocaleTimeString([], {
+                                                                    hour: "2-digit",
+                                                                    minute: "2-digit",
+                                                                    hour12: false,
+                                                                })}
+                                                                <FontAwesomeIcon icon={faMinus} />
+                                                                {new Date(slot.endTime).toLocaleTimeString([], {
+                                                                    hour: "2-digit",
+                                                                    minute: "2-digit",
+                                                                    hour12: false,
+                                                                })}
+                                                            </h1>
+                                                        </SelectItem>
+                                                    );
+                                                })
                                             ) : (
                                                 <SelectItem isReadOnly>Hiện tại không có slot</SelectItem>
                                             )}

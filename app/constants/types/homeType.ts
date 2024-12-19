@@ -497,6 +497,7 @@ export type UnavailableDate = {
   id: string;
   startDate: Date;
   endDate: Date;
+  date: Date;
   dayOfWeek: string;
   isRecurring: boolean;
 };
