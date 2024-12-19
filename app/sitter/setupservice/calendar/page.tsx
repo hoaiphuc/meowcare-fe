@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 import { useEffect, useState } from 'react';
 import styles from './calendar.module.css';
@@ -63,14 +63,13 @@ const Calendar = () => {
         }
     }, [userId]);
 
-
-    const toggleDateAvailability = (index: number) => {
-        setNext15Days((prevDays) =>
-            prevDays.map((day, i) =>
-                i === index ? { ...day, isAvailable: !day.isAvailable } : day
-            )
-        );
-    };
+  const toggleDateAvailability = (index: number) => {
+    setNext15Days((prevDays) =>
+      prevDays.map((day, i) =>
+        i === index ? { ...day, isAvailable: !day.isAvailable } : day
+      )
+    );
+  };
 
     const handleUpdate = () => {
         try {
@@ -95,8 +94,28 @@ const Calendar = () => {
                 })
         } catch (error) {
 
-        }
-    }
+  return (
+    <div className="flex items-center justify-center my-10">
+      <div className="w-[1000px] flex flex-col bg-white shadow-lg rounded-lg p-8">
+        <div className="mb-10 text-center">
+          <h1 className="text-3xl font-bold text-purple-700">
+            Thời gian nhận đặt lịch
+          </h1>
+          <h2 className="text-lg text-gray-600 mt-2">
+            Hãy chọn những ngày bạn không muốn nhận việc
+          </h2>
+        </div>
+        {/* Ghi chú */}
+        <div className="flex justify-center items-center mb-6 space-x-4">
+          <div className="flex items-center">
+            <div className="w-6 h-6 bg-green-500 rounded-full mr-2"></div>
+            <span className="text-gray-600">: Ngày hoạt động</span>
+          </div>
+          <div className="flex items-center">
+            <div className="w-6 h-6 bg-red-500 rounded-full mr-2"></div>
+            <span className="text-gray-600">: Ngày không hoạt động</span>
+          </div>
+        </div>
 
     return (
         <div className="flex items-center justify-center my-5 ">
@@ -148,8 +167,11 @@ const Calendar = () => {
                     <Button onClick={handleUpdate} className='bg-cyan-500 text-white'>Cập nhật</Button>
                 </div>
             </div>
+
         </div>
-    );
+      </div>
+    </div>
+  );
 };
 
 export default Calendar;
