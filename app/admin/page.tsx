@@ -26,42 +26,34 @@ const Page = () => {
   const [discountData, setDiscountData] = useState<unknown[]>([]);
 
   useEffect(() => {
-    try {
-      // Tổng người dùng
-      axiosClient("/users/count")
-        .then((res: { data: React.SetStateAction<number | undefined> }) => {
-          setTotalUser(res.data);
-        })
-        .catch(() => { });
+    const fetchData = async () => {
+      try {
+        const results = await Promise.allSettled([
+          axiosClient("/users/count"),
+          axiosClient("users/count/MANAGER"),
+          axiosClient("users/count/SITTER"),
+        ]);
 
-      // Người nuôi mèo
-      axiosClient(`users/count/USER`)
-        .then((res: { data: React.SetStateAction<number | undefined> }) => {
-          setCatOwner(res.data);
-        })
-        .catch((e: unknown) => {
-          console.log(e);
-        });
-      // Người chăm sóc mèo
-      axiosClient(`users/count/MANAGER`)
-        .then((res: { data: React.SetStateAction<number | undefined> }) => {
-          setManager(res.data);
-        })
-        .catch((e: unknown) => {
-          console.log(e);
-        });
+        // Extract results or default to 0
+        const totalUser =
+          results[0].status === "fulfilled" ? results[0].value.data : 0;
+        const manager =
+          results[1].status === "fulfilled" ? results[1].value.data : 0;
+        const sitter =
+          results[2].status === "fulfilled" ? results[2].value.data : 0;
 
-      // Người chăm sóc mèo
-      axiosClient(`users/count/SITTER`)
-        .then((res: { data: React.SetStateAction<number | undefined> }) => {
-          setSitter(res.data);
-        })
-        .catch((e: unknown) => {
-          console.log(e);
-        });
-    } catch (error) {
-      console.log(error);
-    }
+        setTotalUser(totalUser);
+        setManager(manager);
+        setSitter(sitter);
+
+        // Calculate catOwner
+        setCatOwner(totalUser - manager - sitter);
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+
+    fetchData();
   }, []);
 
   useEffect(() => {
