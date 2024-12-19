@@ -4,7 +4,9 @@ import {
   Avatar,
   Button,
   DateRangePicker,
+  DateValue,
   Input,
+  RangeValue,
   Select,
   SelectItem,
   Slider,
@@ -26,6 +28,7 @@ import useGeoapify from "../hooks/useGeoapify";
 import axiosClient from "../lib/axiosClient";
 import styles from "./service.module.css";
 const Map = dynamic(() => import("../components/Map"), { ssr: false });
+import { getLocalTimeZone, today } from "@internationalized/date";
 
 interface CatSitterData {
   content: [CatSitter];
@@ -38,7 +41,7 @@ interface Address {
 }
 
 const Service = () => {
-  const [selectedService, setSelectedService] = useState<string>("1");
+  const [selectedService, setSelectedService] = useState<string>("");
   const [catSitters, setCatSitters] = useState<CatSitterData>();
   const [price, setPrice] = useState<number[]>([20000, 2000000]);
   //search location
@@ -48,7 +51,8 @@ const Service = () => {
   const [showSuggestions, setShowSuggestions] = useState<boolean>(false);
   const [lat, setLat] = useState<number>();
   const [lng, setLng] = useState<number>();
-
+  const [startTime, setStartTime] = useState<string | null>(null); // Store start time
+  const [endTime, setEndTime] = useState<string | null>(null); // Store end time
   const getUserFromStorage = () => {
     if (typeof window !== "undefined") {
       const storedUser = localStorage.getItem("user");
@@ -112,8 +116,8 @@ const Service = () => {
   };
 
   const services = [
-    { id: "1", serviceName: "Gửi thú cưng" },
-    { id: "2", serviceName: "Dịch vụ khác" },
+    { id: "MAIN_SERVICE", serviceName: "Gửi thú cưng" },
+    { id: "ADDITION_SERVICE", serviceName: "Dịch vụ khác" },
   ];
 
   const [selectedCatNumber, setSelectedCatNumber] = useState<string | null>(
@@ -141,12 +145,11 @@ const Service = () => {
     setPrice(newPrice);
   };
 
-  //get cat sitters
+  //get cat sitters   
   useEffect(() => {
     try {
       axiosClient(
-        `sitter-profiles/search?latitude=${lat ?? 10.8231}&longitude=${lng ?? 106.6297
-        }&page=1&size=10&sort=distance&direction=DESC`
+        `sitter-profiles/search?latitude=${lat ?? 10.8231}&longitude=${lng ?? 106.6297}&page=1&size=10&sort=distance&direction=DESC`
       )
         .then((res) => {
           setCatSitters(res.data);
@@ -158,6 +161,23 @@ const Service = () => {
       console.log(error);
     }
   }, [lat, lng]);
+
+  // Handle date range change
+  const handleDateRangeChange = (range: RangeValue<DateValue> | null) => {
+    if (range) {
+      const { start, end } = range;
+      setStartTime(
+        start
+          ? new Date(start.toString()).toISOString().split("T")[0] // Extract only YYYY-MM-DD
+          : null
+      );
+      setEndTime(
+        end
+          ? new Date(end.toString()).toISOString().split("T")[0] // Extract only YYYY-MM-DD
+          : null
+      );
+    }
+  };
 
   const handleSearch = async () => {
     try {
@@ -171,6 +191,17 @@ const Service = () => {
         setLat(data.features[0].geometry.coordinates[1]);
         setLng(data.features[0].geometry.coordinates[0]);
       }
+
+      axiosClient(
+        `sitter-profiles/search?latitude=${lat ?? 10.8231}&longitude=${lng ?? 106.6297
+        }&serviceType=${selectedService}&minPrice=${price[0]}&maxPrice=${price[1]}&startTime=${startTime}&endTime=${endTime}&page=1&size=10&sort=distance&direction=DESC`
+      )
+        .then((res) => {
+          setCatSitters(res.data);
+        })
+        .catch((e) => {
+          console.log(e);
+        });
     } catch (error) {
       console.error("Error fetching geocoding data:", error);
     }
@@ -183,6 +214,7 @@ const Service = () => {
         <Select
           label={<h2 className={styles.h2}>Loại dịch vụ</h2>}
           labelPlacement="outside"
+          placeholder="Chọn dịch vụ"
           className={`${styles.h2} min-w-full`}
           variant="bordered"
           defaultSelectedKeys={selectedService}
@@ -194,14 +226,6 @@ const Service = () => {
             </SelectItem>
           ))}
         </Select>
-
-        {/* <h2 className={styles.h2}>Tên người chăm sóc</h2>
-        <Input
-          placeholder="Nhập tên người bạn muốn tìm"
-          value={name}
-          variant='bordered'
-          onChange={(e) => setName(e.target.value)}
-        /> */}
 
         <h2 className={styles.h2}>Địa chỉ</h2>
         <div className="relative">
@@ -234,6 +258,8 @@ const Service = () => {
           label="Stay duration"
           className="max-w-[388px]"
           variant="bordered"
+          minValue={today(getLocalTimeZone()).add({ days: 1 })}
+          onChange={handleDateRangeChange}
         />
 
         <div className="flex flex-col gap-3">
@@ -251,10 +277,6 @@ const Service = () => {
             ))}
           </div>
         </div>
-
-        {/* <p className="text-default-500 font-medium text-small">
-                        {Array.isArray(price) && price.map((b) => `$${b}`).join(" – ")}
-                    </p> */}
         <div>
           <h2 className={styles.h2}>Giá mỗi giờ</h2>
           <div className="flex gap-3 justify-center items-center">
@@ -359,8 +381,7 @@ const Service = () => {
                       Giá mỗi ngày
                     </p>
                     <p className="text-[20px] font-semibold text-[#2B764F]">
-                      {/* {catSitter.price} */}
-                      20.000đ
+                      {catSitter.mainServicePrice ? catSitter.mainServicePrice.toLocaleString("de") : 0}đ
                     </p>
                   </div>
                 </div>

@@ -63,12 +63,10 @@ const Page = () => {
       try {
         // Construct the API URL dynamically based on selectedStatus
         const url = selectedStatus
-          ? `booking-orders/user/status?userId=${userId}&status=${selectedStatus}&page=${
-              page - 1
-            }&size=3&prop=createdAt&direction=DESC`
-          : `booking-orders/user/status?userId=${userId}&page=${
-              page - 1
-            }&size=3&prop=createdAt&direction=DESC`;
+          ? `booking-orders/user/status?userId=${userId}&status=${selectedStatus}&page=${page - 1
+          }&size=3&prop=createdAt&direction=DESC`
+          : `booking-orders/user/status?userId=${userId}&page=${page - 1
+          }&size=3&prop=createdAt&direction=DESC`;
 
         const res = await axiosClient(url);
         setData(res.data);
@@ -83,6 +81,23 @@ const Page = () => {
     fetchData();
   }, [userId, page, selectedStatus]);
 
+  const handleRepayment = (id: string) => {
+    try {
+      axiosClient
+        .post(
+          `booking-orders/payment-url?id=${id}&requestType=CAPTURE_WALLET&redirectUrl=${process.env.NEXT_PUBLIC_BASE_URL}/payment-result`
+        )
+        .then((res) => {
+          window.open(res.data.payUrl, "_self");
+        })
+        .catch(() => {
+          toast.error("Hết hạn thanh toán, vui lòng đặt lại");
+        });
+    } catch (error) {
+
+    }
+  }
+
   return (
     <div className="w-[891px] bg-white rounded-2xl shadow-2xl py-10">
       <div className="ml-20 w-full gap-5 flex flex-col">
@@ -91,9 +106,8 @@ const Page = () => {
           {menuItems.map((item) => (
             <Button
               key={item.status}
-              className={`${styles.button} ${
-                selectedStatus === item.status ? styles.activeButton : ""
-              }`}
+              className={`${styles.button} ${selectedStatus === item.status ? styles.activeButton : ""
+                }`}
               onClick={() => {
                 setSelectedStatus(item.status);
                 setPage(1); // Reset to page 1 when changing status
@@ -188,37 +202,35 @@ const Page = () => {
                         {(activity.status === "COMPLETED" ||
                           activity.status === "IN_PROGRESS" ||
                           activity.status === "CONFIRMED") && (
-                          <Button
-                            as={Link}
-                            href={
-                              activity.orderType === "OVERNIGHT"
-                                ? `/profile/activity/detail/${activity.id}`
-                                : `/profile/activity/detailother/${activity.id}`
-                            }
-                            className="bg-btnbg text-white rounded-lg mt-3"
-                          >
-                            Theo dõi lịch
-                          </Button>
-                        )}
+                            <Button
+                              as={Link}
+                              href={
+                                activity.orderType === "OVERNIGHT"
+                                  ? `/profile/activity/detail/${activity.id}`
+                                  : `/profile/activity/detailother/${activity.id}`
+                              }
+                              className="bg-btnbg text-white rounded-lg mt-3"
+                            >
+                              Theo dõi lịch
+                            </Button>
+                          )}
                         {(activity.status === "CANCELLED" ||
                           activity.status === "CONFIRM" ||
                           activity.status === "COMPLETED") && (
-                          <Button
-                            as={Link}
-                            href={`/profile/activity/bookingdetail/${activity.id}`}
-                            className="bg-btnbg text-white rounded-lg mt-3"
-                          >
-                            Đánh giá
-                          </Button>
-                        )}
+                            <Button
+                              as={Link}
+                              href={`/profile/activity/bookingdetail/${activity.id}`}
+                              className="bg-btnbg text-white rounded-lg mt-3"
+                            >
+                              Đánh giá
+                            </Button>
+                          )}
 
                         {activity.status === "AWAITING_PAYMENT" && (
                           <Button
                             // as={Link}
                             // href={`/`}
-                            onClick={() =>
-                              toast.error("Tính năng đang phát triển")
-                            }
+                            onClick={() => handleRepayment(activity.id)}
                             className="bg-yellow-500 text-white rounded-lg mt-3"
                           >
                             Thanh toán lại
@@ -227,9 +239,8 @@ const Page = () => {
                       </div>
                     </div>
                     <h2
-                      className={`${
-                        statusColors[activity.status] || "text-black"
-                      }`}
+                      className={`${statusColors[activity.status] || "text-black"
+                        }`}
                     >
                       {statusLabels[activity.status] ||
                         "Trạng thái không xác định"}

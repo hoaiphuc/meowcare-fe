@@ -12,7 +12,7 @@ import { toast } from 'react-toastify'
 import { today, getLocalTimeZone } from '@internationalized/date';
 import { faCat, faMinus, faPlus, faTrash } from '@fortawesome/free-solid-svg-icons'
 import { v4 as uuidv4 } from 'uuid';
-import Loading from '@/app/components/Loading'
+// import Loading from '@/app/components/Loading'
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import CatBreed from '@/app/lib/CatBreed.json';
 import { storage } from '@/app/utils/firebase'
@@ -210,6 +210,7 @@ const HouseSitting = () => {
     }
 
     const handleBooking = () => {
+        setIsLoading(true)
         const bookingDetails: BookingDetail[] = [];
 
         if (!selectedDate) {
@@ -279,6 +280,7 @@ const HouseSitting = () => {
                 .then(() => {
                     router.push("/payment-result?resultCode=0")
                     toast.success("Đã đặt lịch thành công, bạn có thể xem nó ở phần hoạt động")
+                    setIsLoading(false)
                 })
                 .catch((e) => {
                     if (e.response.data.message === "Sitter is busy") {
@@ -288,6 +290,7 @@ const HouseSitting = () => {
                     }
                     router.push("/payment-result?resultCode=1")
                     toast.error("Có lỗi xảy ra, vui lòng thử lại sau")
+                    setIsLoading(false)
                 })
         }
     }
@@ -462,9 +465,6 @@ const HouseSitting = () => {
         });
     }
 
-    if (isLoading) {
-        return <Loading />
-    }
 
     return (
         <div className='flex flex-col items-center justify-start my-12'>
@@ -476,7 +476,7 @@ const HouseSitting = () => {
                         <h2 className={styles.h2}>Chọn ngày</h2>
                         <DatePicker
                             label="Ngày bắt đầu"
-                            minValue={todayDate}
+                            minValue={today(getLocalTimeZone()).add({ days: 1 })}
                             maxValue={maxDate}
                             visibleMonths={2}
                             onChange={(e) => setSelectedDate(e)}
@@ -821,7 +821,7 @@ const HouseSitting = () => {
                                 </div>
                             </ModalBody>
                             <ModalFooter className='w-full flex justify-center'>
-                                <Button className='bg-btnbg text-white w-[206px] rounded-full h-[42px]' onPress={() => handleBooking()}>
+                                <Button className='bg-btnbg text-white w-[206px] rounded-full h-[42px]' onPress={() => handleBooking()} isDisabled={isLoading}>
                                     Thanh toán
                                 </Button>
                             </ModalFooter>
@@ -907,7 +907,7 @@ const HouseSitting = () => {
                                 />
                             </ModalBody>
                             <ModalFooter className='flex justify-center items-center'>
-                                <Button color="primary" onPress={handleAddPet} className='rounded-full'>
+                                <Button color="primary" onPress={handleAddPet} className='rounded-full' isDisabled={isLoading}>
                                     Lưu
                                 </Button>
                             </ModalFooter>

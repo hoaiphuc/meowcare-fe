@@ -1,8 +1,8 @@
 "use client";
 
+import CatBreed from '@/app/lib/CatBreed.json';
 import { faClock } from "@fortawesome/free-regular-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import CatBreed from '@/app/lib/CatBreed.json';
 import {
   Avatar,
   Button,
@@ -32,16 +32,15 @@ import {
   UserType,
 } from "@/app/constants/types/homeType";
 import axiosClient from "@/app/lib/axiosClient";
+import { storage } from "@/app/utils/firebase";
+import { faCat } from "@fortawesome/free-solid-svg-icons";
 import { getLocalTimeZone, today } from "@internationalized/date";
 import { format } from "date-fns";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import Image from "next/image";
-import { v4 as uuidv4 } from 'uuid';
 import { useParams, useRouter } from "next/navigation";
 import { toast } from "react-toastify";
-import { faCat } from "@fortawesome/free-solid-svg-icons";
-import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
-import { storage } from "@/app/utils/firebase";
-import Loading from "@/app/components/Loading";
+import { v4 as uuidv4 } from 'uuid';
 
 interface BookingDetail {
   quantity: number;
@@ -58,7 +57,8 @@ const Page = () => {
   const [pets, setPets] = useState<PetProfile[]>([]);
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const { isOpen: isOpenAdd, onOpen: onOpenAdd, onOpenChange: onOpenChangeAdd } = useDisclosure();
-  const [isLoading, setIsLoading] = useState(false)
+  // const [isLoading, setIsLoading] = useState(false)
+  const [isButtonLoading, setIsButtonLoading] = useState(false)
   const [childServices, setChildServices] = useState<Service[]>([]);
   const [services, setServices] = useState<Service[]>([]);
   const [name, setName] = useState("");
@@ -214,11 +214,11 @@ const Page = () => {
       return;
     }
 
-    if (phoneNumber)
-      if (!dateRange.startDate || !dateRange.endDate) {
-        toast.error("Vui lòng chọn ngày bắt đầu và ngày kết thúc");
-        return;
-      }
+    if (!dateRange.startDate || !dateRange.endDate) {
+      toast.error("Vui lòng chọn ngày bắt đầu và ngày kết thúc");
+      return;
+    }
+
     if (selectedPet.length < 1) {
       toast.error("Vui lòng chọn ít nhất 1 bé mèo");
       return;
@@ -227,6 +227,7 @@ const Page = () => {
   };
 
   const handleBooking = () => {
+    setIsButtonLoading(true)
     const bookingDetails: BookingDetail[] = [];
 
     selectedPet.map((petId) => {
@@ -292,9 +293,11 @@ const Page = () => {
               });
           })
           .catch((e) => {
+            setIsButtonLoading(false)
             console.log(e);
           });
       } catch (error) {
+        setIsButtonLoading(false)
         console.log(error);
       }
     } else {
@@ -305,10 +308,12 @@ const Page = () => {
           toast.success(
             "Đã đặt lịch thành công, bạn có thể xem tại phần hoạt động"
           );
+          setIsButtonLoading(false)
         })
         .catch(() => {
           router.push("/payment-result?resultCode=1");
           toast.error("Có lỗi xảy ra, vui lòng thử lại sau");
+          setIsButtonLoading(false)
         });
     }
   };
@@ -386,7 +391,7 @@ const Page = () => {
   };
 
   const handleAddPet = async () => {
-    setIsLoading(true)
+    setIsButtonLoading(true)
     try {
       let profilePictureUrl = '';
       if (selectedImage) {
@@ -419,16 +424,16 @@ const Page = () => {
             profilePicture: '',
           });
           fetchPets();
-          setIsLoading(false)
+          setIsButtonLoading(false)
         })
         .catch((e) => {
           console.log(e);
-          setIsLoading(false)
+          setIsButtonLoading(false)
         })
 
     } catch (error) {
       console.log(error);
-      setIsLoading(false)
+      setIsButtonLoading(false)
     }
   }
 
@@ -449,9 +454,10 @@ const Page = () => {
     });
   }
 
-  if (isLoading) {
-    return <Loading />
-  }
+  // if (isLoading) {
+  //   return <Loading />
+  // }
+
   return (
     <div className="flex flex-col items-center justify-start my-12">
       <h1 className={styles.h1}>Gửi thú cưng</h1>
@@ -462,7 +468,7 @@ const Page = () => {
             <h2 className={styles.h2}>Chọn ngày</h2>
             <DateRangePicker
               label="Ngày đặt lịch"
-              minValue={todayDate}
+              minValue={today(getLocalTimeZone()).add({ days: 1 })}
               maxValue={maxDate}
               visibleMonths={2}
               onChange={(range) =>
@@ -808,6 +814,7 @@ const Page = () => {
               </ModalBody>
               <ModalFooter className="w-full flex justify-center">
                 <Button
+                  isDisabled={isButtonLoading}
                   className="bg-btnbg text-white w-[206px] rounded-full h-[42px]"
                   onPress={() => handleBooking()}
                 >
@@ -896,7 +903,7 @@ const Page = () => {
                 />
               </ModalBody>
               <ModalFooter className='flex justify-center items-center'>
-                <Button color="primary" onPress={handleAddPet} className='rounded-full'>
+                <Button color="primary" onPress={handleAddPet} className='rounded-full' isDisabled={isButtonLoading}>
                   Lưu
                 </Button>
               </ModalFooter>
