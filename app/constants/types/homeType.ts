@@ -95,6 +95,7 @@ export type CatSitter = {
   distance: number;
   profilePictures: [ProfilePicture];
   fullRefundDay: number;
+  mainServicePrice: number;
 };
 
 export type ProfilePicture = {
