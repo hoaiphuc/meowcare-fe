@@ -158,6 +158,15 @@ const Page = () => {
     } catch (error) { }
   };
 
+  const handleViewProfile = () => {
+    if (!sitterStatus) {
+      toast.error("Bạn cần thêm thông tin cơ bản trước");
+      return;
+    }
+    router.push(`/service/sitterprofile/${userProfile?.id}`)
+
+  }
+
   return (
     <div className="flex flex-col justify-center items-center text-black my-10">
       <div className="w-[600px]">
@@ -341,7 +350,7 @@ const Page = () => {
                         <div className="flex flex-col justify-center items-center gap-2">
                           <Button
                             className={styles.modalButton}
-                            onClick={() => { }}
+                            onClick={() => handleViewProfile()}
                           >
                             <FontAwesomeIcon
                               icon={faEye}
@@ -415,7 +424,7 @@ const Page = () => {
           )}
         </ModalContent>
       </Modal>
-    </div>
+    </div >
   );
 };
 

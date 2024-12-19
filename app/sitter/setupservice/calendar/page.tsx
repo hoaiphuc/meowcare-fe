@@ -1,24 +1,16 @@
 "use client";
 
-import { useEffect, useState } from 'react';
-import styles from './calendar.module.css';
-import { Button } from '@nextui-org/react';
-import axiosClient from '@/app/lib/axiosClient';
-import { UnavailableDate, UserLocal } from '@/app/constants/types/homeType';
-import { toast } from 'react-toastify';
+import { useEffect, useState } from "react";
+import { Button } from "@nextui-org/react";
+import axiosClient from "@/app/lib/axiosClient";
+import { UnavailableDate, UserLocal } from "@/app/constants/types/homeType";
+import { toast } from "react-toastify";
 
 const Calendar = () => {
     const [previousUnavailableDates, setPreviousUnavailableDates] = useState<UnavailableDate[]>([]);
-    const [daysOfWeek, setDaysOfWeek] = useState([
-        { key: "monday", name: "Thứ 2", isAvailable: true },
-        { key: "tuesday", name: "Thứ 3", isAvailable: true },
-        { key: "wednesday", name: "Thứ 4", isAvailable: true },
-        { key: "thursday", name: "Thứ 5", isAvailable: true },
-        { key: "friday", name: "Thứ 6", isAvailable: true },
-        { key: "saturday", name: "Thứ 7", isAvailable: true },
-        { key: "sunday", name: "Chủ nhật", isAvailable: true },
-    ]);
-    const [next15Days, setNext15Days] = useState<{ date: Date; isAvailable: boolean }[]>([]);
+    const [datesByMonth, setDatesByMonth] = useState<{ month: string; dates: { date: Date; isAvailable: boolean }[] }[]>([]);
+    const [currentMonthIndex, setCurrentMonthIndex] = useState(0);
+
     const getUserFromStorage = () => {
         if (typeof window !== "undefined") {
             const storedUser = localStorage.getItem("user");
@@ -30,29 +22,56 @@ const Calendar = () => {
 
     useEffect(() => {
         const today = new Date();
-        const days = [];
-        for (let i = 0; i <= 13; i++) {
-            const date = new Date();
-            date.setDate(today.getDate() + i);
-            days.push({ date, isAvailable: true });
+        const groupedDates: { month: string; dates: { date: Date; isAvailable: boolean }[] }[] = [];
+
+        for (let i = 0; i < 3; i++) {
+            const monthOffset = today.getMonth() + i;
+            const year = today.getFullYear() + Math.floor(monthOffset / 12);
+            const month = monthOffset % 12;
+
+            const startOfMonth = new Date(year, month, 1);
+            const endOfMonth = new Date(year, month + 1, 0);
+
+            const dates = [];
+            for (let d = startOfMonth; d <= endOfMonth; d.setDate(d.getDate() + 1)) {
+                dates.push({ date: new Date(d), isAvailable: true });
+            }
+
+            groupedDates.push({
+                month: startOfMonth.toLocaleDateString("vi-VN", { month: "long", year: "numeric" }),
+                dates,
+            });
         }
-        setNext15Days(days);
+
+        console.log("Initialized Dates By Month:", groupedDates); // Debugging
+        setDatesByMonth(groupedDates);
+
+        // Ensure the first displayed month is the current month
+        setCurrentMonthIndex(0);
     }, []);
+
+
+
+
 
     useEffect(() => {
         if (userId) {
             axiosClient(`sitter-unavailable-dates/sitter/${userId}`)
                 .then((res) => {
                     const fetchedUnavailableDates = res.data;
-                    setPreviousUnavailableDates(fetchedUnavailableDates)
-                    setNext15Days((prevDays) =>
-                        prevDays.map((day) => {
-                            const isUnavailable = fetchedUnavailableDates.some(
-                                (unavailableDate: UnavailableDate) =>
-                                    new Date(unavailableDate.startDate).toDateString() === day.date.toDateString()
-                            );
-                            return { ...day, isAvailable: !isUnavailable };
-                        })
+                    setPreviousUnavailableDates(fetchedUnavailableDates);
+
+                    setDatesByMonth((prevMonths) =>
+                        prevMonths.map((month) => ({
+                            ...month,
+                            dates: month.dates.map((day) => {
+                                const isUnavailable = fetchedUnavailableDates.some(
+                                    (unavailableDate: UnavailableDate) =>
+                                        new Date(unavailableDate.startDate).toDateString() === day.date.toDateString()
+                                );
+                                return { ...day, isAvailable: !isUnavailable };
+                            }),
+                        }))
                     );
                 })
                 .catch((error) => {
@@ -61,53 +80,65 @@ const Calendar = () => {
         }
     }, [userId]);
 
-    const toggleDateAvailability = (index: number) => {
-        setNext15Days((prevDays) =>
-            prevDays.map((day, i) =>
-                i === index ? { ...day, isAvailable: !day.isAvailable } : day
+    const toggleDateAvailability = (monthIndex: number, dateIndex: number) => {
+        setDatesByMonth((prevMonths) =>
+            prevMonths.map((month, i) =>
+                i === monthIndex
+                    ? {
+                        ...month,
+                        dates: month.dates.map((day, j) =>
+                            j === dateIndex ? { ...day, isAvailable: !day.isAvailable } : day
+                        ),
+                    }
+                    : month
             )
         );
     };
 
     const handleUpdate = async () => {
         try {
-            // Prepare arrays for `POST` and `DELETE` operations
-            const toAdd = next15Days.filter(
-                (day) => !day.isAvailable && !previousUnavailableDates.some((prev) =>
-                    new Date(prev.startDate).toDateString() === day.date.toDateString()
-                )
-            );
+            const toAdd: { date: Date; isAvailable: boolean }[] = [];
+            const toDelete: UnavailableDate[] = [];
 
-            const toDelete = previousUnavailableDates.filter((prev) =>
-                !next15Days.some(
-                    (day) =>
-                        !day.isAvailable && new Date(prev.startDate).toDateString() === day.date.toDateString()
-                )
-            );
+            datesByMonth.forEach((month) => {
+                month.dates.forEach((day) => {
+                    const isPreviouslyUnavailable = previousUnavailableDates.some(
+                        (prev) =>
+                            new Date(prev.startDate).toDateString() === day.date.toDateString()
+                    );
 
-            // Create promises for DELETE requests
+                    if (!day.isAvailable && !isPreviouslyUnavailable) {
+                        toAdd.push(day);
+                    }
+
+                    if (day.isAvailable && isPreviouslyUnavailable) {
+                        const matched = previousUnavailableDates.find(
+                            (prev) =>
+                                new Date(prev.startDate).toDateString() ===
+                                day.date.toDateString()
+                        );
+                        if (matched) toDelete.push(matched);
+                    }
+                });
+            });
+
             const deletePromises = toDelete.map((date) =>
                 axiosClient.delete(`sitter-unavailable-dates/${date.id}`)
             );
-
-            // Create promises for POST requests
             const addPromises = toAdd.map((day) =>
                 axiosClient.post("sitter-unavailable-dates", {
                     startDate: day.date.toISOString(),
                     endDate: day.date.toISOString(),
-                    dayOfWeek: '',
+                    dayOfWeek: "",
                     isRecurring: false,
                 })
             );
 
-            // Wait for all promises to complete
             const results = await Promise.allSettled([...deletePromises, ...addPromises]);
 
-            // Analyze results
             const successCount = results.filter((result) => result.status === "fulfilled").length;
             const failureCount = results.filter((result) => result.status === "rejected").length;
 
-            // Show toast messages
             if (failureCount === 0) {
                 toast.success("Cập nhật thành công");
             } else if (successCount > 0) {
@@ -121,7 +152,6 @@ const Calendar = () => {
         }
     };
 
-
     return (
         <div className="flex items-center justify-center my-10">
             <div className="w-[1000px] flex flex-col bg-white shadow-lg rounded-lg p-8">
@@ -133,7 +163,6 @@ const Calendar = () => {
                         Hãy chọn những ngày bạn không muốn nhận việc
                     </h2>
                 </div>
-                {/* Ghi chú */}
                 <div className="flex justify-center items-center mb-6 space-x-4">
                     <div className="flex items-center">
                         <div className="w-6 h-6 bg-green-500 rounded-full mr-2"></div>
@@ -144,57 +173,41 @@ const Calendar = () => {
                         <span className="text-gray-600">: Ngày không hoạt động</span>
                     </div>
                 </div>
-
-                <div className="flex items-center justify-center my-5 ">
-                    <div className=' w-[1000px] flex flex-col'>
-                        <div>
-                            <div className='mb-10'>
-                                <h1 className={styles.h1}>Thời gian nhận đặt lịch</h1>
-                                <h2>Hãy bỏ chọn những ngày bạn không muốn nhận việc</h2>
-                            </div>
-                            <div className="flex mb-5">
-                                {daysOfWeek.map((day) => (
-                                    <div
-                                        className={`w-[130px] h-[70px] cursor-pointer ${day.isAvailable ? 'bg-green-500' : 'bg-red-500'}`}
-                                        key={day.key}
-                                        onClick={() =>
-                                            setDaysOfWeek((prevDays) =>
-                                                prevDays.map((d) =>
-                                                    d.key === day.key ? { ...d, isAvailable: !d.isAvailable } : d
-                                                )
-                                            )
-                                        }
-                                    >
-                                        <div
-                                            className={`w-[130px] h-[70px]  flex items-center justify-center text-white `}
-                                        >
-                                            {day.name}
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                            <div className="flex flex-wrap">
-                                {next15Days.map((day, index) => (
-                                    <div
-                                        key={index}
-                                        className={` w-[130px] h-[70px] flex justify-center items-center cursor-pointer ${day.isAvailable ? 'bg-green-500' : 'bg-red-500'}`}
-                                        onClick={() => toggleDateAvailability(index)}
-                                    >
-                                        <p className="text-white font-semibold">
-                                            {day.date.toLocaleDateString('vi-VN', {
-                                                day: '2-digit',
-                                                month: '2-digit',
-                                            })}
-                                        </p>
-                                    </div>
-                                ))}
-                            </div>
+                <div className="flex justify-between mb-6">
+                    <Button
+                        disabled={currentMonthIndex === 0}
+                        onClick={() => setCurrentMonthIndex((prev) => prev - 1)}
+                    >
+                        Tháng trước
+                    </Button>
+                    <h2 className="text-xl font-semibold">
+                        {datesByMonth[currentMonthIndex]?.month}
+                    </h2>
+                    <Button
+                        disabled={currentMonthIndex === datesByMonth.length - 1}
+                        onClick={() => setCurrentMonthIndex((prev) => prev + 1)}
+                    >
+                        Tháng sau
+                    </Button>
+                </div>
+                <div className="flex flex-wrap gap-3">
+                    {datesByMonth[currentMonthIndex]?.dates.map((day, index) => (
+                        <div
+                            key={index}
+                            className={`w-[130px] h-[70px] flex justify-center items-center cursor-pointer ${day.isAvailable ? "bg-green-500" : "bg-red-500"
+                                }`}
+                            onClick={() => toggleDateAvailability(currentMonthIndex, index)}
+                        >
+                            <p className="text-white font-semibold">
+                                {day.date.toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit" })}
+                            </p>
                         </div>
-                        <div className='flex justify-end mt-5'>
-                            <Button onClick={handleUpdate} className='bg-cyan-500 text-white'>Cập nhật</Button>
-                        </div>
-                    </div>
-
+                    ))}
+                </div>
+                <div className="flex justify-end mt-5">
+                    <Button onClick={handleUpdate} className="bg-cyan-500 text-white">
+                        Cập nhật
+                    </Button>
                 </div>
             </div>
         </div>
