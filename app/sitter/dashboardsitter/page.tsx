@@ -82,7 +82,7 @@ const Page = () => {
 
         if (bookingRes.status === "fulfilled") {
           setBooking(bookingRes.value.data);
-          setPages(bookingRes.value.data.totalPages)
+          setPages(bookingRes.value.data.page.totalPages)
         } else {
           console.error("Failed to fetch services:", bookingRes.reason);
         }

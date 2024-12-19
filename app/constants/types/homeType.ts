@@ -490,3 +490,11 @@ export type feedbackData = {
     paymentMethod: string;
   };
 };
+
+export type UnavailableDate = {
+  id: string;
+  startDate: Date;
+  endDate: Date;
+  dayOfWeek: string;
+  isRecurring: boolean;
+};
