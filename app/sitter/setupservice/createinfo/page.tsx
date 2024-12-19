@@ -152,10 +152,13 @@ const CreateInfo = () => {
                 })
             );
 
+            const skillString = selectedItems.map((item) => item.skill).join(";");
+
             const completeSitterData = {
                 ...sitterData, // Include existing data
                 location: address,
                 profilePictures: uploadedPictures, // Add uploaded pictures
+                skill: skillString
             } as CatSitter;
 
             const profileResponse = await axiosClient.post("sitter-profiles", completeSitterData)

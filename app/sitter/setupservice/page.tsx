@@ -10,6 +10,7 @@ import axiosClient from "@/app/lib/axiosClient";
 import { useAppDispatch, useAppSelector } from "@/app/lib/hooks";
 import { fetchUserProfile } from "@/app/lib/slices/userSlice";
 import {
+  faCalendarDays,
   faCheck,
   faChevronRight,
   faCircle,
@@ -234,8 +235,8 @@ const Page = () => {
             >
               <div className="flex items-center gap-3">
                 <FontAwesomeIcon
-                  icon={faXmark}
-                  className="text-red-400"
+                  icon={faCalendarDays}
+                  className=""
                   size="lg"
                 />
                 <h3 className="text-lg font-medium">Lịch làm việc</h3>

@@ -127,6 +127,13 @@ const Info = () => {
           if (res.data.location) {
             setAddress(res.data.location);
           }
+          if (res.data.skill) {
+            const existingSkills = res.data.skill.split(";").map((skill: string, index: number) => ({
+              id: index, // Assuming skills do not have unique IDs; use index as fallback
+              skill,
+            }));
+            setSelectedItems(existingSkills);
+          }
         })
         .catch(() => { });
 
@@ -295,13 +302,14 @@ const Info = () => {
         })
       );
 
+      const skillString = selectedItems.map((item) => item.skill).join(";");
+
       const updatedSitterData = {
         ...sitterData,
         location: address, // Include address as location
         profilePictures: uploadedPictures,
+        skill: skillString
       };
-
-      console.log(updatedSitterData);
 
       axiosClient
         .put(`sitter-profiles/${sitterData?.id}`, updatedSitterData)
