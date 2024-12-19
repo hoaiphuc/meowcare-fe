@@ -105,6 +105,7 @@ const Page = () => {
   });
   const [feedback, setFeedback] = useState<feedbackData[]>([]);
   const [visibleFeedback, setVisibleFeedback] = useState<feedbackData[]>([]);
+  const [unavailableDates, setUnavailableDates] = useState<Date[]>([]);
 
   // check user
   useEffect(() => {
@@ -181,6 +182,7 @@ const Page = () => {
           additionServiceRes,
           certificateRes,
           feedbackRes,
+          unavailableRes
         ] = await Promise.allSettled([
           axiosClient(`sitter-profiles/sitter/${params.id}`),
           axiosClient(
@@ -194,6 +196,7 @@ const Page = () => {
           ),
           axiosClient(`certificates/user/${params.id}`),
           axiosClient(`reviews/sitter/${params.id}`),
+          axiosClient(`sitter-unavailable-dates/sitter/${params.id}`),
         ]);
 
         // Handle sitter profile response
@@ -237,6 +240,17 @@ const Page = () => {
         } else {
           console.error("Failed to fetch services:", feedbackRes.reason);
         }
+
+        if (unavailableRes.status === "fulfilled") {
+          const unavailable = unavailableRes.value.data.map((item: { date: string }) =>
+            new Date(item.date)
+          );
+          console.log(new Date(unavailableRes.value.data[0].date));
+          setUnavailableDates(unavailable);
+        } else {
+          console.error("Failed to fetch unavailable dates:", unavailableRes.reason);
+        }
+
       } catch (error) {
         console.error("An unexpected error occurred:", error);
       } finally {
@@ -250,23 +264,6 @@ const Page = () => {
   if (isLoading) {
     return <Loading />;
   }
-
-  // Define unavailable dates
-  const unavailableDates = [
-    new Date(2024, 11, 25), // December 25, 2024
-    new Date(2024, 11, 31), // December 31, 2024
-  ];
-
-  // Function to check if a date is unavailable
-  const isDateUnavailable = (date: DateValue) => {
-    const dateToCheck = new Date(date.year, date.month - 1, date.day);
-    return unavailableDates.some(
-      (unavailableDate) =>
-        unavailableDate.getFullYear() === dateToCheck.getFullYear() &&
-        unavailableDate.getMonth() === dateToCheck.getMonth() &&
-        unavailableDate.getDate() === dateToCheck.getDate()
-    );
-  };
 
   const handleReportDetailChange = (field: keyof Report, value: string) => {
     setReport((prev) => ({
@@ -321,6 +318,17 @@ const Page = () => {
       onReportOpenChange();
     } catch (error) { }
   };
+
+  const isDateUnavailable = (date: DateValue) => {
+    const dateToCheck = new Date(date.year, date.month - 1, date.day);
+    return unavailableDates.some(
+      (unavailableDate) =>
+        unavailableDate.getFullYear() === dateToCheck.getFullYear() &&
+        unavailableDate.getMonth() === dateToCheck.getMonth() &&
+        unavailableDate.getDate() === dateToCheck.getDate()
+    );
+  };
+
 
   return (
     <div className="flex flex-cols-2 my-10 gap-10 justify-center">
@@ -414,31 +422,32 @@ const Page = () => {
           </div>
 
           {/* other service */}
-          <div className="flex flex-col">
-            <div className="flex">
-              <Icon
-                icon="mdi:home-find-outline"
-                className="text-black w-12 h-11"
-              />
-              <div className="text-secondary font-semibold">
-                <h1 className="text-text text-xl font-semibold">Đặt dịch vụ</h1>
-                <p className={styles.p}>Dịch vụ chăm sóc mèo</p>
+          {additionServices.length > 0 &&
+            <div className="flex flex-col">
+              <div className="flex">
+                <Icon
+                  icon="mdi:home-find-outline"
+                  className="text-black w-12 h-11"
+                />
+                <div className="text-secondary font-semibold">
+                  <h1 className="text-text text-xl font-semibold">Đặt dịch vụ</h1>
+                  <p className={styles.p}>Dịch vụ chăm sóc mèo</p>
+                </div>
               </div>
+              <Button
+                as={Link}
+                href={
+                  isUser
+                    ? `/service/housesitting/${sitterProfile?.sitterId}`
+                    : `/login`
+                }
+                className={styles.button}
+                isDisabled={user?.id === params.id}
+              >
+                Đặt dịch vụ
+              </Button>
             </div>
-            <Button
-              as={Link}
-              href={
-                isUser
-                  ? `/service/housesitting/${sitterProfile?.sitterId}`
-                  : `/login`
-              }
-              className={styles.button}
-              isDisabled={user?.id === params.id}
-            >
-              Đặt dịch vụ
-            </Button>
-          </div>
-
+          }
           {/* Calender  */}
           <div className="w-full">
             <h1 className={styles.h1}>Thời gian làm việc</h1>
@@ -578,42 +587,43 @@ const Page = () => {
         </div>
         <hr className={styles.hr} />
 
-        <div className="flex items-start justify-start gap-5">
-          <div className="flex flex-col items-center justify-center">
-            <h1 className={`${styles.h1} w-[170px]`}>Dịch vụ khác</h1>
-            <Image src="/service/other.png" alt="" width={144} height={144} />
-          </div>
-          <div className="flex flex-col items-start justify-start gap-3">
-            <h1 className={styles.h1}>Thông tin dịch vụ</h1>
-            <div className="flex gap-x-10">
-              <p className={styles.tableBlockTitle}>Tên dịch vụ</p>
-              <p className={styles.tableBlockTitle}>Giá tiền</p>
-              <p className={styles.tableBlockTitle}>Đơn vị</p>
+        {additionServices.length > 0 &&
+          <div className="flex items-start justify-start gap-5">
+            <div className="flex flex-col items-center justify-center">
+              <h1 className={`${styles.h1} w-[170px]`}>Dịch vụ khác</h1>
+              <Image src="/service/other.png" alt="" width={144} height={144} />
             </div>
-            {additionServices &&
-              additionServices.map((ser) => (
-                <div
-                  key={ser.id}
-                  className="flex text-xl items-center justify-start"
-                >
-                  <p className={styles.tableBlock}>
-                    <FontAwesomeIcon
-                      icon={faShieldCat}
-                      size="2xs"
-                      className="mr-2"
-                    />
-                    {ser.name}
-                  </p>
-                  <p className={styles.tableBlock}>
-                    {ser.price.toLocaleString("de")}đ
-                  </p>
-                  <p className={styles.tableBlock}>1 lần</p>
-                </div>
-              ))}
+            <div className="flex flex-col items-start justify-start gap-3">
+              <h1 className={styles.h1}>Thông tin dịch vụ</h1>
+              <div className="flex gap-x-10">
+                <p className={styles.tableBlockTitle}>Tên dịch vụ</p>
+                <p className={styles.tableBlockTitle}>Giá tiền</p>
+                <p className={styles.tableBlockTitle}>Đơn vị</p>
+              </div>
+              {additionServices &&
+                additionServices.map((ser) => (
+                  <div
+                    key={ser.id}
+                    className="flex text-xl items-center justify-start"
+                  >
+                    <p className={styles.tableBlock}>
+                      <FontAwesomeIcon
+                        icon={faShieldCat}
+                        size="2xs"
+                        className="mr-2"
+                      />
+                      {ser.name}
+                    </p>
+                    <p className={styles.tableBlock}>
+                      {ser.price.toLocaleString("de")}đ
+                    </p>
+                    <p className={styles.tableBlock}>1 lần</p>
+                  </div>
+                ))}
+            </div>
           </div>
-        </div>
-
-        <hr className={styles.hr} />
+        }
+        {additionServices.length > 0 && <hr className={styles.hr} />}
 
         {/* Feedback */}
         <h1 className={styles.h1}>Đánh giá</h1>

@@ -57,7 +57,7 @@ const Calendar = () => {
                             dates: month.dates.map((day) => {
                                 const isUnavailable = fetchedUnavailableDates.some(
                                     (unavailableDate: UnavailableDate) =>
-                                        new Date(unavailableDate.startDate).toDateString() === day.date.toDateString()
+                                        new Date(unavailableDate.date).toDateString() === day.date.toDateString()
                                 );
                                 return { ...day, isAvailable: !isUnavailable };
                             }),
@@ -94,7 +94,7 @@ const Calendar = () => {
                 month.dates.forEach((day) => {
                     const isPreviouslyUnavailable = previousUnavailableDates.some(
                         (prev) =>
-                            new Date(prev.startDate).toDateString() === day.date.toDateString()
+                            new Date(prev.date).toDateString() === day.date.toDateString()
                     );
 
                     if (!day.isAvailable && !isPreviouslyUnavailable) {
@@ -104,7 +104,7 @@ const Calendar = () => {
                     if (day.isAvailable && isPreviouslyUnavailable) {
                         const matched = previousUnavailableDates.find(
                             (prev) =>
-                                new Date(prev.startDate).toDateString() ===
+                                new Date(prev.date).toDateString() ===
                                 day.date.toDateString()
                         );
                         if (matched) toDelete.push(matched);
@@ -117,8 +117,7 @@ const Calendar = () => {
             );
             const addPromises = toAdd.map((day) =>
                 axiosClient.post("sitter-unavailable-dates", {
-                    startDate: day.date.toISOString(),
-                    endDate: day.date.toISOString(),
+                    date: day.date.toISOString(),
                     dayOfWeek: "",
                     isRecurring: false,
                 })
