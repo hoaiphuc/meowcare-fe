@@ -74,7 +74,7 @@ export type PetProfile = {
   microchipNumber: string;
   medicalConditions: string;
   profilePicture: string;
-  status: number;
+  status: string;
 };
 
 export type CatSitter = {
