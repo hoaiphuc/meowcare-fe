@@ -29,7 +29,8 @@ const Navbar = () => {
 
     // get notifications
     // const currentDate = new Date();
-    const { notifications, fetchNotifications, hasMore, loading } = useNotifications(user?.id);
+    const { notifications, unreadCount, fetchNotifications, hasMore, loading, markAllAsRead } = useNotifications(user?.id);
+
 
     useEffect(() => {
         const fetchUser = async () => {
@@ -134,9 +135,21 @@ const Navbar = () => {
                         <NavbarItem className="lg:flex flex gap-5">
                             <Dropdown placement="bottom-start">
                                 <DropdownTrigger>
-                                    <FontAwesomeIcon icon={faBell} size='2xl' className='cursor-pointer' />
+                                    <div className="relative cursor-pointer" onClick={markAllAsRead}>
+                                        <FontAwesomeIcon icon={faBell} size="2xl" />
+                                        {unreadCount > 0 && (
+                                            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                                                {unreadCount}
+                                            </span>
+                                        )}
+                                    </div>
                                 </DropdownTrigger>
-                                <DropdownMenu aria-label="Notifications" variant="flat" className='max-h-96 overflow-y-auto' closeOnSelect={false}>
+                                <DropdownMenu
+                                    aria-label="Notifications"
+                                    variant="flat"
+                                    className="max-h-96 overflow-y-auto"
+                                    closeOnSelect={false}
+                                >
                                     <>
                                         {notifications.length > 0 ? (
                                             notifications.map((notification) => (
@@ -154,22 +167,10 @@ const Navbar = () => {
                                                 Hiện không có thông báo nào
                                             </DropdownItem>
                                         )}
-                                        {loading && (
-                                            <DropdownItem className="text-center">Đang tải...</DropdownItem>
-                                        )}
+                                        {loading && <DropdownItem className="text-center">Đang tải...</DropdownItem>}
                                         {hasMore && (
-                                            <DropdownItem
-                                                onClick={() => fetchNotifications(true)}
-                                                className="text-center"
-                                            >
-                                                <button className="text-blue-600 underline w-full">
-                                                    Xem thêm
-                                                </button>
-                                            </DropdownItem>
-                                        )}
-                                        {!hasMore && !loading && (
-                                            <DropdownItem className="text-center">
-
+                                            <DropdownItem onClick={() => fetchNotifications(true)} className="text-center">
+                                                <button className="text-blue-600 underline w-full">Xem thêm</button>
                                             </DropdownItem>
                                         )}
                                     </>

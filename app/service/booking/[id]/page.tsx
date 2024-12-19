@@ -509,8 +509,8 @@ const Page = () => {
               }}
             >
               {(pet) => (
-                <SelectItem key={pet.id} value={pet.id} textValue={pet.petName}>
-                  <div className="flex gap-2 items-center">
+                <SelectItem key={pet.id} value={pet.id} textValue={pet.petName} isDisabled={pet.status === "IN_ORDER"}>
+                  <div className="flex gap-2 items-center" >
                     <Avatar
                       alt={pet.petName}
                       className="flex-shrink-0"
@@ -521,6 +521,13 @@ const Page = () => {
                       <span>{pet.petName}</span>
                       <span>{pet.breed}</span>
                     </div>
+                    {pet.status === "IN_ORDER" && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 pointer-events-none">
+                        <span className="text-red-500 font-semibold opacity-100 z-10">
+                          Mèo đang bận
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </SelectItem>
               )}
