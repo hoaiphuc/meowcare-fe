@@ -205,6 +205,7 @@ export type Order = {
   address: string;
   note: string;
   paymentStatus: number;
+  paymentMethod: string;
   status: string;
   createdAt: Date;
   updatedAt: Date;

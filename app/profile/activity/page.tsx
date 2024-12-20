@@ -163,13 +163,18 @@ const Page = () => {
                           </h2>
                           <h2>
                             <span className={styles.title}>Mèo của bạn: </span>
-                            {activity.bookingDetailWithPetAndServices
-                              .filter(
-                                (detail) =>
-                                  detail.service.serviceType === "MAIN_SERVICE"
-                              )
-                              .map((detail) => detail.pet.petName)
-                              .join(", ") || "Không có"}
+                            {activity.orderType === "OVERNIGHT"
+                              ?
+                              activity.bookingDetailWithPetAndServices
+                                .filter(
+                                  (detail) =>
+                                    detail.service.serviceType === "MAIN_SERVICE"
+                                )
+                                .map((detail) => detail.pet.petName)
+                                .join(", ") || "Không có"
+                              :
+                              activity.bookingDetailWithPetAndServices[0].pet.petName || "Không có"
+                            }
                           </h2>
                           <div className="flex items-center gap-2">
                             <h2 className={styles.title}>Thời gian: </h2>
