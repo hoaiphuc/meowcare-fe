@@ -82,6 +82,8 @@ const Page = () => {
 
         if (bookingRes.status === "fulfilled") {
           setBooking(bookingRes.value.data);
+          console.log(bookingRes.value.data);
+
           setPages(bookingRes.value.data.page.totalPages)
         } else {
           console.error("Failed to fetch services:", bookingRes.reason);
@@ -194,7 +196,8 @@ const Page = () => {
                       : "Dịch Vụ Khác"}
                   </td>
                   <td className="py-3 px-4 text-right">
-                    {booking.totalAmount.toLocaleString()}
+                    {typeof booking.totalAmount === "number" ? booking.totalAmount.toLocaleString() : 0} VND
+
                   </td>
                 </tr>
               ))

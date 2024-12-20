@@ -182,7 +182,7 @@ const Page = () => {
                                 <hr className='my-2' />
                                 <div className='flex justify-between'>
                                     <h1>Tổng tiền:</h1>
-                                    <h1>{data.totalAmount.toLocaleString("de")}đ</h1>
+                                    <h1>{typeof data.totalAmount === "number" ? data.totalAmount.toLocaleString() : 0}đ</h1>
                                 </div>
                             </div>
                             {data.status === "CONFIRMED" &&
