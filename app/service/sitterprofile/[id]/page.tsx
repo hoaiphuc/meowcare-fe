@@ -352,12 +352,12 @@ const Page = () => {
                 icon={faStar}
                 className="text-[#F8B816] h-5 w-5"
               />
-              <p className="text-[16px]">5.0</p>
+              <p className="text-[16px]">{sitterProfile?.rating ? sitterProfile.rating : "Chưa có đánh giá"}</p>
               <FontAwesomeIcon
                 icon={faCircle}
                 className="text-text size-1 self-center px-1"
               />
-              <p className="text-[16px]">15 Đánh giá</p>
+              <p className="text-[16px]">{sitterProfile?.numberOfReview ? sitterProfile.numberOfReview : "không có"} đánh giá</p>
             </div>
           </div>
           <div className="flex gap-3 w-full mt-7">
