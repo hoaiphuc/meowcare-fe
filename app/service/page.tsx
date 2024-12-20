@@ -6,6 +6,7 @@ import {
   DateRangePicker,
   DateValue,
   Input,
+  Pagination,
   RangeValue,
   Select,
   SelectItem,
@@ -45,6 +46,7 @@ const Service = () => {
   const [selectedService, setSelectedService] = useState<string>("");
   const [catSitters, setCatSitters] = useState<CatSitterData>();
   const [price, setPrice] = useState<number[]>([20000, 500000]);
+  const [tempValue, setTempValue] = useState<number[]>([20000, 500000]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   //search location
   const [address, setAddress] = useState<string>("");
@@ -55,6 +57,8 @@ const Service = () => {
   const [lng, setLng] = useState<number>();
   const [startTime, setStartTime] = useState<string | null>(""); // Store start time
   const [endTime, setEndTime] = useState<string | null>(""); // Store end time
+  const [page, setPage] = useState(1);
+  const [pages, setPages] = useState(1);
   const getUserFromStorage = () => {
     if (typeof window !== "undefined") {
       const storedUser = localStorage.getItem("user");
@@ -149,15 +153,22 @@ const Service = () => {
     setPrice(newPrice);
   };
 
+  useEffect(() => {
+    // Whenever one of these dependencies changes, reset the page to 1
+    setPage(1);
+  }, [lat, lng, selectedService, price, startTime, endTime]);
+
   //get cat sitters   
   useEffect(() => {
     setIsLoading(true)
     try {
       axiosClient(
-        `sitter-profiles/search?latitude=${lat ?? 10.8231}&longitude=${lng ?? 106.6297}&page=1&size=10&sort=distance&direction=DESC`
+        `sitter-profiles/search?latitude=${lat ?? 10.8231}&longitude=${lng ?? 106.6297
+        }&serviceType=${selectedService}&minPrice=${price[0]}&maxPrice=${price[1]}&startTime=${startTime}&endTime=${endTime}&page=${page}&size=10&sort=distance&direction=DESC`
       )
         .then((res) => {
           setCatSitters(res.data);
+          setPages(res.data.page.totalPages)
           setIsLoading(false)
         })
         .catch((e) => {
@@ -168,7 +179,7 @@ const Service = () => {
       setIsLoading(false)
       console.log(error);
     }
-  }, [lat, lng]);
+  }, [endTime, lat, lng, page, price, selectedService, startTime]);
 
   // Handle date range change
   const handleDateRangeChange = (range: RangeValue<DateValue> | null) => {
@@ -205,10 +216,11 @@ const Service = () => {
 
       axiosClient(
         `sitter-profiles/search?latitude=${lat ?? 10.8231}&longitude=${lng ?? 106.6297
-        }&serviceType=${selectedService}&minPrice=${price[0]}&maxPrice=${price[1]}&startTime=${startTime}&endTime=${endTime}&page=1&size=10&sort=distance&direction=DESC`
+        }&serviceType=${selectedService}&minPrice=${price[0]}&maxPrice=${price[1]}&startTime=${startTime}&endTime=${endTime}&page=${page}&size=10&sort=distance&direction=DESC`
       )
         .then((res) => {
           setCatSitters(res.data);
+          setPages(res.data.page.totalPages)
         })
         .catch((e) => {
           console.log(e);
@@ -327,9 +339,12 @@ const Service = () => {
             minValue={20000}
             maxValue={500000}
             defaultValue={[100, 500]}
-            value={price}
-            // getValue={(price) => `${price}đ`}
+            value={tempValue}
             onChange={(value) => {
+              const newValue = Array.isArray(value) ? value : [value];
+              setTempValue(newValue); // Cập nhật liên tục để có animation
+            }}
+            onChangeEnd={(value) => {
               const newValue = Array.isArray(value) ? value : [value];
               setPrice(newValue);
             }}
@@ -400,17 +415,21 @@ const Service = () => {
                   </div>
                 </div>
                 <div className="flex gap-1 text-[#66625F] mt-3 mb-2x`">
-                  <FontAwesomeIcon
-                    icon={faStar}
-                    className="text-[#F8B816] size-4"
-                  />
-                  <p className="text-[14px] font-normal">
-                    {catSitter.rating ? catSitter.rating : "Chưa có đánh giá"}
-                  </p>
-                  <FontAwesomeIcon
-                    icon={faCircle}
-                    className="text-text size-1 self-center px-1"
-                  />
+                  {catSitter.numberOfReview > 0 &&
+                    <>
+                      <FontAwesomeIcon
+                        icon={faStar}
+                        className="text-[#F8B816] size-4"
+                      />
+                      <p className="text-[14px] font-normal">
+                        {catSitter.rating ? catSitter.rating : "Chưa có đánh giá"}
+                      </p>
+                      <FontAwesomeIcon
+                        icon={faCircle}
+                        className="text-text size-1 self-center px-1"
+                      />
+                    </>
+                  }
                   {/* <p className=' text-[14px] font-normal'>{catSitter.reviews} Đánh giá</p> */}
                   <p className="text-[14px] font-normal">{catSitter.numberOfReview ? catSitter.numberOfReview : "không có"} đánh giá</p>
                 </div>
@@ -437,6 +456,19 @@ const Service = () => {
             </p>
           </div>
         )}
+        {pages > 1 &&
+          <div className="flex w-full justify-center">
+            <Pagination
+              isCompact
+              showControls
+              showShadow
+              color="secondary"
+              page={page}
+              total={pages}
+              onChange={(page) => setPage(page)}
+            />
+          </div>
+        }
       </div>
       {/* 3 */}
       <div className="w-[735px] flex">

@@ -100,8 +100,6 @@ const Page = () => {
   const netIncome = useMemo(() => {
     const money = totalMoney - commission
     return isNaN(money) || !isFinite(money) ? 0 : money;
-
-    return money
   }, [commission, totalMoney])
 
   if (isLoading) {
@@ -196,7 +194,7 @@ const Page = () => {
                       : "Dịch Vụ Khác"}
                   </td>
                   <td className="py-3 px-4 text-right">
-                    {/* {service.amount.toLocaleString()} */}
+                    {booking.totalAmount.toLocaleString()}
                   </td>
                 </tr>
               ))

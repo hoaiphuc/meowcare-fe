@@ -22,8 +22,8 @@ import { useCallback, useEffect, useState } from "react";
 
 const Page = () => {
   const [page, setPage] = useState(1);
-  const [data, setData] = useState<Order[]>([]);
   const [pages, setPages] = useState(1);
+  const [data, setData] = useState<Order[]>([]);
 
   const statusColors: { [key: string]: string } = {
     AWAITING_PAYMENT: 'text-[#e67e22]', // Chờ 

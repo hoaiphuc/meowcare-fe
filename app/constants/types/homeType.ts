@@ -210,6 +210,7 @@ export type Order = {
   updatedAt: Date;
   isHouseSitting: boolean;
   orderType: string;
+  totalAmount: number;
   user: {
     id: string;
     email: string;

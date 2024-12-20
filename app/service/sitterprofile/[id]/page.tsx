@@ -347,16 +347,21 @@ const Page = () => {
             <h1 className="text-[16px] font-semibold">
               {sitterProfile?.location}
             </h1>
-            <div className="flex gap-1 text-[10px] text-[#3b2f26] items-start">
-              <FontAwesomeIcon
-                icon={faStar}
-                className="text-[#F8B816] h-5 w-5"
-              />
-              <p className="text-[16px]">{sitterProfile?.rating ? sitterProfile.rating : "Chưa có đánh giá"}</p>
-              <FontAwesomeIcon
-                icon={faCircle}
-                className="text-text size-1 self-center px-1"
-              />
+            <div className="flex gap-1 text-[10px] text-[#3b2f26] items-center">
+              {sitterProfile && sitterProfile?.numberOfReview > 0 &&
+                <>
+                  <FontAwesomeIcon
+                    size="xl"
+                    icon={faStar}
+                    className="text-[#F8B816] h-5 w-5"
+                  />
+                  <p className="text-[16px]">{sitterProfile?.rating ? sitterProfile.rating : "Chưa có đánh giá"}</p>
+                  <FontAwesomeIcon
+                    icon={faCircle}
+                    className="text-text size-1 self-center px-1"
+                  />
+                </>
+              }
               <p className="text-[16px]">{sitterProfile?.numberOfReview ? sitterProfile.numberOfReview : "không có"} đánh giá</p>
             </div>
           </div>
