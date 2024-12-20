@@ -10,7 +10,7 @@ export type UserType = {
   email: string;
   phoneNumber: string;
   roleName: string;
-  status: number;
+  status: string;
   gender: string;
   address: string;
   roles: [

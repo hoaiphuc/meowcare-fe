@@ -18,26 +18,31 @@ import {
   TableRow,
   useDisclosure,
 } from "@nextui-org/react";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import styles from "./user.module.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircle } from "@fortawesome/free-solid-svg-icons";
 import { showConfirmationDialog } from "@/app/components/confirmationDialog";
+import { toast } from "react-toastify";
+import Loading from "@/app/components/Loading";
 const Page = () => {
   const [page, setPage] = useState(1);
   const [data, setData] = useState<UserType[]>([]);
   const rowsPerPage = 10;
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [selectedUser, setSelectedUser] = useState<UserType>();
+  const [isLoading, setIsLoading] = useState(false)
 
   const statusColors: { [key: string]: string } = {
-    0: "text-[#9E9E9E]", // Chờ duyệt - gray
-    1: "text-[#4CAF50]", // Hoàn thành - green
+    INACTIVE: "text-[#9E9E9E]", // Chờ duyệt - gray
+    ACTIVE: "text-[#4CAF50]", // Hoàn thành - green
+    DELETED: "text-[#DC3545]", // Hoàn thành - green
   };
 
   const statusLabels: { [key: string]: string } = {
-    0: "Ngừng hoạt động",
-    1: "Đang hoạt động",
+    INACTIVE: "Ngừng hoạt động",
+    ACTIVE: "Đang hoạt động",
+    DELETED: "Đã xóa",
   };
 
   const namesLables: { [key: string]: string } = {
@@ -45,19 +50,27 @@ const Page = () => {
     SITTER: "Người chăm sóc",
   };
 
-  useEffect(() => {
+  const fetchUser = useCallback(() => {
+    setIsLoading(true)
     try {
       axiosClient("users")
         .then((res) => {
           setData(res.data);
+          setIsLoading(false)
         })
         .catch((e) => {
+          setIsLoading(false)
           console.log(e);
         });
     } catch (error) {
+      setIsLoading(false)
       console.log(error);
     }
-  }, []);
+  }, [])
+
+  useEffect(() => {
+    fetchUser()
+  }, [fetchUser]);
 
   const pages = Math.ceil(data.length / rowsPerPage);
   const items = useMemo(() => {
@@ -69,18 +82,24 @@ const Page = () => {
 
   const handleOpen = (id: string) => {
     try {
+      setIsLoading(true)
       axiosClient(`users/${id}`)
         .then((res) => {
           setSelectedUser(res.data);
+          setIsLoading(false)
         })
         .catch((e) => {
+          setIsLoading(false)
           console.log(e);
         });
       onOpen();
-    } catch (error) { }
+    } catch (error) {
+      toast.error("Lỗi mạng")
+      setIsLoading(false)
+    }
   };
 
-  const handleInactive = async () => {
+  const handleInactive = async (id: string) => {
     try {
       const isConfirmed = await showConfirmationDialog({
         title: "Bạn muốn khóa tài khoản này?",
@@ -89,13 +108,61 @@ const Page = () => {
         confirmButtonColor: "#00BB00",
       });
       if (isConfirmed) {
+        setIsLoading(true)
+        axiosClient.put(`users/${id}/status?status=INACTIVE`)
+          .then(() => {
+            toast.success("Bạn đã khóa tài khoản này")
+            fetchUser()
+            setIsLoading(false)
+          })
+          .catch(() => {
+            setIsLoading(false)
+            toast.error("Lỗi mạng")
+          })
       } else {
+        setIsLoading(false)
         return;
       }
     } catch (error) {
+      setIsLoading(false)
       console.log(error);
     }
   };
+
+  const handleActive = async (id: string) => {
+    try {
+      const isConfirmed = await showConfirmationDialog({
+        title: "Bạn có muốn mở khóa tài khoản này?",
+        confirmButtonText: "Có",
+        denyButtonText: "Không",
+        confirmButtonColor: "#00BB00",
+      });
+      if (isConfirmed) {
+        setIsLoading(true)
+        axiosClient.put(`users/${id}/status?status=ACTIVE`)
+          .then(() => {
+            setIsLoading(false)
+            toast.success("Bạn đã mở khóa tài khoản này")
+            fetchUser()
+          })
+          .catch(() => {
+            setIsLoading(false)
+            toast.error("Lỗi mạng")
+          })
+      } else {
+        setIsLoading(false)
+        return;
+      }
+    } catch (error) {
+      setIsLoading(false)
+      console.log(error);
+    }
+  };
+
+  if (isLoading) {
+    return <Loading />
+  }
+
   return (
     <div className="flex flex-col justify-start w-full mx-10 gap-5 my-3">
       <h1 className="font-semibold text-3xl">Người Dùng Trên Hệ Thống</h1>
@@ -190,12 +257,21 @@ const Page = () => {
                                   {namesLables[role.roleName]}
                                 </Button>
                               ))}
-                              <Button
-                                className="bg-red-500 text-white"
-                                onClick={handleInactive}
-                              >
-                                khóa tài khoản này
-                              </Button>
+                              {selectedUser.status === "ACTIVE" ?
+                                <Button
+                                  className="bg-red-500 text-white"
+                                  onClick={() => handleInactive(selectedUser.id)}
+                                >
+                                  Khóa tài khoản này
+                                </Button>
+                                :
+                                <Button
+                                  className="bg-red-500 text-white"
+                                  onClick={() => handleActive(selectedUser.id)}
+                                >
+                                  Mở khóa tài khoản này
+                                </Button>
+                              }
                             </div>
                           </div>
                         </div>
