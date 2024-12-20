@@ -2,7 +2,7 @@
 
 import { RequestWithdrawal, UserLocal } from '@/app/constants/types/homeType';
 import axiosClient from '@/app/lib/axiosClient';
-import { faMoneyBillTransfer } from '@fortawesome/free-solid-svg-icons';
+import { faCoins, faMoneyBillTransfer } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Accordion, AccordionItem, Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, useDisclosure } from '@nextui-org/react';
 import React, { useCallback, useEffect, useState } from 'react'
@@ -72,6 +72,16 @@ const Wallet = () => {
     }
 
     const handleSendRequest = () => {
+        if (!wallet || !wallet.balance) {
+            toast.error(`Ví không đủ tiền`)
+            return
+        }
+
+        if (requestData.balance < 20000 || requestData.balance > wallet?.balance) {
+            toast.error(`Tiền phải ít nhất 20.000đ và nhiều nhất ${wallet?.balance}`)
+            return
+        }
+
         try {
             axiosClient.post("request-withdrawal/createNewRequest", requestData)
                 .then(() => {
@@ -89,7 +99,7 @@ const Wallet = () => {
 
     const handleTopUp = () => {
         try {
-            axiosClient.post(`wallets/top-up/momo?userId=${userId}&amount=${topUpMoney}&redirectUrl=${process.env.NEXT_PUBLIC_BASE_URL}&requestType=CAPTURE_WALLET`)
+            axiosClient.post(`wallets/top-up/momo?userId=${userId}&amount=${topUpMoney}&redirectUrl=${process.env.NEXT_PUBLIC_BASE_URL}/profile/wallet&requestType=CAPTURE_WALLET`)
                 .then((res) => {
                     window.open(res.data.payUrl, "_self");
                 })
@@ -102,7 +112,7 @@ const Wallet = () => {
     }
 
     return (
-        <div className="w-full max-w-[891px] h-full bg-white rounded-2xl shadow-xl flex flex-col text-black">
+        <div className="w-full max-w-[891px] h-[567px] bg-white rounded-2xl shadow-xl flex flex-col text-black">
             <div className="m-5 flex flex-col gap-4">
                 <div className="bg-orange-100 p-5 rounded-md flex">
                     <h1>
@@ -112,25 +122,33 @@ const Wallet = () => {
                         </span>
                     </h1>
                 </div>
-                <div className="bg-orange-100 p-5 rounded-md">
+                <div className="bg-orange-100 p-5 rounded-md h-full">
                     <Accordion>
                         <AccordionItem
                             key="1"
                             aria-label="Accordion 1"
-                            title="Rút tiền"
                             className="flex flex-col"
+                            title={
+                                <div className='flex items-center gap-3'>
+                                    <FontAwesomeIcon icon={faCoins} />
+                                    <h1>Rút tiền</h1>
+                                </div>
+                            }
                         >
                             Rút ít nhất 20.000đ
                             <div className="flex gap-3 mt-2">
                                 <Input
+                                    isDisabled={wallet && wallet?.balance < 20000}
                                     errorMessage={`Số tiền phải ít nhất 20000 và không được nhiều hơn ${wallet?.balance}`}
                                     type="number"
                                     className="w-52 no-spinner"
                                     min={20000}
                                     max={wallet?.balance}
                                     placeholder="Số tiền muốn rút"
+                                    name="balance"
+                                    onChange={(e) => handleInputChange(e)}
                                 />
-                                <Button onClick={onOpen} className="bg-blue-500 hover:bg-blue-700 text-white">
+                                <Button onClick={onOpen} className="bg-blue-500 hover:bg-blue-700 text-white" isDisabled={wallet && wallet?.balance < 20000}>
                                     Yêu cầu rút tiền
                                 </Button>
                             </div>
@@ -178,7 +196,7 @@ const Wallet = () => {
                                         <h1 className="font-medium">Tên chủ thẻ</h1>
                                         <Input name="fullName" onChange={(e) => handleInputChange(e)} />
                                         <h1 className="font-medium">Số tiền</h1>
-                                        <Input name="balance" onChange={(e) => handleInputChange(e)} />
+                                        <Input name="balance" value={requestData.balance ? requestData.balance.toString() : "0"} onChange={(e) => handleInputChange(e)} />
                                     </div>
                                 </ModalBody>
                                 <ModalFooter>
