@@ -44,7 +44,7 @@ interface Address {
 const Service = () => {
   const [selectedService, setSelectedService] = useState<string>("");
   const [catSitters, setCatSitters] = useState<CatSitterData>();
-  const [price, setPrice] = useState<number[]>([20000, 2000000]);
+  const [price, setPrice] = useState<number[]>([20000, 500000]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   //search location
   const [address, setAddress] = useState<string>("");
@@ -325,7 +325,7 @@ const Service = () => {
             aria-label="price range"
             step={50}
             minValue={20000}
-            maxValue={2000000}
+            maxValue={500000}
             defaultValue={[100, 500]}
             value={price}
             // getValue={(price) => `${price}đ`}

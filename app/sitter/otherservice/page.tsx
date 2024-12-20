@@ -464,8 +464,8 @@ const OtherService = () => {
     return (
         <div className='flex flex-col justify-center items-center my-10 text-black'>
             <div className='w-[1000px] flex flex-col gap-5'>
-                <h1 className={styles.title}>Trông tại nhà</h1>
-                <h2>Hãy thêm dịch vụ cho trông tại nhà</h2>
+                <h1 className={styles.title}>Các dịch vụ khác</h1>
+                <h2>Hãy thêm nhưng dịch vụ mà bạn có thể thực hiện</h2>
                 <div className='flex bg-[#F3F5F7] p-5 rounded-2xl gap-2'>
                     <FontAwesomeIcon icon={faCircleInfo} />
                     <h3>Chúng tôi đề xuất cho bạn đặt giá trung bình. Bạn có thể chỉnh sửa chúng ngay bây giờ hoặc bất kì lúc nào trong tương lai.</h3>
