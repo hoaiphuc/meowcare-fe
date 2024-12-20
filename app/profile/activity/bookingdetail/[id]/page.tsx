@@ -3,7 +3,7 @@
 import { Feedback, Order } from '@/app/constants/types/homeType';
 import axiosClient from '@/app/lib/axiosClient';
 import { faCircleCheck } from '@fortawesome/free-regular-svg-icons';
-import { faCalendarCheck, faTriangleExclamation } from '@fortawesome/free-solid-svg-icons';
+import { faCalendarCheck, faMinus, faTriangleExclamation } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Button, Textarea } from '@nextui-org/react';
 import { Rating } from '@smastrom/react-rating';
@@ -13,6 +13,7 @@ import '@smastrom/react-rating/style.css';
 import { toast } from 'react-toastify';
 import { IconProp } from '@fortawesome/fontawesome-svg-core';
 import { showConfirmationDialog } from '@/app/components/confirmationDialog';
+import { formatDate } from 'date-fns';
 
 const Page = () => {
     const param = useParams();
@@ -43,6 +44,11 @@ const Page = () => {
         COMPLETED: "Dịch vụ này đã hoàn thành",
         CANCELLED: "Yêu cầu này đã bị hủy",
         CONFIRMED: "Yêu cầu này đã được xác nhận",
+    };
+
+    const paymentLabels: { [key: string]: string } = {
+        MOMO: "Momo",
+        PAY_LATER: "Tiền mặt",
     };
 
     useEffect(() => {
@@ -158,38 +164,69 @@ const Page = () => {
                             <FontAwesomeIcon icon={statusIcon[data.status]} size='2xl' className={statusIconColor[data.status]} />
                             <h1 className='text-black p-5 text-2xl font-semibold'>{statusLabels[data.status]}</h1>
                         </div>
-                        <div className='bg-[#FFE3D5] text-black p-5 py-10 rounded-md shadow-xl font-medium flex items-start justify-between gap-3'>
-                            <div className='flex flex-col gap-3'>
-                                <div>
-                                    <h1 className='font-semibold text-xl'>Người chăm sóc</h1>
-                                    <h1>{data.sitter.fullName}</h1>
-                                </div>
-                                <div>
-                                    <h1 className='font-semibold text-xl'>{data.orderType === "OVERNIGHT" ? "Gửi thú cưng" : "Dịch vụ khác"}</h1>
-                                    <h1>15 tháng 10 - 16 tháng 10</h1>
-                                    <h1>Bé mèo: {data.bookingDetailWithPetAndServices[0].pet.petName}</h1>
-                                </div>
-                            </div>
-
-                            <div className='bg-white rounded-md text-black p-5 w-96'>
-                                <h1>Bé mèo</h1>
-                                <hr className='my-2' />
-                                <div className='flex justify-between'>
+                        <div className='bg-[#FFE3D5] text-black p-5 py-10 rounded-md shadow-xl font-medium flex flex-col  gap-3 h-full'>
+                            <div className='flex items-start justify-between'>
+                                <div className='flex flex-col gap-3'>
                                     <div>
-                                        <h1 className='text-lg'>{data.bookingDetailWithPetAndServices[0].pet.petName}</h1>
+                                        <h1 className='font-semibold text-xl'>Người chăm sóc</h1>
+                                        <h1>{data.sitter.fullName}</h1>
+                                    </div>
+                                    <div>
+                                        <h1 className='font-semibold text-xl'>{data.orderType === "OVERNIGHT" ? "Gửi thú cưng" : "Dịch vụ khác"}</h1>
+                                        <div className="flex items-center gap-2">
+                                            <h1>Thời gian diễn ra:</h1>
+                                            {data.startDate && data.endDate ? (
+                                                <>
+                                                    {formatDate(
+                                                        new Date(data.startDate),
+                                                        "dd/MM/yyyy"
+                                                    )}
+                                                    <FontAwesomeIcon icon={faMinus} />
+                                                    {formatDate(
+                                                        new Date(data.endDate),
+                                                        "dd/MM/yyyy"
+                                                    )}
+                                                </>
+                                            ) : data.startDate ? (
+                                                <span>
+                                                    {formatDate(
+                                                        new Date(data.startDate),
+                                                        "dd/MM/yyyy"
+                                                    )}
+                                                </span>
+                                            ) : (
+                                                "Lỗi hiện thị ngày"
+                                            )}
+                                        </div>
+                                        <h1>Bé mèo: {data.bookingDetailWithPetAndServices[0].pet.petName}</h1>
                                     </div>
                                 </div>
-                                <hr className='my-2' />
-                                <div className='flex justify-between'>
-                                    <h1>Tổng tiền:</h1>
-                                    <h1>{typeof data.totalAmount === "number" ? data.totalAmount.toLocaleString() : 0}đ</h1>
+
+                                <div className='bg-white rounded-md text-black p-5 w-96'>
+                                    <div className='flex justify-between'>
+                                        <h1>Phương thức thanh toán:</h1>
+                                        <p>{paymentLabels[data.paymentMethod]}</p>
+                                    </div>
+                                    <hr className='my-2' />
+                                    <div className='flex justify-between'>
+                                        <h1>Bé mèo</h1>
+                                        <div>
+                                            <h1 className='text-lg'>{data.bookingDetailWithPetAndServices[0].pet.petName}</h1>
+                                        </div>
+                                    </div>
+                                    <hr className='my-2' />
+                                    <div className='flex justify-between'>
+                                        <h1>Tổng tiền:</h1>
+                                        <h1>{typeof data.totalAmount === "number" ? data.totalAmount.toLocaleString() : 0}đ</h1>
+                                    </div>
                                 </div>
                             </div>
                             {data.status === "CONFIRMED" &&
-                                <div>
-                                    <Button onClick={handleCancel}>Hủy dịch vụ</Button>
+                                <div className='flex items-center justify-end my-3 '>
+                                    <Button onClick={handleCancel} className='bg-red-500 text-white'>Hủy dịch vụ</Button>
                                 </div>
                             }
+
                         </div>
                     </div>
                     {data.status === "COMPLETED" &&

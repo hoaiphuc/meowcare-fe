@@ -18,6 +18,11 @@ const Page = () => {
     const [data, setData] = useState<Order>();
     const [feedback, setFeedback] = useState<Feedback>()
 
+    const paymentLabels: { [key: string]: string } = {
+        MOMO: "Momo",
+        PAY_LATER: "Tiền mặt",
+    };
+
     useEffect(() => {
         try {
             axiosClient(`booking-orders/${param.id}`)
@@ -76,19 +81,20 @@ const Page = () => {
                             <h1>Bé mèo: {data.bookingDetailWithPetAndServices[0].pet.petName}</h1>
 
                             <div className='bg-white rounded-md text-black p-5 my-5'>
-                                <h1>Bảng giá</h1>
-                                <hr className='my-2' />
                                 <div className='flex justify-between'>
-                                    <div>
-                                        <h1 className='text-lg'>{data.bookingDetailWithPetAndServices[0].pet.petName}</h1>
-                                        <h1 className='text-secondary'>150.000 x 6 đêm</h1>
-                                    </div>
-                                    <h2>150.000đ</h2>
+                                    <h1>Phương thức thanh toán:</h1>
+                                    <p>{paymentLabels[data.paymentMethod]}</p>
                                 </div>
                                 <hr className='my-2' />
                                 <div className='flex justify-between'>
+                                    <h1>Bé mèo</h1>
+                                    <div>
+                                        <h1 className='text-lg'>{data.bookingDetailWithPetAndServices[0].pet.petName}</h1>
+                                    </div>
+                                </div>
+                                <div className='flex justify-between'>
                                     <h1>Tổng tiền:</h1>
-                                    <h1>150.000đ</h1>
+                                    <h1>{typeof data.totalAmount === "number" ? data.totalAmount.toLocaleString() : 0}đ</h1>
                                 </div>
                             </div>
 
@@ -123,7 +129,7 @@ const Page = () => {
                                 </ul>
                                 <h1>Nếu bạn từ chối yêu cầu này, nó sẽ không ảnh hưởng đến thứ hạng tìm kiếm của bạn. Bạn nên gửi 1 tin nhắn đến người yêu cầu để xác nhận nếu từ chối yêu cầu này.</h1>
                                 <h1>Bạn có thể tắt hoạt động cho dịch vụ của bạn nếu như không cần thiết, bạn có thể bật lại bất cứ lúc nào.</h1>
-                                <Button className='rounded-full text-black bg-[#f1f1f3] font-semibold w-36'>Tắt nhận yêu cầu</Button>
+                                <Button className='rounded-full text-white bg-maincolor font-semibold w-36' as={Link} href='/sitter/setupservice'>Tắt nhận yêu cầu</Button>
                             </div>
                         </div>
                     </div>
