@@ -62,7 +62,7 @@ const Page = () => {
     const start = (page - 1) * rowsPerPage;
     const end = start + rowsPerPage;
 
-    return data.slice(start, end);
+    return data.reverse().slice(start, end);
   }, [page, data]);
 
   const handleAccept = (id: string) => {
