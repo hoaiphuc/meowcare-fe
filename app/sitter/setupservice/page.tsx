@@ -131,6 +131,11 @@ const Page = () => {
       return;
     }
 
+    if (createdServices.length < 1) {
+      toast.error("Bạn cần phải tạo dịch vụ trước khi kích hoạt")
+      return
+    }
+
     if (!sitterProfile) {
       toast.error("Sitter profile is undefined");
       return;
@@ -152,7 +157,11 @@ const Page = () => {
           );
           onOpenChange();
         })
-        .catch(() => {
+        .catch((e) => {
+          if (e.response.data.status === 2003) {
+            toast.error("Bạn cần 200.000đ trong tài khoản để kích hoạt")
+            return
+          }
           toast.error("Đã có lỗi xảy ra, vui lòng thử lại sau");
         });
     } catch (error) { }

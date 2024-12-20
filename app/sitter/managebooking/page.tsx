@@ -11,6 +11,7 @@ import {
   NavbarItem,
   Pagination,
 } from "@nextui-org/react";
+import { formatDate } from "date-fns";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
 
@@ -154,16 +155,16 @@ const Page = () => {
                       {activity.startDate && activity.endDate ?
                         (
                           <>
-                            {new Date(activity.startDate).toLocaleDateString()}{" "}
+                            {formatDate(new Date(activity.startDate).toLocaleDateString(), "dd/MM/yyyy")}{" "}
                             <FontAwesomeIcon icon={faMinus} />{" "}
-                            {new Date(activity.endDate).toLocaleDateString()}
+                            {formatDate(new Date(activity.endDate).toLocaleDateString(), "dd/MM/yyyy")}
                           </>
                         )
                         :
                         (
                           activity.startDate
                             ?
-                            <span> {new Date(activity.startDate).toLocaleDateString()}</span>
+                            <span> {formatDate(new Date(activity.startDate).toLocaleDateString(), "dd/MM/yyyy")}</span>
                             :
                             "Lỗi hiện thị ngày"
                         )}

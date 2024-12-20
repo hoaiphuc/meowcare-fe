@@ -215,7 +215,7 @@ const Page = () => {
                             </Button>
                           )}
                         {(activity.status === "CANCELLED" ||
-                          activity.status === "CONFIRM" ||
+                          activity.status === "CONFIRMED" ||
                           activity.status === "COMPLETED") && (
                             <Button
                               as={Link}
