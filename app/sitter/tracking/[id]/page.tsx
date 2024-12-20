@@ -148,6 +148,7 @@ const Tracking = () => {
     //get evidence
     const handleOpenEvidenceTask = (task: Task) => {
         try {
+            setSelectedTask(task);
             axiosClient(`task-evidences/task/${task.id}`)
                 .then((res) => {
                     setSelectedTaskEvidence(res.data)
@@ -155,7 +156,6 @@ const Tracking = () => {
                 .catch(() => { })
         } catch (error) {
         }
-        setSelectedTask(task);
         setDescription(task.description)
         onOpen();
         console.log(task)
@@ -164,6 +164,7 @@ const Tracking = () => {
     //get evidence to update
     const handleOpenUpdate = (task: Task) => {
         try {
+            setSelectedTask(task);
             axiosClient(`task-evidences/task/${task.id}`)
                 .then((res) => {
                     setSelectedTaskEvidence(res.data)
@@ -172,7 +173,6 @@ const Tracking = () => {
         } catch (error) {
 
         }
-        setSelectedTask(task);
         setDescription(task.description)
         onOpenUpdate();
         console.log(task)
@@ -548,7 +548,7 @@ const Tracking = () => {
         try {
             axiosClient.put(`booking-orders/status/${param.id}?status=CANCELLED`)
                 .then(() => {
-                    toast.success("Bạn đã hoàn thành dịch vụ này")
+                    toast.success("Bạn đã hủy dịch vụ này")
                     router.push("/sitter/managebooking")
                 })
                 .catch((e) => {
@@ -705,6 +705,7 @@ const Tracking = () => {
                                                     </Button>
                                                 ) : (
                                                     <Button
+                                                        isDisabled={task.status === 0}
                                                         className="bg-gradient-to-r from-btnbg to-[#5f91ec] text-white px-7"
                                                         onClick={() => handleOpenEvidenceTask(task)}
                                                     >
@@ -858,7 +859,12 @@ const Tracking = () => {
                                 >
                                     Trở lại
                                 </Button>
-                                <Button color="primary" className="p-3 bg-blue-500 text-white font-bold rounded-md hover:bg-blue-600" onPress={() => { handleAdd() }}>
+                                <Button
+                                    isDisabled={selectedTask?.status === 2 || selectedTask?.status === 3}
+                                    color="primary"
+                                    className="p-3 bg-blue-500 text-white font-bold rounded-md hover:bg-blue-600"
+                                    onPress={() => { handleAdd() }}
+                                >
                                     Cập nhật
                                 </Button>
                             </ModalFooter>
@@ -994,12 +1000,22 @@ const Tracking = () => {
                                 <Button color="danger" variant="light" onClick={() => { onClose(), setIsUpdateMode(false), setAddList([]), setRemoveList([]) }}>
                                     Trở lại
                                 </Button>
-                                {isUpdateMode ?
-                                    <Button color="primary" className="p-3 bg-blue-500 text-white font-bold rounded-md hover:bg-blue-600" onClick={() => { handleUpdate() }}>
+                                {isUpdateMode && selectedTask ?
+                                    <Button
+                                        isDisabled={selectedTask?.status === 2 || selectedTask?.status === 3}
+                                        color="primary"
+                                        className="p-3 bg-blue-500 text-white font-bold rounded-md hover:bg-blue-600"
+                                        onClick={() => { handleUpdate() }}
+                                    >
                                         Xác nhận
                                     </Button>
                                     :
-                                    <Button color="primary" className="p-3 bg-blue-500 text-white font-bold rounded-md hover:bg-blue-600" onClick={() => setIsUpdateMode(true)}>
+                                    <Button
+                                        isDisabled={selectedTask?.status === 2 || selectedTask?.status === 3}
+                                        color="primary"
+                                        className="p-3 bg-blue-500 text-white font-bold rounded-md hover:bg-blue-600"
+                                        onClick={() => setIsUpdateMode(true)}
+                                    >
                                         Chỉnh sửa
                                     </Button>
                                 }

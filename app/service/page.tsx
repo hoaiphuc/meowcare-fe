@@ -291,7 +291,7 @@ const Service = () => {
           </div>
         </div>
         <div>
-          <h2 className={styles.h2}>Giá mỗi giờ</h2>
+          <h2 className={styles.h2}>Giá mỗi ngày</h2>
           <div className="flex gap-3 justify-center items-center">
             <Input
               aria-label="Giá tối thiểu"
