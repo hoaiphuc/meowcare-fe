@@ -46,6 +46,7 @@ const HouseSitting = () => {
     const { isOpen: isOpenAdd, onOpen: onOpenAdd, onOpenChange: onOpenChangeAdd } = useDisclosure();
     const [userId, setUserId] = useState<string | null>(null);
     const [selectedSlots, setSelectedSlots] = useState<string[]>([]);
+    const [unavailableDates, setUnavailableDates] = useState<Date[]>([]);
     //image data
     const [selectedImage, setSelectedImage] = useState<File | null>(null);
     const [previewImage, setPreviewImage] = useState<string | null>(null);
@@ -101,6 +102,16 @@ const HouseSitting = () => {
                 .catch((e) => {
                     console.log(e);
                 })
+            axiosClient(`sitter-unavailable-dates/sitter/${params.id}`)
+                .then((res) => {
+                    const unavailable = res.data.map((item: { date: string }) =>
+                        new Date(item.date)
+                    );
+                    console.log(res.data);
+
+                    setUnavailableDates(unavailable);
+                })
+                .catch(() => { })
         } catch (error) {
 
         }
@@ -434,6 +445,15 @@ const HouseSitting = () => {
         });
     }
 
+    const isDateUnavailable = (date: DateValue) => {
+        const dateToCheck = new Date(date.year, date.month - 1, date.day);
+        return unavailableDates.some(
+            (unavailableDate) =>
+                unavailableDate.getFullYear() === dateToCheck.getFullYear() &&
+                unavailableDate.getMonth() === dateToCheck.getMonth() &&
+                unavailableDate.getDate() === dateToCheck.getDate()
+        );
+    };
 
     return (
         <div className='flex flex-col items-center justify-start my-12'>
@@ -445,6 +465,7 @@ const HouseSitting = () => {
                         <h2 className={styles.h2}>Chọn ngày</h2>
                         <DatePicker
                             label="Ngày bắt đầu"
+                            isDateUnavailable={isDateUnavailable}
                             minValue={today(getLocalTimeZone()).add({ days: 1 })}
                             maxValue={maxDate}
                             visibleMonths={2}

@@ -35,7 +35,7 @@ const Page = () => {
             axiosClient(`booking-orders/count-by-sitter?id=${userProfile?.id}&status=COMPLETED`),
             axiosClient(`booking-orders/count-by-sitter?id=${userProfile?.id}&status=COMPLETED&orderType=OVERNIGHT`),
             axiosClient(`booking-orders/count-by-sitter?id=${userProfile?.id}&status=COMPLETED&orderType=BUY_SERVICE`),
-            axiosClient(`transactions/search/total-amount?userId=${userProfile?.id}&status=COMPLETED&transactionType=PAYMENT`),
+            axiosClient(`booking-orders/total-amount?sitterId=${userProfile?.id}&status=COMPLETED`),
             axiosClient(`transactions/search/total-amount?userId=${userProfile?.id}&transactionType=COMMISSION`),
             axiosClient(`booking-orders/sitter/status?sitterId=${userProfile?.id}&status=COMPLETED&page=0&size=10&prop=createdAt&direction=DESC`),
           ]);
