@@ -422,7 +422,8 @@ const Service = () => {
                         className="text-[#F8B816] size-4"
                       />
                       <p className="text-[14px] font-normal">
-                        {catSitter.rating ? catSitter.rating : "Chưa có đánh giá"}
+                        {catSitter.rating ? parseFloat(catSitter.rating.toFixed(1)) : "Chưa có đánh giá"}
+
                       </p>
                       <FontAwesomeIcon
                         icon={faCircle}
@@ -431,7 +432,7 @@ const Service = () => {
                     </>
                   }
                   {/* <p className=' text-[14px] font-normal'>{catSitter.reviews} Đánh giá</p> */}
-                  <p className="text-[14px] font-normal">{catSitter.numberOfReview ? catSitter.numberOfReview : "không có"} đánh giá</p>
+                  <p className="text-[14px] font-normal">{catSitter.numberOfReview ? catSitter.numberOfReview : "Chưa có"} đánh giá</p>
                 </div>
                 <p className="text-[14px] my-2 line-clamp-1">{catSitter.bio}</p>
                 <div className="flex font-semibold text-[#66625F]">

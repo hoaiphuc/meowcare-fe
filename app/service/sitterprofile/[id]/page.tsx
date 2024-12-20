@@ -355,14 +355,14 @@ const Page = () => {
                     icon={faStar}
                     className="text-[#F8B816] h-5 w-5"
                   />
-                  <p className="text-[16px]">{sitterProfile?.rating ? sitterProfile.rating : "Chưa có đánh giá"}</p>
+                  <p className="text-[16px]">{sitterProfile?.rating ? parseFloat(sitterProfile.rating.toFixed(1)) : "Chưa có đánh giá"}</p>
                   <FontAwesomeIcon
                     icon={faCircle}
                     className="text-text size-1 self-center px-1"
                   />
                 </>
               }
-              <p className="text-[16px]">{sitterProfile?.numberOfReview ? sitterProfile.numberOfReview : "không có"} đánh giá</p>
+              <p className="text-[16px]">{sitterProfile?.numberOfReview ? sitterProfile.numberOfReview : "Chưa có"} đánh giá</p>
             </div>
           </div>
           <div className="flex gap-3 w-full mt-7">

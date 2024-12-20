@@ -93,6 +93,7 @@ const Page = () => {
     description: '',
   });
   const [userId, setUserId] = useState<string | null>(null);
+  const [unavailableDates, setUnavailableDates] = useState<Date[]>([]);
 
   useEffect(() => {
     axiosClient(
@@ -164,6 +165,16 @@ const Page = () => {
         .catch((e) => {
           console.log(e);
         });
+      axiosClient(`sitter-unavailable-dates/sitter/${params.id}`)
+        .then((res) => {
+          const unavailable = res.data.map((item: { date: string }) =>
+            new Date(item.date)
+          );
+          console.log(res.data);
+
+          setUnavailableDates(unavailable);
+        })
+        .catch(() => { })
     } catch (error) {
       console.log(error);
     }
@@ -190,14 +201,15 @@ const Page = () => {
 
   useEffect(() => {
     try {
-
-      axiosClient(`/users/${userId}`)
-        .then((res) => {
-          setUserData(res.data);
-        })
-        .catch((e) => {
-          console.log(e);
-        });
+      if (userId) {
+        axiosClient(`/users/${userId}`)
+          .then((res) => {
+            setUserData(res.data);
+          })
+          .catch((e) => {
+            console.log(e);
+          });
+      }
     } catch (error) {
       console.log(error);
     }
@@ -454,9 +466,16 @@ const Page = () => {
     });
   }
 
-  // if (isLoading) {
-  //   return <Loading />
-  // }
+  const isDateUnavailable = (date: DateValue) => {
+    const dateToCheck = new Date(date.year, date.month - 1, date.day);
+    return unavailableDates.some(
+      (unavailableDate) =>
+        unavailableDate.getFullYear() === dateToCheck.getFullYear() &&
+        unavailableDate.getMonth() === dateToCheck.getMonth() &&
+        unavailableDate.getDate() === dateToCheck.getDate()
+    );
+  };
+
 
   return (
     <div className="flex flex-col items-center justify-start my-12">
@@ -468,6 +487,7 @@ const Page = () => {
             <h2 className={styles.h2}>Chọn ngày</h2>
             <DateRangePicker
               label="Ngày đặt lịch"
+              isDateUnavailable={isDateUnavailable}
               minValue={today(getLocalTimeZone()).add({ days: 1 })}
               maxValue={maxDate}
               visibleMonths={2}

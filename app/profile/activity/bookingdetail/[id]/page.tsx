@@ -150,9 +150,9 @@ const Page = () => {
     }
 
     return (
-        <div className='flex justify-center items-center w-[891px]'>
+        <div className='flex justify-center items-start w-[891px]'>
             {data &&
-                <div key={data.id} className='flex flex-col gap-5 '>
+                <div key={data.id} className='flex flex-col gap-5 w-full'>
                     <div className='flex flex-col gap-5'>
                         <div className='bg-white rounded-md shadow-xl flex justify-center items-center'>
                             <FontAwesomeIcon icon={statusIcon[data.status]} size='2xl' className={statusIconColor[data.status]} />
@@ -193,8 +193,8 @@ const Page = () => {
                         </div>
                     </div>
                     {data.status === "COMPLETED" &&
-                        <div className=' flex flex-col gap-3 w-[850px]'>
-                            <div className='bg-white w-full h-full shadow-2xl rounded-md p-5'>
+                        <div className=' flex flex-col gap-3 w-full'>
+                            <div className='bg-white h-full shadow-2xl rounded-md p-5'>
                                 <h1 className='font-semibold text-2xl my-3'>Đánh giá dịch vụ</h1>
                                 <div className='bg-from-[#d8ab95] bg-gradient-to-r from-[#fab1a0] to-blue-[#FFE3D5] p-3 rounded-xl'>
                                     <Rating value={feedback.rating} onChange={(e: number) => handleInputChange("rating", e)} />
