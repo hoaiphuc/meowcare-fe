@@ -53,24 +53,6 @@ const OtherService = () => {
     const user: UserLocal | null = getUserFromStorage();
     const userId = user?.id;
 
-    // const fetchChildeService = useCallback(() => {
-    //     try {
-    //         axiosClient(`/services/sitter/${userId}/type?serviceType=ADDITION_SERVICE&status=ACTIVE`)
-    //             .then((res) => {
-    //                 setAdditionServices(res.data);
-    //             })
-    //             .catch((e) => {
-    //                 console.log(e);
-    //             })
-    //     } catch (error) {
-
-    //     }
-    // }, [userId])
-
-    // useEffect(() => {
-    //     fetchChildeService()
-    // }, [fetchChildeService])
-
     const fetchSlot = useCallback(() => {
         try {
             axiosClient(`booking-slots?userId=${userId}`)
@@ -403,13 +385,11 @@ const OtherService = () => {
     }
 
     const handleUpdateSlot = async () => {
+        setIsLoading(true); // Show loading indicator
         try {
-            // Separate child services by their state
             const toAdd = slots.filter((slot) => slot.isNew);
-            // const toUpdate = slots.filter((slot) => slot.isUpdate && !slot.isNew && !slot.isDeleted);
             const toDelete = slots.filter((slot) => slot.isDeleted);
 
-            // Perform API calls
             const addPromises = toAdd.map(async (slot) => {
                 try {
                     const response = await axiosClient.post("booking-slots", {
@@ -423,15 +403,7 @@ const OtherService = () => {
                     throw error;
                 }
             });
-            // const updatePromises = toUpdate.map((slot) =>
-            //     axiosClient.put(`booking-slots/${slot.id}`, {
-            //         ...slot,
-            //         startTime: (slot.startTime as Date).toISOString(),
-            //         endTime: (slot.endTime as Date).toISOString(),
-            //         isNew: undefined,
-            //         isUpdate: undefined,
-            //     })
-            // );
+
             const deletePromises = toDelete.map((slot) =>
                 axiosClient.delete(`booking-slots/${slot.id}`)
             );
@@ -440,18 +412,21 @@ const OtherService = () => {
 
             fetchSlot();
             fetchData();
+
             toast.success("Cập nhật slot thành công");
-            onOpenChange()
+            onOpenChange();
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (error: any) {
-            console.log(error);
-            if (error.response.data.status === 2014) {
+            console.error(error);
+            if (error.response?.data?.status === 2014) {
                 toast.error("Thời gian của slot tối thiểu 1 giờ và tối đa 3 giờ");
-            } else
+            } else {
                 toast.error("Có lỗi xảy ra trong quá trình cập nhật!");
-
+            }
+        } finally {
+            setIsLoading(false); // Hide loading indicator
         }
-    }
+    };
 
     const parseTimeString = (dateValue: Date | undefined) => {
         if (!dateValue) {
@@ -471,8 +446,17 @@ const OtherService = () => {
                     <h3>Chúng tôi đề xuất cho bạn đặt giá trung bình. Bạn có thể chỉnh sửa chúng ngay bây giờ hoặc bất kì lúc nào trong tương lai.</h3>
                 </div>
 
-                <div>
-                    <h1 className={styles.title}>Dịch vụ hiện có</h1>
+                <div className='mt-10'>
+                    <div className='flex justify-between'>
+                        <h1 className={styles.title}>Dịch vụ hiện có</h1>
+                        <div
+                            onClick={onOpen}
+                            className='border rounded-lg h-10 w-32 flex items-center justify-center cursor-pointer gap-3 bg-maincolor text-white'
+                        >
+                            <FontAwesomeIcon icon={faPlus} />
+                            <p>Quản lí slot</p>
+                        </div>
+                    </div>
                     <Accordion
                         selectedKeys={expandedKeys}
                         onSelectionChange={(keys) => setExpandedKeys(new Set(keys))}
@@ -515,28 +499,9 @@ const OtherService = () => {
                                             <p>đ</p>
                                         }
                                     />
-                                    {/* <Input
-                                        label='Thời gian cần để hoàn thành'
-                                        variant='bordered'
-                                        type='number'
-                                        className='no-spinner'
-                                        value={additionService.duration.toString()}
-                                        onChange={(e) =>
-                                            handleInputChildChange(additionService.id, 'duration', e.target.value)
-                                        }
-                                        endContent={
-                                            <p>phút</p>
-                                        }
-                                    /> */}
                                     <h1 className='font-semibold text-xl text-maincolor'>Vui lòng chọn slot hoạt động</h1>
                                     <div className="flex w-full gap-3 flex-wrap">
-                                        <div
-                                            onClick={onOpen}
-                                            className='border rounded-lg h-10 w-32 flex items-center justify-center cursor-pointer gap-3 bg-maincolor text-white'
-                                        >
-                                            <FontAwesomeIcon icon={faPlus} />
-                                            <p>Thêm slot</p>
-                                        </div>
+
                                         {additionService.slots ? additionService.slots.map((slot: Slot) => (
                                             <div
                                                 key={slot.id}
